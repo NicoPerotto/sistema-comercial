@@ -1,0 +1,62 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/lib/prisma-client"
+}
+
+// SQLite doesn't support Enums natively, so we use String
+// Allowed values logic should be handled in application layer: ADMIN, MANAGER, SELLER, PREVENTISTA
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("SELLER") 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sales     Sale[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String
+  price       Decimal
+  cost        Decimal?
+  stock       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  saleItems   SaleItem[]
+}
+
+model Sale {
+  id        String     @id @default(cuid())
+  total     Decimal
+  status    String     @default("COMPLETED") // PENDING, COMPLETED, CANCELLED
+  type      String     // "VENTA", "PRESUPUESTO"
+  createdAt DateTime   @default(now())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+  items     SaleItem[]
+}
+
+model SaleItem {
+  id        String  @id @default(cuid())
+  quantity  Int
+  price     Decimal
+  saleId    String
+  sale      Sale    @relation(fields: [saleId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model FixedCost {
+  id          String   @id @default(cuid())
+  description String
+  amount      Decimal
+  date        DateTime @default(now())
+}
