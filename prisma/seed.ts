@@ -1,8 +1,11 @@
-import { PrismaClient } from '../src/lib/prisma-client'
+import { PrismaClient } from '@prisma/client'
+import 'dotenv/config'
 
 const prisma = new PrismaClient()
 
 async function main() {
+    console.log('Starting seed...')
+
     // Create Admin
     const admin = await prisma.user.upsert({
         where: { email: 'admin@sistema.com' },
@@ -11,7 +14,7 @@ async function main() {
             email: 'admin@sistema.com',
             name: 'Administrador',
             role: 'ADMIN',
-            password: 'admin', // En producción usar bcrypt!
+            password: 'admin',
         },
     })
 
@@ -29,7 +32,7 @@ async function main() {
 
     // Create Product
     const product = await prisma.product.upsert({
-        where: { id: 'prod-1' }, // ID hardcoded for check
+        where: { id: 'prod-1' },
         update: {},
         create: {
             id: 'prod-1',
@@ -40,7 +43,7 @@ async function main() {
         },
     })
 
-    console.log({ admin, product })
+    console.log('Seed completed:', { admin: admin.email, product: product.name })
 }
 
 main()
@@ -48,7 +51,7 @@ main()
         await prisma.$disconnect()
     })
     .catch(async (e) => {
-        console.error(e)
+        console.error('Seed failed:', e)
         await prisma.$disconnect()
         process.exit(1)
     })

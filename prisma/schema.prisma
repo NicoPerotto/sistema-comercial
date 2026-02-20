@@ -1,10 +1,10 @@
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/lib/prisma-client"
+  provider = "prisma-client-js"
 }
 
 // SQLite doesn't support Enums natively, so we use String
@@ -18,35 +18,93 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   sales     Sale[]
+  shifts    Shift[]
+  openedRegisters CashRegister[] @relation("OpenedBy")
+  closedRegisters CashRegister[] @relation("ClosedBy")
+}
+
+model Shift {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  startTime DateTime  @default(now())
+  endTime   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  icon      String    @default("Package")
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  category    String
-  price       Decimal
-  cost        Decimal?
-  stock       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  saleItems   SaleItem[]
+  id           String    @id @default(cuid())
+  name         String
+  description  String?
+  categoryId   String
+  category     Category  @relation(fields: [categoryId], references: [id])
+  barcode      String?   @unique
+  price        Decimal
+  cost         Decimal?
+  stock        Decimal   @default(0)
+  sellByWeight Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  saleItems    SaleItem[]
+}
+
+model PaymentMethod {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  percentage   Float    @default(0) // e.g., 10 for +10%, -5 for -5%
+  isArqueable  Boolean  @default(true) // If true, it is included in cash count/arqueo
+  sales        Sale[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model CashRegister {
+  id              String    @id @default(cuid())
+  shortId         String    @unique // Alphanumeric 5 chars
+  openingAmount   Decimal
+  closingAmount   Decimal?
+  expectedAmount  Decimal?
+  difference      Decimal?
+  depositAmount   Decimal?  // Amount to be deposited in safe
+  status          String    @default("OPEN") // OPEN, CLOSED
+  openedById      String
+  openedBy        User      @relation("OpenedBy", fields: [openedById], references: [id])
+  closedById      String?
+  closedBy        User?     @relation("ClosedBy", fields: [closedById], references: [id])
+  openedAt        DateTime  @default(now())
+  closedAt        DateTime?
+  sales           Sale[]
 }
 
 model Sale {
-  id        String     @id @default(cuid())
-  total     Decimal
-  status    String     @default("COMPLETED") // PENDING, COMPLETED, CANCELLED
-  type      String     // "VENTA", "PRESUPUESTO"
-  createdAt DateTime   @default(now())
-  userId    String
-  user      User       @relation(fields: [userId], references: [id])
-  items     SaleItem[]
+  id              String         @id @default(cuid())
+  total           Decimal
+  status          String         @default("COMPLETED") // PENDING, COMPLETED, CANCELLED
+  type            String         // "VENTA", "PRESUPUESTO", "VENTA_NO_REALIZADA"
+  auditLog        String?        // Store JSON analysis of additions and removals
+  paymentMethodId String?
+  paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  createdAt       DateTime       @default(now())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id])
+  items           SaleItem[]
+  cashRegisterId  String?
+  cashRegister    CashRegister?  @relation(fields: [cashRegisterId], references: [id])
 }
 
 model SaleItem {
   id        String  @id @default(cuid())
-  quantity  Int
+  quantity  Decimal
   price     Decimal
   saleId    String
   sale      Sale    @relation(fields: [saleId], references: [id])
