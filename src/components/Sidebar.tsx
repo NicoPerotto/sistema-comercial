@@ -5,36 +5,41 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
     LayoutGrid, Package, Tag, ShoppingCart, ClipboardList,
-    Wallet, CreditCard, Users, BarChart3, Zap, LogOut
+    Wallet, CreditCard, Users, BarChart3, Zap, LogOut, Archive
 } from 'lucide-react';
 
 interface NavItemProps {
     children: React.ReactNode;
     Icon: React.ElementType;
     href: string;
+    exact?: boolean;
 }
 
-const NavItem = ({ children, Icon, href }: NavItemProps) => {
+const NavItem = ({ children, Icon, href, exact = false }: NavItemProps) => {
     const pathname = usePathname();
-    const active = pathname === href || (href !== '/' && pathname.startsWith(href + '/') && href.length > 1);
+    // Routes with their own child nav entries must use exact match only
+    const useExact = exact || href === '/caja' || href === '/';
+    const active = useExact
+        ? pathname === href
+        : pathname === href || (href.length > 1 && pathname.startsWith(href + '/'));
 
     return (
         <Link
             href={href}
             className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 group ${active
-                ? 'bg-primary text-white shadow-md shadow-primary/20'
-                : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white'
+                ? 'bg-primary text-white shadow-sm shadow-primary/25'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                 }`}
         >
-            <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-white' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} />
+            <Icon className={`w-5 h-5 flex-shrink-0 transition-colors ${active ? 'text-white' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300'}`} />
             <span className={`text-sm ${active ? 'font-bold' : 'font-medium'}`}>{children}</span>
         </Link>
     );
 };
 
 const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-    <div className="pt-6 pb-2 px-4">
-        <p className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.15em]">{children}</p>
+    <div className="pt-5 pb-1.5 px-4">
+        <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.18em]">{children}</p>
     </div>
 );
 
@@ -72,9 +77,9 @@ export default function Sidebar() {
     const isAdminOrManager = user?.role === 'ADMIN' || user?.role === 'MANAGER';
 
     return (
-        <aside className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hidden md:flex flex-col h-screen sticky top-0 z-50">
+        <aside className="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hidden md:flex flex-col h-screen sticky top-0 z-50">
             {/* Logo */}
-            <div className="p-6">
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
                         <Zap className="w-5 h-5" />
@@ -87,14 +92,13 @@ export default function Sidebar() {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 overflow-y-auto custom-scrollbar">
+            <nav className="flex-1 px-3 overflow-y-auto custom-scrollbar py-2">
 
                 <SectionLabel>Inicio</SectionLabel>
                 <NavItem href="/" Icon={LayoutGrid}>Dashboard</NavItem>
 
                 <SectionLabel>Operaciones</SectionLabel>
                 <NavItem href="/ventas/nueva" Icon={ShoppingCart}>Nueva Venta</NavItem>
-                <NavItem href="/ventas" Icon={ClipboardList}>Historial de Ventas</NavItem>
                 <NavItem href="/caja" Icon={Wallet}>Caja Diaria</NavItem>
 
                 <SectionLabel>Catálogo</SectionLabel>
@@ -105,6 +109,8 @@ export default function Sidebar() {
                     <>
                         <SectionLabel>Administración</SectionLabel>
                         <NavItem href="/metricas" Icon={BarChart3}>Métricas</NavItem>
+                        <NavItem href="/ventas" Icon={ClipboardList}>Historial de Ventas</NavItem>
+                        <NavItem href="/caja/historial" Icon={Archive}>Historial de Caja</NavItem>
                         <NavItem href="/empleados" Icon={Users}>Empleados</NavItem>
                         <NavItem href="/configuracion/pagos" Icon={CreditCard}>Métodos de Pago</NavItem>
                     </>
@@ -112,14 +118,14 @@ export default function Sidebar() {
             </nav>
 
             {/* User Panel */}
-            <div className="p-4 mt-auto border-t border-slate-100 dark:border-slate-800">
-                <div className="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 flex items-center gap-3">
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800">
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center text-white font-black text-sm flex-shrink-0">
                         {user?.name?.[0]?.toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1 overflow-hidden">
                         <p className="text-xs font-bold truncate text-slate-900 dark:text-white">{user?.name || 'Usuario'}</p>
-                        <p className="text-[10px] text-slate-400 font-medium truncate">{user?.role || 'Vendedor'}</p>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">{user?.role || 'Vendedor'}</p>
                     </div>
                     <button
                         onClick={handleLogout}
