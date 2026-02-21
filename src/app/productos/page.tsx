@@ -5,11 +5,18 @@ import { useToast } from '@/components/ToastProvider';
 import * as XLSX from 'xlsx';
 import Link from 'next/link';
 
-const Icon = ({ children, className = "w-5 h-5" }: { children: React.ReactNode, className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        {children}
-    </svg>
-);
+import {
+    Search, Tag, Download, Upload, Plus, Pencil, Trash2, Check, X, Package
+} from 'lucide-react';
+
+const Icon = ({ name, className = "w-5 h-5" }: { name: string, className?: string }) => {
+    const icons: Record<string, any> = {
+        Search, Tag, Download, Upload, Plus, Edit: Pencil, Trash: Trash2, Check, X
+    };
+    const LucideIcon = icons[name] || Package;
+    return <LucideIcon className={className} />;
+};
+
 
 interface Category {
     id: string;
@@ -231,7 +238,7 @@ export default function ProductsPage() {
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                     <div className="relative flex-1 md:w-64">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                            <Icon className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></Icon>
+                            <Icon name="Search" />
                         </span>
                         <input
                             type="text"
@@ -244,21 +251,21 @@ export default function ProductsPage() {
 
                     <div className="flex gap-2">
                         <Link href="/categorias" className="btn-secondary" title="Gestionar Categorías">
-                            <Icon className="w-5 h-5 text-primary"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></Icon>
+                            <Icon name="Tag" className="w-5 h-5 text-primary" />
                             <span className="hidden sm:inline">Categorías</span>
                         </Link>
                         <button onClick={handleExportExcel} className="btn-secondary" title="Exportar a Excel">
-                            <Icon className="w-5 h-5 text-emerald-600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></Icon>
+                            <Icon name="Download" className="w-5 h-5 text-emerald-600" />
                             <span className="hidden sm:inline">Exportar</span>
                         </button>
                         <button onClick={() => fileInputRef.current?.click()} className="btn-secondary" title="Importar desde Excel">
-                            <Icon className="w-5 h-5 text-blue-600"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></Icon>
+                            <Icon name="Upload" className="w-5 h-5 text-blue-600" />
                             <span className="hidden sm:inline">Importar</span>
                         </button>
                     </div>
 
                     <button onClick={() => handleOpenModal()} className="btn-primary">
-                        <Icon><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></Icon>
+                        <Icon name="Plus" />
                         NUEVO PRODUCTO
                     </button>
                 </div>
@@ -312,10 +319,10 @@ export default function ProductsPage() {
                                         <td className="px-6 py-4 text-right pr-6">
                                             <div className="flex justify-end gap-2">
                                                 <button onClick={() => handleOpenModal(p)} className="p-2 text-slate-400 hover:text-primary transition-colors">
-                                                    <Icon><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></Icon>
+                                                    <Icon name="Edit" />
                                                 </button>
                                                 <button onClick={() => handleDelete(p.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors">
-                                                    <Icon><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></Icon>
+                                                    <Icon name="Trash" />
                                                 </button>
                                             </div>
                                         </td>
@@ -340,7 +347,7 @@ export default function ProductsPage() {
                     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95">
                         <header className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
                             <h2 className="text-xl font-bold">{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><Icon className="w-6 h-6"><path d="M6 18L18 6M6 6l12 12" /></Icon></button>
+                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><Icon name="X" className="w-6 h-6" /></button>
                         </header>
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -372,7 +379,7 @@ export default function ProductsPage() {
                                 </div>
                                 <div className="md:col-span-2 flex items-center gap-2 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg cursor-pointer" onClick={() => setFormData({ ...formData, sellByWeight: !formData.sellByWeight })}>
                                     <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.sellByWeight ? 'bg-primary border-primary text-white' : 'border-slate-300'}`}>
-                                        {formData.sellByWeight && <Icon className="w-3 h-3"><path d="M5 13l4 4L19 7" /></Icon>}
+                                        {formData.sellByWeight && <Icon name="Check" className="w-3 h-3" />}
                                     </div>
                                     <span className="text-sm font-medium">Venta por peso (kg)</span>
                                 </div>

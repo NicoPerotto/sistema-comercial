@@ -1,12 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-
-// Common Icon Wrapper
-const Icon = ({ children }: { children: React.ReactNode }) => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    {children}
-  </svg>
-);
+import { Plus, TrendingUp, ShoppingBag, AlertTriangle, BarChart3 } from 'lucide-react';
 
 export default function DashboardPage() {
   return (
@@ -17,17 +11,17 @@ export default function DashboardPage() {
           <p className="text-subtitle">Resumen general de tu sistema comercial</p>
         </div>
         <Link href="/ventas/nueva" className="btn-primary">
-          <Icon><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></Icon>
+          <Plus className="w-5 h-5" />
           Nueva Venta
         </Link>
       </header>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Ventas Totales" value="$42.500" trend="+12.5%" icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />} />
-        <StatCard title="Transacciones" value="156" trend="+5.2%" icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />} />
-        <StatCard title="Stock Bajo" value="12" trend="-2" icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />} warning />
-        <StatCard title="Costos Fijos" value="$8.200" trend="Estable" icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />} />
+        <StatCard title="Ventas Totales" value="$42.500" trend="+12.5%" Icon={TrendingUp} />
+        <StatCard title="Transacciones" value="156" trend="+5.2%" Icon={ShoppingBag} />
+        <StatCard title="Stock Bajo" value="12" trend="-2" Icon={AlertTriangle} warning />
+        <StatCard title="Costos Fijos" value="$8.200" trend="Estable" Icon={BarChart3} />
       </div>
 
       {/* Recent Activity Table */}
@@ -60,12 +54,12 @@ export default function DashboardPage() {
   );
 }
 
-function StatCard({ title, value, trend, icon, warning = false }: { title: string, value: string, trend: string, icon: React.ReactNode, warning?: boolean }) {
+function StatCard({ title, value, trend, Icon, warning = false }: { title: string, value: string, trend: string, Icon: any, warning?: boolean }) {
   return (
     <div className="card-premium flex flex-col gap-4">
       <div className="flex justify-between items-start">
         <div className={`p-3 rounded-lg ${warning ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
-          <Icon>{icon}</Icon>
+          <Icon className="w-5 h-5" />
         </div>
         <span className={`text-xs font-bold px-2 py-1 rounded-full ${trend.startsWith('+') ? 'badge-success' : warning ? 'badge-danger' : 'badge-primary'}`}>
           {trend}

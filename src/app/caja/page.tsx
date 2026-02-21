@@ -3,11 +3,21 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-const Icon = ({ children, className = "w-5 h-5" }: { children: React.ReactNode, className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        {children}
-    </svg>
-);
+import { Calendar, ArrowDownToLine, History, DollarSign, X, Lock } from 'lucide-react';
+
+const Icon = ({ name, className = "w-5 h-5" }: { name: string, className?: string }) => {
+    const icons: Record<string, any> = {
+        Calendar,
+        Close: ArrowDownToLine,
+        History,
+        DollarSign,
+        X,
+        Lock
+    };
+    const LucideIcon = icons[name] || History;
+    return <LucideIcon className={className} />;
+};
+
 
 export default function CajaPage() {
     const [registerData, setRegisterData] = useState<any>(null);
@@ -118,7 +128,7 @@ export default function CajaPage() {
                         <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
                         <div className="flex items-center gap-4 mb-8">
                             <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 rounded-xl flex items-center justify-center">
-                                <Icon className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></Icon>
+                                <Icon name="Calendar" className="w-6 h-6" />
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold">Apertura de Caja</h2>
@@ -188,7 +198,7 @@ export default function CajaPage() {
                         <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
                         <div className="flex items-center gap-4 mb-8">
                             <div className="w-12 h-12 bg-red-50 dark:bg-red-900/10 text-red-600 rounded-xl flex items-center justify-center">
-                                <Icon className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15V3m0 12l-4-4m4 4l4-4M2 17l.621 2.485A2 2 0 004.561 21h14.878a2 2 0 001.94-1.515L22 17" /></Icon>
+                                <Icon name="Close" className="w-6 h-6" />
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold">Cierre de Caja</h2>

@@ -3,11 +3,20 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/ToastProvider';
 
-const Icon = ({ children, className = "w-5 h-5" }: { children: React.ReactNode, className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        {children}
-    </svg>
-);
+import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
+
+const Icon = ({ name, className = "w-5 h-5" }: { name: string, className?: string }) => {
+    const icons: Record<string, any> = {
+        Plus,
+        Edit: Pencil,
+        Trash: Trash2,
+        Check,
+        X
+    };
+    const LucideIcon = icons[name] || Plus;
+    return <LucideIcon className={className} />;
+};
+
 
 interface PaymentMethod {
     id: string;
@@ -95,7 +104,7 @@ export default function PaymentMethodsPage() {
                     }}
                     className="btn-primary"
                 >
-                    <Icon><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></Icon>
+                    <Icon name="Plus" />
                     NUEVO MÉTODO
                 </button>
             </header>
@@ -133,10 +142,10 @@ export default function PaymentMethodsPage() {
                                 <td className="px-6 py-4 text-right pr-6">
                                     <div className="flex justify-end gap-2">
                                         <button onClick={() => { setEditingId(m.id); setFormData({ name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable }); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-primary transition-colors">
-                                            <Icon><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></Icon>
+                                            <Icon name="Edit" />
                                         </button>
                                         <button onClick={() => deleteMethod(m.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors">
-                                            <Icon><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></Icon>
+                                            <Icon name="Trash" />
                                         </button>
                                     </div>
                                 </td>
@@ -151,7 +160,7 @@ export default function PaymentMethodsPage() {
                     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
                         <header className="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
                             <h2 className="text-xl font-bold">{editingId ? 'Editar' : 'Nuevo'} Método</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><Icon><path d="M6 18L18 6M6 6l12 12" /></Icon></button>
+                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><Icon name="X" /></button>
                         </header>
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             <div className="space-y-1">
@@ -167,7 +176,7 @@ export default function PaymentMethodsPage() {
                             </div>
                             <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg cursor-pointer" onClick={() => setFormData({ ...formData, isArqueable: !formData.isArqueable })}>
                                 <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.isArqueable ? 'bg-primary border-primary text-white' : 'border-slate-300'}`}>
-                                    {formData.isArqueable && <Icon className="w-3 h-3"><path d="M5 13l4 4L19 7" /></Icon>}
+                                    {formData.isArqueable && <Icon name="Check" className="w-3 h-3" />}
                                 </div>
                                 <span className="text-sm font-medium">Método Arqueable (Efectivo)</span>
                             </div>
