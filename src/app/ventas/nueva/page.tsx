@@ -111,6 +111,8 @@ export default function POSPage() {
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [auditLog, setAuditLog] = useState<any[]>([]);
+    const [registerOpen, setRegisterOpen] = useState<boolean | null>(null);
+    const [showExitWarning, setShowExitWarning] = useState(false);
 
     // Weight Modal state
     const [weightModal, setWeightModal] = useState<{ isOpen: boolean; product: Product | null; isRemoving: boolean }>({
@@ -122,15 +124,41 @@ export default function POSPage() {
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
+        checkRegisterStatus();
         fetchData();
         const savedCart = localStorage.getItem('active_cart');
         if (savedCart) setCart(JSON.parse(savedCart));
     }, []);
 
+    const checkRegisterStatus = async () => {
+        try {
+            const res = await fetch('/api/cash-register');
+            const data = await res.json();
+            setRegisterOpen(data.status === 'OPEN');
+        } catch {
+            setRegisterOpen(false);
+        }
+    };
+
+    // Interceptar botón físico Atrás del navegador cuando hay venta activa
+    useEffect(() => {
+        const handlePopState = (e: PopStateEvent) => {
+            if (auditLog.length > 0) {
+                // Re-push state para que el browser no cambie de página
+                window.history.pushState(null, '', window.location.href);
+                setShowExitWarning(true);
+            }
+        };
+        // Push initial state so we can catch the back event
+        window.history.pushState(null, '', window.location.href);
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [auditLog.length]);
+
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             // Si hay un modal abierto, no interferir con el foco
-            if (isPaymentModalOpen || weightModal.isOpen) return;
+            if (isPaymentModalOpen || weightModal.isOpen || showExitWarning) return;
 
             // F2 fuerza el foco si se perdió por alguna razón
             if (e.key === 'F2') {
@@ -311,6 +339,9 @@ export default function POSPage() {
                 setSearch('');
                 setSelectedCategory(null);
                 fetchData();
+            } else if (result.error === 'CAJA_CERRADA') {
+                showToast('La caja está cerrada. Abrí el turno antes de vender.', 'error');
+                setRegisterOpen(false);
             } else {
                 showToast('Error: ' + result.error, 'error');
             }
@@ -329,15 +360,60 @@ export default function POSPage() {
         return matchesSearch && matchesCategory && hasStock;
     });
 
+    // --- CAJA CERRADA: pantalla de bloqueo ---
+    if (registerOpen === false) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-950 z-10">
+                <div className="text-center max-w-sm px-8 space-y-6">
+                    <div className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mx-auto">
+                        <AlertTriangle className="w-10 h-10 text-red-500" />
+                    </div>
+                    <div className="space-y-2">
+                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Caja Cerrada</h1>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                            No podés registrar ventas sin un turno activo. Abrí la caja diaria primero.
+                        </p>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                        <Link
+                            href="/caja"
+                            className="btn-primary py-3 text-base w-full"
+                        >
+                            Ir a Abrir Caja
+                        </Link>
+                        <Link href="/" className="btn-secondary py-3 text-sm w-full">
+                            Volver al Inicio
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="fixed inset-0 flex flex-row overflow-hidden bg-slate-50 dark:bg-slate-950 z-10">
             <main className="flex-1 flex flex-col p-6 overflow-hidden">
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div className="flex items-center gap-4">
-                        <Link href="/" className="p-2 text-slate-400 hover:text-slate-600">
-                            <Icon name="ArrowLeft" />
-                        </Link>
-                        <h1 className="text-2xl font-bold">Punto de Venta</h1>
+                        <button
+                            onClick={() => {
+                                if (auditLog.length > 0) {
+                                    setShowExitWarning(true);
+                                } else {
+                                    router.push('/');
+                                }
+                            }}
+                            className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                            title={auditLog.length > 0 ? 'Tenés una venta en curso' : 'Volver al inicio'}
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
+                        <div>
+                            <h1 className="text-2xl font-bold">Punto de Venta</h1>
+                            {auditLog.length > 0 && (
+                                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Venta en curso • {auditLog.length} acción{auditLog.length !== 1 ? 'es' : ''}</p>
+                            )}
+                        </div>
                     </div>
 
                     <div className="relative w-full md:w-80">
@@ -581,6 +657,47 @@ export default function POSPage() {
                                     {weightModal.isRemoving ? 'QUITAR' : 'AGREGAR'}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Modal Advertencia de Salida ── */}
+            {showExitWarning && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="bg-amber-500 p-6 text-white">
+                            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                                <AlertTriangle className="w-7 h-7" />
+                            </div>
+                            <h2 className="text-xl font-bold">Venta en Curso</h2>
+                            <p className="text-amber-100 text-sm mt-1">
+                                Hay {auditLog.length} acción{auditLog.length !== 1 ? 'es' : ''} registradas en esta sesión
+                            </p>
+                        </div>
+
+                        <div className="p-6 space-y-3">
+                            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                                No podés salir con una venta iniciada. Debés <strong className="text-slate-800 dark:text-white">cobrar</strong> la operación o registrarla como <strong className="text-slate-800 dark:text-white">venta no realizada</strong> antes de salir.
+                            </p>
+
+                            <button
+                                onClick={() => setShowExitWarning(false)}
+                                className="btn-primary w-full py-3"
+                            >
+                                Continuar la Venta
+                            </button>
+
+                            <button
+                                onClick={async () => {
+                                    setShowExitWarning(false);
+                                    await finalizarVenta('VENTA_NO_REALIZADA');
+                                    router.push('/');
+                                }}
+                                className="w-full py-3 rounded-lg font-semibold border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm"
+                            >
+                                Cancelar y Registrar como No Realizada
+                            </button>
                         </div>
                     </div>
                 </div>

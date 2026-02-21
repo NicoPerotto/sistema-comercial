@@ -47,6 +47,11 @@ export async function POST(request: Request) {
                 where: { status: 'OPEN' }
             });
 
+            // GUARD: block real sales if register is closed
+            if (!activeRegister && !isNoRealizada) {
+                throw new Error('CAJA_CERRADA');
+            }
+
             // 1. First, fetch all products to get their prices and check stock
             const productIds = items.map((item: any) => item.productId);
             const dbProducts = await (tx as any).product.findMany({
@@ -122,6 +127,12 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: true, sale: result });
     } catch (error: any) {
         console.error('Sale Error:', error);
+        if (error.message === 'CAJA_CERRADA') {
+            return NextResponse.json(
+                { error: 'CAJA_CERRADA', message: 'No hay una caja abierta. Abrí la caja diaria antes de registrar ventas.' },
+                { status: 403 }
+            );
+        }
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
