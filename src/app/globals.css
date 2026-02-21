@@ -17,7 +17,13 @@
   --color-border-dark: #1e293b;
 }
 
+
 :root {
+  --forest-green: #1B4332;
+  --sand-beige: #D8C3A5;
+  --off-white: #F8F9FA;
+  --color-text: #333;
+
   --background: #ffffff;
   --foreground: #0f172a;
 
