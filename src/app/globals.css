@@ -72,51 +72,27 @@
 }
 
 /* ═══════════════════════════════════════════════════
-   VALUES — Modo Claro
+   VALUES 
 ═══════════════════════════════════════════════════ */
 :root {
-  --background: #ffffff;
-  --foreground: #0f172a;
+  --background: #0f172a;
   /* slate-900  */
-
-  --card-background: #ffffff;
-  --card-border: #e2e8f0;
-  /* slate-200  */
-  --border-subtle: #f1f5f9;
-  /* slate-100  */
-  --surface-alt: #f8fafc;
+  --foreground: #f8fafc;
   /* slate-50   */
 
-  --text-muted: #64748b;
-  /* slate-500  */
-  --text-faint: #94a3b8;
+  --card-background: #1e293b;
+  /* slate-800  */
+  --card-border: #334155;
+  /* slate-700  */
+  --border-subtle: #1e293b;
+  /* slate-800  */
+  --surface-alt: #0f172a;
+  /* slate-900  */
+
+  --text-muted: #94a3b8;
   /* slate-400  */
-}
-
-/* ═══════════════════════════════════════════════════
-   VALUES — Modo Oscuro
-═══════════════════════════════════════════════════ */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0f172a;
-    /* slate-900  */
-    --foreground: #f8fafc;
-    /* slate-50   */
-
-    --card-background: #1e293b;
-    /* slate-800  */
-    --card-border: #334155;
-    /* slate-700  */
-    --border-subtle: #1e293b;
-    /* slate-800  */
-    --surface-alt: #0f172a;
-    /* slate-900  */
-
-    --text-muted: #94a3b8;
-    /* slate-400  */
-    --text-faint: #64748b;
-    /* slate-500  */
-  }
+  --text-faint: #64748b;
+  /* slate-500  */
 }
 
 /* ═══════════════════════════════════════════════════
