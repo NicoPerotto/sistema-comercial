@@ -100,9 +100,9 @@ export default function CajaPage() {
             {!isOpen && !isRecentlyClosed && (
                 <div className="max-w-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="card-premium relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                        <div className="absolute top-0 left-0 w-full h-1 bg-success"></div>
                         <div className="flex items-center gap-4 mb-8">
-                            <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/10 text-emerald-600 rounded-xl flex items-center justify-center">
+                            <div className="w-12 h-12 bg-success-subtle dark:bg-success/10 text-success-dark rounded-xl flex items-center justify-center">
                                 <Calendar className="w-6 h-6" />
                             </div>
                             <div>
@@ -126,7 +126,7 @@ export default function CajaPage() {
                                     />
                                 </div>
                                 {suggestedOpening > 0 && (
-                                    <p className="text-xs text-emerald-600 font-medium">Sugerido del turno anterior: ${suggestedOpening}</p>
+                                    <p className="text-xs text-success-dark font-medium">Sugerido del turno anterior: ${suggestedOpening}</p>
                                 )}
                             </div>
                             <button type="submit" className="btn-primary w-full py-4 text-base">
@@ -149,8 +149,8 @@ export default function CajaPage() {
                                 <div className="text-5xl font-bold mt-2">#{registerData.shortId}</div>
                             </div>
                             <span className="flex h-3 w-3 mt-2">
-                                <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                                <span className="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-success opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-success"></span>
                             </span>
                         </div>
 
@@ -173,9 +173,9 @@ export default function CajaPage() {
 
                     {/* Close form */}
                     <div className="card-premium relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+                        <div className="absolute top-0 left-0 w-full h-1 bg-danger"></div>
                         <div className="flex items-center gap-4 mb-8">
-                            <div className="w-12 h-12 bg-red-50 dark:bg-red-900/10 text-red-600 rounded-xl flex items-center justify-center">
+                            <div className="w-12 h-12 bg-danger-subtle dark:bg-danger/10 text-danger-dark rounded-xl flex items-center justify-center">
                                 <ArrowDownToLine className="w-6 h-6" />
                             </div>
                             <div>
@@ -185,7 +185,7 @@ export default function CajaPage() {
                         </div>
 
                         <form onSubmit={handleClose} className="space-y-6">
-                            <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl text-blue-800 dark:text-blue-300 text-sm">
+                            <div className="bg-primary-subtle dark:bg-primary/10 p-4 rounded-xl text-primary-dark dark:text-primary text-sm">
                                 Aparta <strong>${Number(registerData.openingAmount).toLocaleString()}</strong> para el próximo turno. Ingresá el total de efectivo contado.
                             </div>
                             <div className="space-y-2">
@@ -198,7 +198,7 @@ export default function CajaPage() {
                                         value={amount}
                                         onChange={(e) => setAmount(e.target.value)}
                                         placeholder="0.00"
-                                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 pl-10 text-3xl font-bold outline-none focus:ring-2 focus:ring-red-500"
+                                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 pl-10 text-3xl font-bold outline-none focus:ring-2 focus:ring-danger"
                                     />
                                 </div>
                             </div>
@@ -246,11 +246,11 @@ export default function CajaPage() {
                                 </div>
 
                                 <div className="space-y-6">
-                                    <div className={`p-6 rounded-xl border ${Number(registerData.difference) >= 0 ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-800'}`}>
+                                    <div className={`p-6 rounded-xl border ${Number(registerData.difference) >= 0 ? 'bg-success-subtle border-success-light text-success-dark' : 'bg-danger-subtle border-danger-light text-danger-dark'}`}>
                                         <p className="text-xs font-bold uppercase mb-1">Diferencia</p>
                                         <p className="text-4xl font-bold">{Number(registerData.difference) >= 0 ? '+' : ''}${Number(registerData.difference).toLocaleString()}</p>
                                     </div>
-                                    <div className="p-6 rounded-xl border border-blue-200 bg-blue-50 text-blue-800">
+                                    <div className="p-6 rounded-xl border border-primary-light bg-primary-subtle text-primary-dark">
                                         <p className="text-xs font-bold uppercase mb-1">Depositar en Caja Fuerte</p>
                                         <p className="text-4xl font-bold">${Number(registerData.depositAmount).toLocaleString()}</p>
                                     </div>

@@ -1,49 +1,127 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════
+   DESIGN TOKENS — Fuente única de verdad de colores
+   Todos los colores del sistema se definen aquí.
+   Tailwind 4 los expone como clases utilitarias automáticamente.
+═══════════════════════════════════════════════════ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+
+  /* ── Tipografía ── */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  --color-primary: #2563eb;
-  /* Blue 600 */
-  --color-primary-dark: #1d4ed8;
-  /* Blue 700 */
-  --color-accent: #f59e0b;
-  /* Amber 500 */
+  /* ── Color Background/Foreground (modo claro — dark se sobreescribe en :root) ── */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 
-  --color-border: #e2e8f0;
-  --color-border-dark: #1e293b;
+  /* ── Brand Primary ── */
+  --color-primary: #2563eb;
+  /* Blue 600  */
+  --color-primary-dark: #1d4ed8;
+  /* Blue 700  */
+  --color-primary-light: #dbeafe;
+  /* Blue 100  */
+
+  /* ── Semantic States ── */
+  --color-success: #10b981;
+  /* Emerald 500 */
+  --color-success-light: #d1fae5;
+  /* Emerald 100 */
+  --color-success-subtle: #ecfdf5;
+  /* Emerald 50  */
+  --color-success-dark: #059669;
+  /* Emerald 600 */
+
+  --color-danger: #ef4444;
+  /* Red 500     */
+  --color-danger-light: #fee2e2;
+  /* Red 100     */
+  --color-danger-subtle: #fef2f2;
+  /* Red 50      */
+  --color-danger-dark: #dc2626;
+  /* Red 600     */
+
+  --color-warning: #f59e0b;
+  /* Amber 500   */
+  --color-warning-light: #fef3c7;
+  /* Amber 100   */
+  --color-warning-subtle: #fffbeb;
+  /* Amber 50    */
+  --color-warning-dark: #d97706;
+  /* Amber 600   */
+
+  --color-primary-subtle: #eff6ff;
+  /* Blue 50     */
+
+  /* ── Surfaces / Cards ── */
+  --color-surface: var(--card-background);
+  --color-surface-alt: var(--surface-alt);
+  /* Fila alterna, inputs */
+  --color-border: var(--card-border);
+  --color-border-subtle: var(--border-subtle);
+  /* Bordes más livianos  */
+
+  /* ── Texto ── */
+  --color-text-base: var(--foreground);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+
+  /* ── Accent (Amber) ── */
+  --color-accent: #f59e0b;
 }
 
-
+/* ═══════════════════════════════════════════════════
+   VALUES — Modo Claro
+═══════════════════════════════════════════════════ */
 :root {
-  --forest-green: #1B4332;
-  --sand-beige: #D8C3A5;
-  --off-white: #F8F9FA;
-  --color-text: #333;
-
   --background: #ffffff;
   --foreground: #0f172a;
+  /* slate-900  */
 
   --card-background: #ffffff;
   --card-border: #e2e8f0;
+  /* slate-200  */
+  --border-subtle: #f1f5f9;
+  /* slate-100  */
+  --surface-alt: #f8fafc;
+  /* slate-50   */
 
-  --success: #10b981;
-  --error: #ef4444;
-  --warning: #f59e0b;
+  --text-muted: #64748b;
+  /* slate-500  */
+  --text-faint: #94a3b8;
+  /* slate-400  */
 }
 
+/* ═══════════════════════════════════════════════════
+   VALUES — Modo Oscuro
+═══════════════════════════════════════════════════ */
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0f172a;
+    /* slate-900  */
     --foreground: #f8fafc;
+    /* slate-50   */
+
     --card-background: #1e293b;
+    /* slate-800  */
     --card-border: #334155;
+    /* slate-700  */
+    --border-subtle: #1e293b;
+    /* slate-800  */
+    --surface-alt: #0f172a;
+    /* slate-900  */
+
+    --text-muted: #94a3b8;
+    /* slate-400  */
+    --text-faint: #64748b;
+    /* slate-500  */
   }
 }
 
+/* ═══════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════ */
 body {
   background: var(--background);
   color: var(--foreground);
@@ -52,25 +130,31 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Base UI Components */
+/* ═══════════════════════════════════════════════════
+   COMPONENT CLASSES — usan los tokens del @theme
+═══════════════════════════════════════════════════ */
 @layer components {
+
+  /* ── Layout ── */
   .page-container {
     @apply flex-1 flex flex-col p-6 lg:p-10 space-y-6 overflow-y-auto;
   }
 
+  /* ── Tipografía ── */
   .text-title {
-    @apply text-3xl font-bold tracking-tight text-slate-900 dark:text-white;
+    @apply text-3xl font-bold tracking-tight text-foreground;
   }
 
   .text-subtitle {
-    @apply text-slate-500 dark:text-slate-400 text-sm mt-1;
+    @apply text-text-muted text-sm mt-1;
   }
 
+  /* ── Cards ── */
   .card-premium {
-    @apply bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm transition-all;
+    @apply bg-surface rounded-xl border border-border p-6 shadow-sm transition-all;
   }
 
-  /* Buttons */
+  /* ══ Buttons ══ */
   .btn-base,
   .btn-primary,
   .btn-secondary,
@@ -85,59 +169,66 @@ body {
   }
 
   .btn-secondary {
-    @apply bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700;
+    @apply bg-surface border border-border text-foreground hover:bg-surface-alt;
   }
 
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-700;
+    @apply bg-danger text-white hover:bg-danger-dark;
   }
 
   .btn-warning {
-    @apply bg-amber-500 text-white hover:bg-amber-600;
+    @apply bg-warning text-white hover:bg-warning-dark;
   }
 
   .btn-ghost {
-    @apply text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800;
+    @apply text-text-muted hover:bg-surface-alt hover:text-foreground;
   }
 
-  /* Badges */
+  /* ══ Badges ══ */
   .badge,
   .badge-success,
   .badge-danger,
   .badge-warning,
   .badge-primary {
-    @apply px-2.5 py-0.5 rounded-full text-xs font-medium inline-flex items-center;
+    @apply px-2.5 py-0.5 rounded-full text-xs font-medium inline-flex items-center gap-1;
   }
 
   .badge-success {
-    @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400;
+    @apply bg-success-light text-success-dark;
   }
 
   .badge-danger {
-    @apply bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400;
+    @apply bg-danger-light text-danger-dark;
   }
 
   .badge-warning {
-    @apply bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400;
+    @apply bg-warning-light text-warning-dark;
   }
 
   .badge-primary {
-    @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400;
+    @apply bg-primary-light text-primary-dark;
+  }
+
+  /* ══ Tables ══ */
+  .table-header {
+    @apply px-6 py-3 text-text-muted font-semibold text-xs uppercase tracking-wider border-b border-border bg-surface-alt;
+  }
+
+  .table-row {
+    @apply hover:bg-surface-alt transition-colors border-b border-border-subtle last:border-0;
   }
 }
 
+/* ═══════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════ */
+
 /* Glassmorphism */
 .glass {
-  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-r border-slate-200 dark:border-slate-800;
-}
-
-/* Table */
-.table-header {
-  @apply px-6 py-3 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50;
-}
-
-.table-row {
-  @apply hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-100 dark:border-slate-800/50 last:border-0;
+  background: color-mix(in srgb, var(--card-background) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid var(--card-border);
 }
 
 /* Scrollbar */
@@ -150,5 +241,5 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+  @apply bg-border rounded-full;
 }

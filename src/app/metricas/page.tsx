@@ -137,7 +137,7 @@ export default function MetricasPage() {
                                 />
                                 <Tooltip
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', background: '#fff', fontSize: '12px' }}
-                                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Ventas']}
+                                    formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString()}`, 'Ventas']}
                                 />
                                 <Area type="monotone" dataKey="total" stroke="#2563eb" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
                             </AreaChart>
@@ -166,7 +166,7 @@ export default function MetricasPage() {
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '12px' }}
-                                    formatter={(value: number) => [`$${value.toLocaleString()}`, 'Total']}
+                                    formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString()}`, 'Total']}
                                 />
                                 <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
                             </PieChart>
@@ -216,7 +216,7 @@ export default function MetricasPage() {
                                     cy="50%"
                                     outerRadius={70}
                                     dataKey="value"
-                                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                    label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`}
                                     labelLine={false}
                                 >
                                     {(data?.paymentMethods || []).map((entry: any, index: number) => (
@@ -239,11 +239,11 @@ function StatCard({ title, value, Icon, trend, warning = false }: any) {
     return (
         <div className="card-premium flex flex-col gap-4 group">
             <div className="flex justify-between items-start">
-                <div className={`p-3 rounded-lg transition-colors ${warning ? 'bg-red-100 text-red-600' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'}`}>
+                <div className={`p-3 rounded-lg transition-colors ${warning ? 'bg-danger-light text-danger-dark' : 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white'}`}>
                     <Icon className="w-5 h-5" />
                 </div>
                 {trend && (
-                    <span className={`flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${trend.startsWith('+') ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                    <span className={`flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${trend.startsWith('+') ? 'bg-success-subtle text-success-dark' : 'bg-danger-subtle text-danger-dark'}`}>
                         {trend.startsWith('+') ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                         {trend}
                     </span>

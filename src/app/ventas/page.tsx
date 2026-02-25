@@ -182,7 +182,7 @@ export default function SalesHistoryPage() {
                                                     <div className="inline-flex flex-col items-center gap-0.5">
                                                         <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">{sale.paymentMethod.name}</span>
                                                         {sale.paymentMethod.percentage !== 0 && (
-                                                            <span className={`text-[8px] font-bold ${sale.paymentMethod.percentage > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                            <span className={`text-[8px] font-bold ${sale.paymentMethod.percentage > 0 ? 'text-danger' : 'text-success'}`}>
                                                                 {sale.paymentMethod.percentage > 0 ? '+' : ''}{sale.paymentMethod.percentage}%
                                                             </span>
                                                         )}
@@ -296,7 +296,7 @@ export default function SalesHistoryPage() {
                                                     const log = JSON.parse(selectedSale.auditLog!);
                                                     if (!Array.isArray(log)) return null;
                                                     return log.map((entry: any, i: number) => (
-                                                        <div key={i} className={`flex justify-between items-center px-4 py-2 rounded-lg text-xs ${entry.action === 'ADD' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                                                        <div key={i} className={`flex justify-between items-center px-4 py-2 rounded-lg text-xs ${entry.action === 'ADD' ? 'bg-success-subtle text-success-dark border border-success-light' : 'bg-danger-subtle text-danger-dark border border-danger-light'}`}>
                                                             <div className="flex items-center gap-2">
                                                                 <span className="font-black w-4">{entry.action === 'ADD' ? '+' : '−'}</span>
                                                                 <span className="font-medium">{entry.productName}</span>

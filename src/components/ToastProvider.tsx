@@ -48,18 +48,18 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                             flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md
                             transition-all duration-300 animate-in slide-in-from-top-10 fade-in
                             pointer-events-auto min-w-[300px]
-                            ${toast.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400' : ''}
-                            ${toast.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400' : ''}
+                            ${toast.type === 'success' ? 'bg-success/10 border-success/20 text-success-dark' : ''}
+                            ${toast.type === 'error' ? 'bg-danger/10 border-danger/20 text-danger-dark' : ''}
                             ${toast.type === 'info' ? 'bg-primary/10 border-primary/20 text-primary' : ''}
-                            ${toast.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-400' : ''}
+                            ${toast.type === 'warning' ? 'bg-warning/10 border-warning/20 text-warning-dark' : ''}
                         `}
                     >
                         {/* Bullet matching type */}
                         <div className={`w-2 h-2 rounded-full shrink-0 animate-pulse
-                            ${toast.type === 'success' ? 'bg-green-500' : ''}
-                            ${toast.type === 'error' ? 'bg-red-500' : ''}
+                            ${toast.type === 'success' ? 'bg-success' : ''}
+                            ${toast.type === 'error' ? 'bg-danger' : ''}
                             ${toast.type === 'info' ? 'bg-primary' : ''}
-                            ${toast.type === 'warning' ? 'bg-amber-500' : ''}
+                            ${toast.type === 'warning' ? 'bg-warning' : ''}
                         `} />
 
                         <p className="text-sm font-bold tracking-tight">{toast.message}</p>

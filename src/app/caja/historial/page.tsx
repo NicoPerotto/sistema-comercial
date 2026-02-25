@@ -177,7 +177,7 @@ export default function CajaHistorialPage() {
                                             {/* Abierto por */}
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-black flex items-center justify-center flex-shrink-0">
+                                                    <div className="w-6 h-6 rounded-full bg-success-light text-success-dark text-[10px] font-black flex items-center justify-center flex-shrink-0">
                                                         {session.openedBy?.name?.[0] || '?'}
                                                     </div>
                                                     <span className="text-sm font-medium">{session.openedBy?.name || '—'}</span>
@@ -187,7 +187,7 @@ export default function CajaHistorialPage() {
                                             {/* Cerrado por */}
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-full bg-red-100 text-red-700 text-[10px] font-black flex items-center justify-center flex-shrink-0">
+                                                    <div className="w-6 h-6 rounded-full bg-danger-light text-danger-dark text-[10px] font-black flex items-center justify-center flex-shrink-0">
                                                         {session.closedBy?.name?.[0] || '?'}
                                                     </div>
                                                     <span className="text-sm font-medium">{session.closedBy?.name || 'Sistema'}</span>
@@ -206,14 +206,14 @@ export default function CajaHistorialPage() {
 
                                             {/* Diferencia */}
                                             <td className="px-6 py-4 text-right">
-                                                <span className={`font-black text-sm ${ok ? 'text-emerald-600' : 'text-red-600'}`}>
+                                                <span className={`font-black text-sm ${ok ? 'text-success-dark' : 'text-danger-dark'}`}>
                                                     {ok ? '+' : ''}${diff.toLocaleString()}
                                                 </span>
                                             </td>
 
                                             {/* Estado */}
                                             <td className="px-6 py-4 text-center">
-                                                <span className={`inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full ${ok ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                                <span className={`inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-1 rounded-full ${ok ? 'bg-success-light text-success-dark' : 'bg-danger-light text-danger-dark'}`}>
                                                     {ok
                                                         ? <TrendingUp className="w-3 h-3" />
                                                         : <TrendingDown className="w-3 h-3" />
@@ -291,13 +291,13 @@ export default function CajaHistorialPage() {
                                 {/* Resultado */}
                                 <div className="space-y-3">
                                     <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Resultado</h3>
-                                    <div className={`p-5 rounded-xl ${Number(selected.difference) >= 0 ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'}`}>
+                                    <div className={`p-5 rounded-xl ${Number(selected.difference) >= 0 ? 'bg-success-subtle text-success-dark' : 'bg-danger-subtle text-danger-dark'}`}>
                                         <p className="text-[10px] font-bold uppercase mb-1">Diferencia</p>
                                         <p className="text-3xl font-black">
                                             {Number(selected.difference) >= 0 ? '+' : ''}${Number(selected.difference).toLocaleString()}
                                         </p>
                                     </div>
-                                    <div className="p-5 rounded-xl bg-blue-50 text-blue-800">
+                                    <div className="p-5 rounded-xl bg-primary-subtle text-primary-dark">
                                         <p className="text-[10px] font-bold uppercase mb-1">En Caja Fuerte</p>
                                         <p className="text-3xl font-black">${Number(selected.depositAmount).toLocaleString()}</p>
                                     </div>
