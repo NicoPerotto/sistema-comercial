@@ -30,6 +30,16 @@ async function main() {
         },
     })
 
+    // Create Category
+    const category = await prisma.category.upsert({
+        where: { name: 'General' },
+        update: {},
+        create: {
+            name: 'General',
+            icon: 'Package',
+        },
+    })
+
     // Create Product
     const product = await prisma.product.upsert({
         where: { id: 'prod-1' },
@@ -37,7 +47,7 @@ async function main() {
         create: {
             id: 'prod-1',
             name: 'Producto Ejemplo',
-            category: 'General',
+            categoryId: category.id,
             price: 1500.00,
             stock: 50,
         },

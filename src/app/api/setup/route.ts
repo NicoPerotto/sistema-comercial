@@ -16,19 +16,39 @@ export async function GET() {
             },
         });
 
-        // 2. Create Products
-        const products = [
-            { id: 'p1', name: 'Coca Cola 1.5L', price: 1200, stock: 50, category: 'Bebidas' },
-            { id: 'p2', name: 'Arroz 1kg', price: 850, stock: 100, category: 'Alimentos' },
-            { id: 'p3', name: 'Detergente Bio', price: 2100, stock: 30, category: 'Limpieza' },
-            { id: 'p4', name: 'Café Molido 500g', price: 3400, stock: 15, category: 'Alimentos' },
+        // 2. Create Categories and Products
+        const productsData = [
+            { id: 'p1', name: 'Coca Cola 1.5L', price: 1200, stock: 50, categoryName: 'Bebidas' },
+            { id: 'p2', name: 'Arroz 1kg', price: 850, stock: 100, categoryName: 'Alimentos' },
+            { id: 'p3', name: 'Detergente Bio', price: 2100, stock: 30, categoryName: 'Limpieza' },
+            { id: 'p4', name: 'Café Molido 500g', price: 3400, stock: 15, categoryName: 'Alimentos' },
         ];
 
-        for (const p of products) {
+        for (const p of productsData) {
+            // Ensure category exists
+            const category = await prisma.category.upsert({
+                where: { name: p.categoryName },
+                update: {},
+                create: {
+                    name: p.categoryName,
+                    icon: 'Package',
+                },
+            });
+
             await prisma.product.upsert({
                 where: { id: p.id },
-                update: { stock: p.stock, price: p.price },
-                create: p,
+                update: {
+                    stock: p.stock,
+                    price: p.price,
+                    categoryId: category.id
+                },
+                create: {
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    stock: p.stock,
+                    categoryId: category.id
+                },
             });
         }
 
