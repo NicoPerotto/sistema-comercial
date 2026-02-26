@@ -1,28 +1,39 @@
 import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        const sales = await prisma.sale.findMany({
-            include: {
-                user: {
-                    select: {
-                        name: true,
-                        role: true
-                    }
+        const { searchParams } = new URL(request.url);
+        const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+        const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '100', 10)));
+        const skip = (page - 1) * limit;
+
+        const [sales, total] = await prisma.$transaction([
+            prisma.sale.findMany({
+                include: {
+                    user: {
+                        select: {
+                            name: true,
+                            role: true
+                        }
+                    },
+                    items: {
+                        include: {
+                            product: { select: { name: true } } // Solo traemos el nombre, no todo el producto
+                        }
+                    },
+                    paymentMethod: { select: { name: true, percentage: true } } // Solo los campos necesarios
                 },
-                items: {
-                    include: {
-                        product: true
-                    }
+                orderBy: {
+                    createdAt: 'desc'
                 },
-                paymentMethod: true
-            },
-            orderBy: {
-                createdAt: 'desc'
-            }
-        });
-        return NextResponse.json(sales);
+                skip,
+                take: limit,
+            }),
+            prisma.sale.count(),
+        ]);
+
+        return NextResponse.json({ sales, total, page, limit });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
@@ -107,18 +118,16 @@ export async function POST(request: Request) {
                 },
             });
 
-            // 5. Update stock (only if not "No Realizada")
+            // 5. Update stock en paralelo (only if not "No Realizada")
             if (!isNoRealizada) {
-                for (const item of items) {
-                    await (tx as any).product.update({
-                        where: { id: item.productId },
-                        data: {
-                            stock: {
-                                decrement: item.quantity,
-                            },
-                        },
-                    });
-                }
+                await Promise.all(
+                    items.map((item: any) =>
+                        (tx as any).product.update({
+                            where: { id: item.productId },
+                            data: { stock: { decrement: item.quantity } },
+                        })
+                    )
+                );
             }
 
             return sale;

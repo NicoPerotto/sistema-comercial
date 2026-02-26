@@ -32,7 +32,9 @@ export default function SalesHistoryPage() {
         try {
             const res = await fetch('/api/sales');
             const data = await res.json();
-            setSales(Array.isArray(data) ? data : []);
+            // La API ahora devuelve { sales, total, page, limit }
+            const list = Array.isArray(data) ? data : (data.sales || []);
+            setSales(list);
         } catch (error) {
             showToast('Error al cargar historial de ventas', 'error');
         } finally {
@@ -40,13 +42,18 @@ export default function SalesHistoryPage() {
         }
     };
 
-    const getAuditStats = (auditLogStr: string | null) => {
-        if (!auditLogStr) return { removedCount: 0 };
-        try {
-            const log = JSON.parse(auditLogStr);
-            return { removedCount: Array.isArray(log) ? log.filter((e: any) => e.action === 'REMOVE').length : 0 };
-        } catch { return { removedCount: 0 }; }
-    };
+    // Memoizamos el parseo de auditoria por venta para no re-parsearlo en cada render del filtro
+    const auditStatsMap = React.useMemo(() => {
+        const map = new Map<string, { removedCount: number }>();
+        sales.forEach(s => {
+            if (!s.auditLog) { map.set(s.id, { removedCount: 0 }); return; }
+            try {
+                const log = JSON.parse(s.auditLog);
+                map.set(s.id, { removedCount: Array.isArray(log) ? log.filter((e: any) => e.action === 'REMOVE').length : 0 });
+            } catch { map.set(s.id, { removedCount: 0 }); }
+        });
+        return map;
+    }, [sales]);
 
     const filtered = sales.filter(s => {
         const matchSearch =
@@ -145,7 +152,7 @@ export default function SalesHistoryPage() {
                                 </tr>
                             ) : (
                                 filtered.map((sale, idx) => {
-                                    const { removedCount } = getAuditStats(sale.auditLog);
+                                    const { removedCount } = auditStatsMap.get(sale.id) ?? { removedCount: 0 };
                                     return (
                                         <tr key={sale.id} className={`table-row ${idx % 2 !== 0 ? 'bg-slate-50/50 dark:bg-slate-900/30' : ''}`}>
                                             {/* ID + Fecha */}

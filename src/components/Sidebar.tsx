@@ -3,20 +3,21 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from './AuthProvider';
 import {
     LayoutGrid, Package, Tag, ShoppingCart, ClipboardList,
-    Wallet, CreditCard, Users, BarChart3, Zap, LogOut, Archive
+    Wallet, CreditCard, Users, BarChart3, Zap, LogOut, Archive, LucideIcon
 } from 'lucide-react';
 
 interface NavItemProps {
     children: React.ReactNode;
-    Icon: React.ElementType;
+    Icon: LucideIcon;
     href: string;
+    pathname: string; // Recibido desde el padre para evitar llamar usePathname() N veces
     exact?: boolean;
 }
 
-const NavItem = ({ children, Icon, href, exact = false }: NavItemProps) => {
-    const pathname = usePathname();
+const NavItem = ({ children, Icon, href, pathname, exact = false }: NavItemProps) => {
     // Routes with their own child nav entries must use exact match only
     const useExact = exact || href === '/caja' || href === '/';
     const active = useExact
@@ -45,17 +46,7 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const router = useRouter();
-    const [user, setUser] = React.useState<any>(null);
-
-    React.useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        } else if (pathname !== '/login') {
-            router.push('/login');
-        }
-    }, [pathname, router]);
+    const { user, logout } = useAuth();
 
     const handleLogout = async () => {
         if (!user) return;
@@ -63,10 +54,9 @@ export default function Sidebar() {
             await fetch('/api/auth/logout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: user.id }),
+                body: JSON.stringify({ userId: (user as any).id }),
             });
-            localStorage.removeItem('user');
-            router.push('/login');
+            logout();
         } catch (error) {
             console.error('Logout error:', error);
         }
@@ -95,24 +85,24 @@ export default function Sidebar() {
             <nav className="flex-1 px-3 overflow-y-auto custom-scrollbar py-2">
 
                 <SectionLabel>Inicio</SectionLabel>
-                <NavItem href="/" Icon={LayoutGrid}>Dashboard</NavItem>
+                <NavItem href="/" Icon={LayoutGrid} pathname={pathname}>Dashboard</NavItem>
 
                 <SectionLabel>Operaciones</SectionLabel>
-                <NavItem href="/ventas/nueva" Icon={ShoppingCart}>Nueva Venta</NavItem>
-                <NavItem href="/caja" Icon={Wallet}>Caja Diaria</NavItem>
+                <NavItem href="/ventas/nueva" Icon={ShoppingCart} pathname={pathname}>Nueva Venta</NavItem>
+                <NavItem href="/caja" Icon={Wallet} pathname={pathname}>Caja Diaria</NavItem>
 
                 <SectionLabel>Catálogo</SectionLabel>
-                <NavItem href="/productos" Icon={Package}>Productos</NavItem>
-                <NavItem href="/categorias" Icon={Tag}>Categorías</NavItem>
+                <NavItem href="/productos" Icon={Package} pathname={pathname}>Productos</NavItem>
+                <NavItem href="/categorias" Icon={Tag} pathname={pathname}>Categorías</NavItem>
 
                 {isAdminOrManager && (
                     <>
                         <SectionLabel>Administración</SectionLabel>
-                        <NavItem href="/metricas" Icon={BarChart3}>Métricas</NavItem>
-                        <NavItem href="/ventas" Icon={ClipboardList}>Historial de Ventas</NavItem>
-                        <NavItem href="/caja/historial" Icon={Archive}>Historial de Caja</NavItem>
-                        <NavItem href="/empleados" Icon={Users}>Empleados</NavItem>
-                        <NavItem href="/configuracion/pagos" Icon={CreditCard}>Métodos de Pago</NavItem>
+                        <NavItem href="/metricas" Icon={BarChart3} pathname={pathname}>Métricas</NavItem>
+                        <NavItem href="/ventas" Icon={ClipboardList} pathname={pathname}>Historial de Ventas</NavItem>
+                        <NavItem href="/caja/historial" Icon={Archive} pathname={pathname}>Historial de Caja</NavItem>
+                        <NavItem href="/empleados" Icon={Users} pathname={pathname}>Empleados</NavItem>
+                        <NavItem href="/configuracion/pagos" Icon={CreditCard} pathname={pathname}>Métodos de Pago</NavItem>
                     </>
                 )}
             </nav>

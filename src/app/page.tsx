@@ -8,15 +8,10 @@ import {
   ArrowRight, Sparkles, ShieldCheck
 } from 'lucide-react';
 
-export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
+import { useAuth } from '@/components/AuthProvider';
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+export default function DashboardPage() {
+  const { user } = useAuth();
 
   const roleLabels: Record<string, string> = {
     'ADMIN': 'Administrador del Sistema',
@@ -39,7 +34,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
               <span className="badge-primary">
                 <ShieldCheck className="w-3 h-3 mr-1" />
-                {roleLabels[user?.role] || user?.role || 'Personal'}
+                {user?.role ? (roleLabels[user.role] || user.role) : 'Personal'}
               </span>
               <span className="text-xs text-slate-500 font-medium italic">Sesión activa correctamente</span>
             </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useCallback, useRef, useEffect, createContext, useContext } from 'react';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -24,16 +24,28 @@ export const useToast = () => {
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [toasts, setToasts] = useState<Toast[]>([]);
+    // Guardamos los IDs de los timers para limpiarlos si el componente se desmonta
+    const timersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-    const showToast = (message: string, type: ToastType = 'success') => {
+    // Limpiamos todos los timers activos al desmontar
+    useEffect(() => {
+        return () => {
+            timersRef.current.forEach(timer => clearTimeout(timer));
+            timersRef.current.clear();
+        };
+    }, []);
+
+    const showToast = useCallback((message: string, type: ToastType = 'success') => {
         const id = Math.random().toString(36).substring(2, 9);
         setToasts(prev => [...prev, { id, message, type }]);
 
         // Auto-remove after 3 seconds
-        setTimeout(() => {
+        const timer = setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== id));
+            timersRef.current.delete(id);
         }, 3000);
-    };
+        timersRef.current.set(id, timer);
+    }, []);
 
     return (
         <ToastContext.Provider value={{ showToast }}>

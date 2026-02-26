@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/components/ToastProvider';
-import * as XLSX from 'xlsx';
 import Link from 'next/link';
 
 import {
@@ -83,7 +82,10 @@ export default function ProductsPage() {
         fetchData();
     }, []);
 
-    const handleExportExcel = () => {
+    const handleExportExcel = async () => {
+        // Importación dinámica para reducir bundle size
+        const XLSX = await import('xlsx');
+
         const exportData = products.map(p => ({
             'Nombre': p.name,
             'Código': p.barcode || '',
@@ -107,6 +109,9 @@ export default function ProductsPage() {
         const reader = new FileReader();
         reader.onload = async (event) => {
             try {
+                // Importación dinámica
+                const XLSX = await import('xlsx');
+
                 const data = new Uint8Array(event.target?.result as ArrayBuffer);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const sheetName = workbook.SheetNames[0];

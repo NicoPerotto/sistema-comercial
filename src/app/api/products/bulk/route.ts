@@ -9,104 +9,75 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Formato inválido. Se espera un array.' }, { status: 400 });
         }
 
-        // 1. Obtener todas las categorías para mapeo utilizando (prisma as any)
-        const allCategories = await (prisma as any).category.findMany();
-        const categoryMap = new Map(allCategories.map((c: any) => [c.name.toLowerCase(), c.id]));
+        // 1. Pre-cargar todas las categorías y productos existentes en memoria
+        //    para evitar queries N+1 dentro del loop principal.
+        const [allCategories, allProducts] = await Promise.all([
+            prisma.category.findMany(),
+            prisma.product.findMany({ select: { id: true, name: true, barcode: true, stock: true } }),
+        ]);
 
-        const results = {
-            created: 0,
-            updated: 0,
-            errors: 0
-        };
+        const categoryMap = new Map(allCategories.map((c) => [c.name.toLowerCase(), c.id]));
+        // Índices en memoria para lookup O(1) sin queries adicionales
+        const productByBarcode = new Map(allProducts.filter(p => p.barcode).map(p => [p.barcode!, p]));
+        const productByName = new Map(allProducts.map(p => [p.name.toLowerCase(), p]));
 
+        const results = { created: 0, updated: 0, errors: 0 };
+
+        // 2. Pre-crear categorías faltantes (fuera de la transacción principal para no bloquearla)
+        const missingCategories = new Set<string>();
         for (const item of products) {
-            try {
-                // Limpieza de datos (Mapeo de nombres de columnas de Excel)
-                // Usamos nombres en español para el Excel base como pidió el usuario
-                const name = (item.Nombre || item.Nombre).toString().trim();
-                const barcode = item.Código?.toString().trim() || item.Barcode?.toString().trim() || null;
-                const categoryName = item.Categoría?.toString().trim() || item.Categoria?.toString().trim();
-                const price = parseFloat(item.Precio) || 0;
-                const cost = item.Costo ? parseFloat(item.Costo) : null;
-                const stockQty = parseFloat(item.Stock) || 0;
-
-                if (!name) {
-                    results.errors++;
-                    continue;
-                }
-
-                // Obtener o crear categoría
-                let categoryId = null;
-                if (categoryName) {
-                    const normalizedCat = categoryName.toLowerCase();
-                    if (categoryMap.has(normalizedCat)) {
-                        categoryId = categoryMap.get(normalizedCat);
-                    } else {
-                        const newCat = await (prisma as any).category.create({
-                            data: { name: categoryName, icon: 'Package' }
-                        });
-                        categoryId = newCat.id;
-                        categoryMap.set(normalizedCat, categoryId);
-                    }
-                } else {
-                    // Si no hay categoría, buscar o crear una por defecto "Sin Categoría"
-                    const fallbackName = 'Sin Categoría';
-                    const normalizedFallback = fallbackName.toLowerCase();
-                    if (categoryMap.has(normalizedFallback)) {
-                        categoryId = categoryMap.get(normalizedFallback);
-                    } else {
-                        const defaultCat = await (prisma as any).category.create({
-                            data: { name: fallbackName, icon: 'Package' }
-                        });
-                        categoryId = defaultCat.id;
-                        categoryMap.set(normalizedFallback, categoryId);
-                    }
-                }
-
-                // Buscar si existe el producto
-                let existingProduct = null;
-                if (barcode) {
-                    existingProduct = await prisma.product.findUnique({
-                        where: { barcode }
-                    });
-                } else {
-                    // Si no hay barcode, intentar buscar por nombre exacto
-                    existingProduct = await prisma.product.findFirst({
-                        where: { name }
-                    });
-                }
-
-                if (existingProduct) {
-                    // ACTUALIZAR: Sumar stock y actualizar precios
-                    await (prisma.product as any).update({
-                        where: { id: existingProduct.id },
-                        data: {
-                            price,
-                            cost,
-                            stock: existingProduct.stock + stockQty,
-                            categoryId: categoryId || (existingProduct as any).categoryId
-                        }
-                    });
-                    results.updated++;
-                } else {
-                    // CREAR NUEVO
-                    await (prisma.product as any).create({
-                        data: {
-                            name,
-                            barcode,
-                            price,
-                            cost,
-                            stock: stockQty,
-                            categoryId: categoryId,
-                        }
-                    });
-                    results.created++;
-                }
-            } catch (err) {
-                console.error('Error procesando item:', item, err);
-                results.errors++;
-            }
+            const raw = item.Categoría?.toString().trim() || item.Categoria?.toString().trim() || 'Sin Categoría';
+            const normalized = raw.toLowerCase();
+            if (!categoryMap.has(normalized)) missingCategories.add(raw);
         }
+        for (const catName of missingCategories) {
+            const newCat = await prisma.category.create({ data: { name: catName, icon: 'Package' } });
+            categoryMap.set(catName.toLowerCase(), newCat.id);
+        }
+
+        // 3. Procesar productos en una sola transacción para atomicidad y mejor rendimiento
+        await prisma.$transaction(async (tx) => {
+            for (const item of products) {
+                try {
+                    const name = (item.Nombre || '').toString().trim();
+                    const barcode = item.Código?.toString().trim() || item.Barcode?.toString().trim() || null;
+                    const categoryName = item.Categoría?.toString().trim() || item.Categoria?.toString().trim() || 'Sin Categoría';
+                    const price = parseFloat(item.Precio) || 0;
+                    const cost = item.Costo ? parseFloat(item.Costo) : null;
+                    const stockQty = parseFloat(item.Stock) || 0;
+
+                    if (!name) { results.errors++; continue; }
+
+                    const categoryId = categoryMap.get(categoryName.toLowerCase()) ?? null;
+
+                    // Buscar en los índices en-memoria (sin queries adicionales)
+                    const existingProduct = (barcode && productByBarcode.get(barcode)) ||
+                        productByName.get(name.toLowerCase());
+
+                    if (existingProduct) {
+                        await (tx as any).product.update({
+                            where: { id: existingProduct.id },
+                            data: {
+                                price,
+                                cost,
+                                // Convertimos el Decimal a número antes de sumar
+                                stock: Number(existingProduct.stock) + stockQty,
+                                ...(categoryId ? { categoryId } : {}),
+                            },
+                        });
+                        results.updated++;
+                    } else {
+                        await (tx as any).product.create({
+                            data: { name, barcode, price, cost, stock: stockQty, categoryId },
+                        });
+                        results.created++;
+                    }
+                } catch (err) {
+                    console.error('Error procesando item:', item, err);
+                    results.errors++;
+                }
+            }
+        });
 
         return NextResponse.json({
             success: true,
