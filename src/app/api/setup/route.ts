@@ -35,20 +35,30 @@ export async function GET() {
                 },
             });
 
-            await prisma.product.upsert({
+            await (prisma.product as any).upsert({
                 where: { id: p.id },
                 update: {
                     stock: p.stock,
                     price: p.price,
-                    categoryId: category.id
+                    category: { connect: { id: category.id } }
                 },
                 create: {
                     id: p.id,
                     name: p.name,
                     price: p.price,
                     stock: p.stock,
-                    categoryId: category.id
+                    category: { connect: { id: category.id } }
                 },
+            });
+        }
+
+        // 3. Create Suppliers
+        const suppliers = ['Coca Cola Argentina', 'Sancor', 'Arcor', 'Molinos Rio de la Plata'];
+        for (const name of suppliers) {
+            await (prisma as any).supplier.upsert({
+                where: { name },
+                update: {},
+                create: { name }
             });
         }
 

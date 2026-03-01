@@ -32,6 +32,8 @@ interface Product {
     barcode?: string;
     description?: string;
     cost?: number;
+    hasIva?: boolean;
+    margin?: number;
     sellByWeight?: boolean;
 }
 
@@ -54,8 +56,28 @@ export default function ProductsPage() {
         barcode: '',
         description: '',
         cost: '',
+        hasIva: false,
+        margin: '0',
         sellByWeight: false
     });
+
+    // Auto-calculate price
+    useEffect(() => {
+        const costVal = parseFloat(formData.cost);
+        const marginVal = parseFloat(formData.margin);
+
+        if (!isNaN(costVal) && !isNaN(marginVal)) {
+            const base = formData.hasIva ? costVal * 1.21 : costVal;
+            const calculatedPrice = base * (1 + marginVal / 100);
+
+            // Solo actualizamos si el precio es diferente (para evitar loops)
+            // y si el usuario no está editando el campo de precio directamente en este frame
+            const currentPrice = parseFloat(formData.price);
+            if (isNaN(currentPrice) || Math.abs(currentPrice - calculatedPrice) > 0.01) {
+                setFormData(prev => ({ ...prev, price: calculatedPrice.toFixed(2) }));
+            }
+        }
+    }, [formData.cost, formData.hasIva, formData.margin]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -92,6 +114,8 @@ export default function ProductsPage() {
             'Categoría': p.category?.name || 'Sin Categoría',
             'Precio': p.price,
             'Costo': p.cost || 0,
+            'Tiene IVA': p.hasIva ? 'SI' : 'NO',
+            'Margen %': p.margin || 0,
             'Stock': p.stock
         }));
 
@@ -159,6 +183,8 @@ export default function ProductsPage() {
                 barcode: product.barcode || '',
                 description: product.description || '',
                 cost: product.cost ? product.cost.toString() : '',
+                hasIva: product.hasIva || false,
+                margin: product.margin ? product.margin.toString() : '0',
                 sellByWeight: product.sellByWeight || false
             });
         } else {
@@ -167,10 +193,12 @@ export default function ProductsPage() {
                 name: '',
                 categoryId: categories.length > 0 ? categories[0].id : '',
                 price: '',
-                stock: '',
+                stock: '0',
                 barcode: '',
                 description: '',
                 cost: '',
+                hasIva: false,
+                margin: '0',
                 sellByWeight: false
             });
         }
@@ -191,7 +219,7 @@ export default function ProductsPage() {
             });
             if (res.ok) {
                 setIsModalOpen(false);
-                setFormData({ name: '', categoryId: '', price: '', stock: '', barcode: '', description: '', cost: '', sellByWeight: false });
+                setFormData({ name: '', categoryId: '', price: '', stock: '', barcode: '', description: '', cost: '', hasIva: false, margin: '0', sellByWeight: false });
                 showToast(editingProduct ? 'Producto actualizado' : 'Producto creado', 'success');
                 fetchData();
             } else {
@@ -354,7 +382,7 @@ export default function ProductsPage() {
                             <h2 className="text-xl font-bold">{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><Icon name="X" className="w-6 h-6" /></button>
                         </header>
-                        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="md:col-span-2 space-y-1">
                                     <label className="text-sm font-medium">Nombre</label>
@@ -374,16 +402,44 @@ export default function ProductsPage() {
                                     <label className="text-sm font-medium">Código / Barcode</label>
                                     <input type="text" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary" value={formData.barcode} onChange={e => setFormData({ ...formData, barcode: e.target.value })} />
                                 </div>
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium">Precio</label>
-                                    <input required type="number" step="0.01" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
+
+                                {/* Cálculo de Precio */}
+                                <div className="md:col-span-2 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4">
+                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Configuración de Precio</h3>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-medium">Costo</label>
+                                            <input type="number" step="0.01" className="w-full px-3 py-1.5 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right" value={formData.cost} onChange={e => setFormData({ ...formData, cost: e.target.value })} />
+                                        </div>
+                                        <div className="space-y-1 flex flex-col justify-end">
+                                            <label onClick={() => setFormData({ ...formData, hasIva: !formData.hasIva })} className="flex items-center gap-2 cursor-pointer p-1.5 h-[38px]">
+                                                <div className={`w-4 h-4 rounded border flex items-center justify-center ${formData.hasIva ? 'bg-primary border-primary text-white' : 'border-slate-300 bg-white dark:bg-slate-800'}`}>
+                                                    {formData.hasIva && <Icon name="Check" className="w-3 h-3" />}
+                                                </div>
+                                                <span className="text-xs font-bold uppercase tracking-tighter">Compra con IVA</span>
+                                            </label>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-medium">Margen %</label>
+                                            <input type="number" step="0.1" className="w-full px-3 py-1.5 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right font-bold text-primary" value={formData.margin} onChange={e => setFormData({ ...formData, margin: e.target.value })} />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-primary">Precio Final</label>
+                                            <input required type="number" step="0.01" className="w-full px-3 py-1.5 rounded-lg border-2 border-primary/30 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-primary text-right font-bold text-lg" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
+                                        </div>
+                                    </div>
+                                    <p className="text-[10px] text-slate-400 italic">
+                                        El precio se calcula: (Costo {formData.hasIva ? '+ 21%' : ''}) + {formData.margin}% de margen. Puedes sobrescribir el precio final manualmente.
+                                    </p>
                                 </div>
+
                                 <div className="space-y-1">
-                                    <label className="text-sm font-medium">Stock</label>
+                                    <label className="text-sm font-medium">Stock Inicial</label>
                                     <input required type="number" step="0.01" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right" value={formData.stock} onChange={e => setFormData({ ...formData, stock: e.target.value })} />
                                 </div>
-                                <div className="md:col-span-2 flex items-center gap-2 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg cursor-pointer" onClick={() => setFormData({ ...formData, sellByWeight: !formData.sellByWeight })}>
-                                    <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.sellByWeight ? 'bg-primary border-primary text-white' : 'border-slate-300'}`}>
+
+                                <div className="flex items-center gap-2 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg cursor-pointer h-fit self-end" onClick={() => setFormData({ ...formData, sellByWeight: !formData.sellByWeight })}>
+                                    <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.sellByWeight ? 'bg-primary border-primary text-white' : 'border-slate-300 bg-white dark:bg-slate-800'}`}>
                                         {formData.sellByWeight && <Icon name="Check" className="w-3 h-3" />}
                                     </div>
                                     <span className="text-sm font-medium">Venta por peso (kg)</span>

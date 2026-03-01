@@ -41,13 +41,13 @@ async function main() {
     })
 
     // Create Product
-    const product = await prisma.product.upsert({
+    const product = await (prisma.product as any).upsert({
         where: { id: 'prod-1' },
         update: {},
         create: {
             id: 'prod-1',
             name: 'Producto Ejemplo',
-            categoryId: category.id,
+            category: { connect: { id: category.id } },
             price: 1500.00,
             stock: 50,
         },

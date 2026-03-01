@@ -111,6 +111,9 @@ export async function POST(request: Request) {
                             return {
                                 quantity: item.quantity,
                                 price: product.price,
+                                cost: product.cost,
+                                hasIva: product.hasIva,
+                                margin: product.margin,
                                 productId: item.productId,
                             };
                         }),

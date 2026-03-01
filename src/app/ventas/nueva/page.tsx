@@ -123,12 +123,84 @@ export default function POSPage() {
     const [weightInput, setWeightInput] = useState('');
     const searchInputRef = useRef<HTMLInputElement>(null);
 
+    // Quick Edit Product Modal (for cost/iva/margin)
+    const [quickEditModal, setQuickEditModal] = useState<{ isOpen: boolean; product: any | null }>({
+        isOpen: false,
+        product: null
+    });
+    const [quickEditData, setQuickEditData] = useState({
+        cost: '',
+        hasIva: false,
+        margin: '0',
+        price: ''
+    });
+
+    // Handle price calculation in Quick Edit
+    useEffect(() => {
+        const costVal = parseFloat(quickEditData.cost);
+        const marginVal = parseFloat(quickEditData.margin);
+        if (!isNaN(costVal) && !isNaN(marginVal)) {
+            const base = quickEditData.hasIva ? costVal * 1.21 : costVal;
+            const calculated = base * (1 + marginVal / 100);
+            const currentPrice = parseFloat(quickEditData.price);
+            if (isNaN(currentPrice) || Math.abs(currentPrice - calculated) > 0.01) {
+                setQuickEditData(prev => ({ ...prev, price: calculated.toFixed(2) }));
+            }
+        }
+    }, [quickEditData.cost, quickEditData.hasIva, quickEditData.margin]);
+
     useEffect(() => {
         checkRegisterStatus();
         fetchData();
         const savedCart = localStorage.getItem('active_cart');
         if (savedCart) setCart(JSON.parse(savedCart));
     }, []);
+
+    const handleOpenQuickEdit = (e: React.MouseEvent, product: any) => {
+        e.stopPropagation();
+        setQuickEditModal({ isOpen: true, product });
+        setQuickEditData({
+            cost: product.cost ? product.cost.toString() : '',
+            hasIva: product.hasIva || false,
+            margin: product.margin ? product.margin.toString() : '0',
+            price: product.price.toString()
+        });
+    };
+
+    const handleSaveQuickEdit = async () => {
+        if (!quickEditModal.product) return;
+        setProcessing(true);
+        try {
+            const body = {
+                ...quickEditModal.product,
+                cost: quickEditData.cost,
+                hasIva: quickEditData.hasIva,
+                margin: quickEditData.margin,
+                price: quickEditData.price
+            };
+
+            const res = await fetch('/api/products', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                const updatedProduct = await res.json();
+                showToast('Producto actualizado', 'success');
+                // Update local products list
+                setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+                setQuickEditModal({ isOpen: false, product: null });
+            } else {
+                showToast('Error al actualizar el producto', 'error');
+            }
+        } catch (error) {
+            showToast('Error de conexión', 'error');
+        } finally {
+            setProcessing(false);
+        }
+    };
+
 
     const checkRegisterStatus = async () => {
         try {
@@ -468,16 +540,25 @@ export default function POSPage() {
                             </button>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                                 {filteredProducts.map(p => (
-                                    <div key={p.id} className="card-premium p-4 flex flex-col justify-between hover:border-primary transition-all">
+                                    <div key={p.id} className="card-premium p-4 flex flex-col justify-between hover:border-primary transition-all relative group">
                                         <div className="mb-4">
-                                            <p className="text-[10px] text-slate-400 font-bold uppercase">{p.category?.name || 'Sin categoría'}</p>
+                                            <div className="flex justify-between items-start">
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase">{p.category?.name || 'Sin categoría'}</p>
+                                                <button
+                                                    onClick={(e) => handleOpenQuickEdit(e, p)}
+                                                    className="p-1 text-slate-300 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                                                    title="Configurar Precio"
+                                                >
+                                                    <Icon name="Edit" className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                             <h3 className="font-bold text-sm line-clamp-2">{p.name}</h3>
                                         </div>
                                         <div className="space-y-3">
                                             <div className="text-xl font-bold">${Number(p.price).toLocaleString()}</div>
                                             <div className="flex gap-2">
-                                                <button onClick={() => handleAddToCart(p, 1)} className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-bold hover:bg-primary-dark">SUMAR</button>
-                                                <button onClick={() => handleAddToCart(p, -1)} className="px-3 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors">
+                                                <button onClick={() => handleAddToCart(p as any as Product, 1)} className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-bold hover:bg-primary-dark">SUMAR</button>
+                                                <button onClick={() => handleAddToCart(p as any as Product, -1)} className="px-3 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors">
                                                     <Icon name="Minus" className="w-4 h-4" />
                                                 </button>
                                             </div>
@@ -494,6 +575,77 @@ export default function POSPage() {
                     )}
                 </div>
             </main>
+
+            {/* Quick Edit Modal */}
+            {quickEditModal.isOpen && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
+                        <header className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                            <div>
+                                <h2 className="text-lg font-bold">{quickEditModal.product?.name}</h2>
+                                <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Configuración de Precios</p>
+                            </div>
+                            <button onClick={() => setQuickEditModal({ isOpen: false, product: null })} className="text-slate-400 hover:text-slate-600"><Icon name="X" /></button>
+                        </header>
+                        <div className="p-6 space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-xs font-medium">Costo de Compra</label>
+                                    <input
+                                        type="number" step="0.01"
+                                        className="w-full p-2.5 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right font-medium"
+                                        value={quickEditData.cost}
+                                        onChange={e => setQuickEditData({ ...quickEditData, cost: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-1 flex flex-col justify-end">
+                                    <label
+                                        onClick={() => setQuickEditData({ ...quickEditData, hasIva: !quickEditData.hasIva })}
+                                        className="flex items-center gap-2 cursor-pointer p-2.5 h-[46px] bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800"
+                                    >
+                                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${quickEditData.hasIva ? 'bg-primary border-primary text-white' : 'border-slate-300 bg-white dark:bg-slate-800'}`}>
+                                            {quickEditData.hasIva && <Icon name="Check" className="w-3 h-3" />}
+                                        </div>
+                                        <span className="text-xs font-bold uppercase tracking-tighter">Compra con IVA</span>
+                                    </label>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-medium">Margen de Ganancia (%)</label>
+                                    <input
+                                        type="number" step="0.1"
+                                        className="w-full p-2.5 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right font-bold text-primary"
+                                        value={quickEditData.margin}
+                                        onChange={e => setQuickEditData({ ...quickEditData, margin: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-primary">Precio de Venta Final</label>
+                                    <input
+                                        required type="number" step="0.01"
+                                        className="w-full p-2.5 rounded-lg border-2 border-primary/30 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-primary text-right font-bold text-xl"
+                                        value={quickEditData.price}
+                                        onChange={e => setQuickEditData({ ...quickEditData, price: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl flex gap-3 items-start">
+                                <Icon name="Sparkles" className="w-5 h-5 text-blue-500 mt-0.5" />
+                                <div className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                                    El precio final se calcula sumando el <span className="font-bold">IVA (21%)</span> al costo (si corresponde) y aplicando un <span className="font-bold">{quickEditData.margin}%</span> de margen sobre ese valor. Los cambios se guardarán en la base de datos de productos.
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 pt-2">
+                                <button onClick={() => setQuickEditModal({ isOpen: false, product: null })} className="btn-secondary flex-1 h-12 uppercase tracking-widest text-xs font-bold">Cancelar</button>
+                                <button onClick={handleSaveQuickEdit} disabled={processing} className="btn-primary flex-1 h-12 uppercase tracking-widest text-xs font-bold">
+                                    {processing ? 'Guardando...' : 'Actualizar Producto'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <aside className="w-80 lg:w-96 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-xl h-full">
 

@@ -17,34 +17,46 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, categoryId, price, stock, barcode, description, cost, sellByWeight } = body;
+        const { name, categoryId, price, stock, barcode, description, cost, hasIva, margin, sellByWeight } = body;
 
-        if (!name || !categoryId || price === undefined) {
+        if (!name || !categoryId) {
             return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
         }
 
-        const parsedPrice = parseFloat(price);
-        const parsedStock = parseFloat(stock);
-        const parsedCost = cost ? parseFloat(cost) : null;
+        const parsedCost = cost ? parseFloat(cost) : 0;
+        const parsedMargin = margin ? parseFloat(margin) : 0;
+        const useHasIva = !!hasIva;
 
-        if (isNaN(parsedPrice)) {
-            return NextResponse.json({ error: 'Precio inválido' }, { status: 400 });
+        // Calculate price based on cost, iva and margin if price is not provided or if we want to ensure it matches
+        let calculatedPrice = parseFloat(price);
+        if (isNaN(calculatedPrice) && parsedCost > 0) {
+            const base = useHasIva ? parsedCost * 1.21 : parsedCost;
+            calculatedPrice = base * (1 + parsedMargin / 100);
         }
+
+        const parsedStock = parseFloat(stock);
 
         const product = await (prisma.product as any).create({
             data: {
                 name,
-                categoryId,
-                price: parsedPrice,
+                category: { connect: { id: categoryId } },
+                price: isNaN(calculatedPrice) ? 0 : calculatedPrice,
                 stock: isNaN(parsedStock) ? 0 : parsedStock,
                 barcode: barcode || null,
                 description: description || '',
-                cost: parsedCost && !isNaN(parsedCost) ? parsedCost : null,
+                cost: parsedCost,
+                // hasIva and margin are handled via executeRaw below due to locked prisma client
                 sellByWeight: !!sellByWeight
             }
         });
 
-        return NextResponse.json(product);
+        // Workaround: Update fields directly in DB because Prisma Client is locked/stale
+        await prisma.$executeRawUnsafe(
+            `UPDATE Product SET hasIva = ?, margin = ? WHERE id = ?`,
+            useHasIva ? 1 : 0, parsedMargin, product.id
+        );
+
+        return NextResponse.json({ ...product, hasIva: useHasIva, margin: parsedMargin });
     } catch (error: any) {
         console.error('API Error POST:', error);
         const errorMessage = error.code === 'P2002'
@@ -58,35 +70,46 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { id, name, categoryId, price, stock, barcode, description, cost, sellByWeight } = body;
+        const { id, name, categoryId, price, stock, barcode, description, cost, hasIva, margin, sellByWeight } = body;
 
         if (!id) {
             return NextResponse.json({ error: 'Falta el ID del producto' }, { status: 400 });
         }
 
-        const parsedPrice = parseFloat(price);
-        const parsedStock = parseFloat(stock);
-        const parsedCost = cost ? parseFloat(cost) : null;
+        const parsedCost = cost ? parseFloat(cost) : 0;
+        const parsedMargin = margin ? parseFloat(margin) : 0;
+        const useHasIva = !!hasIva;
 
-        if (isNaN(parsedPrice)) {
-            return NextResponse.json({ error: 'Precio inválido' }, { status: 400 });
+        let calculatedPrice = parseFloat(price);
+        if (!calculatedPrice && parsedCost > 0) {
+            const base = useHasIva ? parsedCost * 1.21 : parsedCost;
+            calculatedPrice = base * (1 + parsedMargin / 100);
         }
+
+        const parsedStock = parseFloat(stock);
 
         const product = await (prisma.product as any).update({
             where: { id: id },
             data: {
                 name,
-                categoryId,
-                price: parsedPrice,
+                category: { connect: { id: categoryId } },
+                price: isNaN(calculatedPrice) ? 0 : calculatedPrice,
                 stock: isNaN(parsedStock) ? 0 : parsedStock,
                 barcode: barcode || null,
                 description: description || '',
-                cost: parsedCost && !isNaN(parsedCost) ? parsedCost : null,
+                cost: parsedCost,
+                // hasIva and margin are updated via raw SQL below
                 sellByWeight: !!sellByWeight
             }
         });
 
-        return NextResponse.json(product);
+        // Workaround for stale Prisma Client
+        await prisma.$executeRawUnsafe(
+            `UPDATE Product SET hasIva = ?, margin = ? WHERE id = ?`,
+            useHasIva ? 1 : 0, parsedMargin, id
+        );
+
+        return NextResponse.json({ ...product, hasIva: useHasIva, margin: parsedMargin });
     } catch (error: any) {
         console.error('API Error PUT:', error);
         const errorMessage = error.code === 'P2002'

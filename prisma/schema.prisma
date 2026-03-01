@@ -19,8 +19,9 @@ model User {
   updatedAt DateTime @updatedAt
   sales     Sale[]
   shifts    Shift[]
-  openedRegisters CashRegister[] @relation("OpenedBy")
-  closedRegisters CashRegister[] @relation("ClosedBy")
+  openedRegisters  CashRegister[] @relation("OpenedBy")
+  closedRegisters  CashRegister[] @relation("ClosedBy")
+  supplierPayments SupplierPayment[]
 }
 
 model Shift {
@@ -51,6 +52,8 @@ model Product {
   barcode      String?   @unique
   price        Decimal
   cost         Decimal?
+  hasIva       Boolean   @default(false)
+  margin       Decimal   @default(0)
   stock        Decimal   @default(0)
   sellByWeight Boolean   @default(false)
   createdAt    DateTime  @default(now())
@@ -59,31 +62,33 @@ model Product {
 }
 
 model PaymentMethod {
-  id           String   @id @default(cuid())
-  name         String   @unique
-  percentage   Float    @default(0) // e.g., 10 for +10%, -5 for -5%
-  isArqueable  Boolean  @default(true) // If true, it is included in cash count/arqueo
-  sales        Sale[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id               String            @id @default(cuid())
+  name             String            @unique
+  percentage       Float             @default(0) // e.g., 10 for +10%, -5 for -5%
+  isArqueable      Boolean           @default(true) // If true, it is included in cash count/arqueo
+  sales            Sale[]
+  supplierPayments SupplierPayment[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
 model CashRegister {
-  id              String    @id @default(cuid())
-  shortId         String    @unique // Alphanumeric 5 chars
-  openingAmount   Decimal
-  closingAmount   Decimal?
-  expectedAmount  Decimal?
-  difference      Decimal?
-  depositAmount   Decimal?  // Amount to be deposited in safe
-  status          String    @default("OPEN") // OPEN, CLOSED
-  openedById      String
-  openedBy        User      @relation("OpenedBy", fields: [openedById], references: [id])
-  closedById      String?
-  closedBy        User?     @relation("ClosedBy", fields: [closedById], references: [id])
-  openedAt        DateTime  @default(now())
-  closedAt        DateTime?
-  sales           Sale[]
+  id               String            @id @default(cuid())
+  shortId          String            @unique // Alphanumeric 5 chars
+  openingAmount    Decimal
+  closingAmount    Decimal?
+  expectedAmount   Decimal?
+  difference       Decimal?
+  depositAmount    Decimal?          // Amount to be deposited in safe
+  status           String            @default("OPEN") // OPEN, CLOSED
+  openedById       String
+  openedBy         User              @relation("OpenedBy", fields: [openedById], references: [id])
+  closedById       String?
+  closedBy         User?             @relation("ClosedBy", fields: [closedById], references: [id])
+  openedAt         DateTime          @default(now())
+  closedAt         DateTime?
+  sales            Sale[]
+  supplierPayments SupplierPayment[]
 }
 
 model Sale {
@@ -106,10 +111,39 @@ model SaleItem {
   id        String  @id @default(cuid())
   quantity  Decimal
   price     Decimal
+  cost      Decimal?
+  hasIva    Boolean @default(false)
+  margin    Decimal @default(0)
   saleId    String
   sale      Sale    @relation(fields: [saleId], references: [id])
   productId String
   product   Product @relation(fields: [productId], references: [id])
+}
+
+model Supplier {
+  id        String            @id @default(cuid())
+  name      String            @unique
+  contact   String?
+  payments  SupplierPayment[]
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model SupplierPayment {
+  id              String        @id @default(cuid())
+  shortId         String        @unique // Alphanumeric code similar to CashRegister
+  amount          Decimal
+  description     String?
+  paidFromCash    Boolean       @default(false)
+  supplierId      String
+  supplier        Supplier      @relation(fields: [supplierId], references: [id])
+  paymentMethodId String
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  cashRegisterId  String?
+  cashRegister    CashRegister? @relation(fields: [cashRegisterId], references: [id])
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  createdAt       DateTime      @default(now())
 }
 
 model FixedCost {

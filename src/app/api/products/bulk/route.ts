@@ -43,8 +43,10 @@ export async function POST(request: Request) {
                     const barcode = item.Código?.toString().trim() || item.Barcode?.toString().trim() || null;
                     const categoryName = item.Categoría?.toString().trim() || item.Categoria?.toString().trim() || 'Sin Categoría';
                     const price = parseFloat(item.Precio) || 0;
-                    const cost = item.Costo ? parseFloat(item.Costo) : null;
+                    const cost = item.Costo ? parseFloat(item.Costo) : 0;
                     const stockQty = parseFloat(item.Stock) || 0;
+                    const hasIva = item['Tiene IVA']?.toString().toUpperCase() === 'SI' || !!item.hasIva;
+                    const margin = parseFloat(item['Margen %']) || parseFloat(item.margin) || 0;
 
                     if (!name) { results.errors++; continue; }
 
@@ -60,15 +62,26 @@ export async function POST(request: Request) {
                             data: {
                                 price,
                                 cost,
+                                hasIva,
+                                margin,
                                 // Convertimos el Decimal a número antes de sumar
                                 stock: Number(existingProduct.stock) + stockQty,
-                                ...(categoryId ? { categoryId } : {}),
+                                ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
                             },
                         });
                         results.updated++;
                     } else {
                         await (tx as any).product.create({
-                            data: { name, barcode, price, cost, stock: stockQty, categoryId },
+                            data: {
+                                name,
+                                barcode,
+                                price,
+                                cost,
+                                hasIva,
+                                margin,
+                                stock: stockQty,
+                                category: categoryId ? { connect: { id: categoryId } } : undefined
+                            },
                         });
                         results.created++;
                     }
