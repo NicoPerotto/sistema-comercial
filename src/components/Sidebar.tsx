@@ -102,6 +102,7 @@ export default function Sidebar() {
                         <SectionLabel>Administración</SectionLabel>
                         <NavItem href="/metricas" Icon={BarChart3} pathname={pathname}>Métricas</NavItem>
                         <NavItem href="/ventas" Icon={ClipboardList} pathname={pathname}>Historial de Ventas</NavItem>
+                        <NavItem href="/pago-proveedores/historial" Icon={Archive} pathname={pathname}>Historial de Pagos</NavItem>
                         <NavItem href="/caja/historial" Icon={Archive} pathname={pathname}>Historial de Caja</NavItem>
                         <NavItem href="/empleados" Icon={Users} pathname={pathname}>Empleados</NavItem>
                         <NavItem href="/configuracion/pagos" Icon={CreditCard} pathname={pathname}>Métodos de Pago</NavItem>
