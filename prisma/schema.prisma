@@ -22,6 +22,7 @@ model User {
   openedRegisters  CashRegister[] @relation("OpenedBy")
   closedRegisters  CashRegister[] @relation("ClosedBy")
   supplierPayments SupplierPayment[]
+  weeklyClosures   WeeklyClosure[]
 }
 
 model Shift {
@@ -67,9 +68,10 @@ model PaymentMethod {
   percentage       Float             @default(0) // e.g., 10 for +10%, -5 for -5%
   isArqueable      Boolean           @default(true) // If true, it is included in cash count/arqueo
   sales            Sale[]
-  supplierPayments SupplierPayment[]
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  supplierPayments     SupplierPayment[]
+  weeklyClosureDetails WeeklyClosureDetail[]
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
 }
 
 model CashRegister {
@@ -152,3 +154,29 @@ model FixedCost {
   amount      Decimal
   date        DateTime @default(now())
 }
+
+model WeeklyClosure {
+  id               String                 @id @default(cuid())
+  shortId          String                 @unique
+  startDate        DateTime
+  endDate          DateTime               @default(now())
+  totalExpected    Decimal
+  totalReal        Decimal
+  difference       Decimal
+  details          WeeklyClosureDetail[]
+  userId           String
+  user             User                   @relation(fields: [userId], references: [id])
+  createdAt        DateTime               @default(now())
+}
+
+model WeeklyClosureDetail {
+  id               String               @id @default(cuid())
+  weeklyClosureId  String
+  weeklyClosure    WeeklyClosure        @relation(fields: [weeklyClosureId], references: [id])
+  paymentMethodId  String
+  paymentMethod    PaymentMethod        @relation(fields: [paymentMethodId], references: [id])
+  expectedAmount   Decimal
+  realAmount       Decimal
+  difference       Decimal
+}
+

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, ArrowDownToLine, History, Printer } from 'lucide-react';
+import { Calendar, ArrowDownToLine, History, Printer, TrendingUp } from 'lucide-react';
 
 export default function CajaPage() {
     const [registerData, setRegisterData] = useState<any>(null);
@@ -88,12 +88,20 @@ export default function CajaPage() {
                     <h1 className="text-title text-2xl font-bold">Caja Diaria</h1>
                     <p className="text-subtitle">Gestión de apertura y cierre de turno auditado</p>
                 </div>
-                {isAdminOrManager && (
-                    <Link href="/caja/historial" className="btn-secondary gap-2">
-                        <History className="w-4 h-4" />
-                        Ver Historial
-                    </Link>
-                )}
+                <div className="flex gap-3">
+                    {isAdminOrManager && (
+                        <>
+                            <Link href="/caja/semanal" className="btn-primary bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-500/20 gap-2">
+                                <TrendingUp className="w-4 h-4" />
+                                Cierre Semanal
+                            </Link>
+                            <Link href="/caja/historial" className="btn-secondary gap-2">
+                                <History className="w-4 h-4" />
+                                Ver Historial
+                            </Link>
+                        </>
+                    )}
+                </div>
             </header>
 
             {/* --- APERTURA --- */}

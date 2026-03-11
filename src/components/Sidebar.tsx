@@ -6,7 +6,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from './AuthProvider';
 import {
     LayoutGrid, Package, Tag, ShoppingCart, ClipboardList,
-    Wallet, CreditCard, Users, BarChart3, Zap, LogOut, Archive, Truck, LucideIcon
+    Wallet, CreditCard, Users, BarChart3, Zap, LogOut, Archive, Truck, LucideIcon,
+    Calendar
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -101,6 +102,7 @@ export default function Sidebar() {
                     <>
                         <SectionLabel>Administración</SectionLabel>
                         <NavItem href="/metricas" Icon={BarChart3} pathname={pathname}>Métricas</NavItem>
+                        <NavItem href="/caja/semanal" Icon={Calendar} pathname={pathname}>Cierre Semanal</NavItem>
                         <NavItem href="/ventas" Icon={ClipboardList} pathname={pathname}>Historial de Ventas</NavItem>
                         <NavItem href="/pago-proveedores/historial" Icon={Archive} pathname={pathname}>Historial de Pagos</NavItem>
                         <NavItem href="/caja/historial" Icon={Archive} pathname={pathname}>Historial de Caja</NavItem>
