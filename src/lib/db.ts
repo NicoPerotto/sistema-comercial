@@ -1,4 +1,3 @@
-process.env.PRISMA_CLIENT_ENGINE_TYPE = 'binary';
 import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
