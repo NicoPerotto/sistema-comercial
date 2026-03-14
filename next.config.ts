@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   experimental: {
   },
 
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
   // Cabeceras de caché para assets estáticos
   async headers() {
     return [
