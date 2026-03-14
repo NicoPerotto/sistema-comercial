@@ -16,7 +16,7 @@
     "@prisma/client": "^5.22.0",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.575.0",
-    "next": "15.1.0",
+    "next": "15.1.11",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.7.0",
