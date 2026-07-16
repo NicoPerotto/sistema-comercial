@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ═══════════════════════════════════════════════════
    DESIGN TOKENS — Fuente única de verdad de colores
    Todos los colores del sistema se definen aquí.
