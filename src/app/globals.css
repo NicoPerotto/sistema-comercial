@@ -13,17 +13,14 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 
-  /* ── Color Background/Foreground (modo claro — dark se sobreescribe en :root) ── */
+  /* ── Color Background/Foreground ── */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
   /* ── Brand Primary ── */
-  --color-primary: #2563eb;
-  /* Blue 600  */
-  --color-primary-dark: #1d4ed8;
-  /* Blue 700  */
-  --color-primary-light: #dbeafe;
-  /* Blue 100  */
+  --color-primary: var(--color-primary);
+  --color-primary-dark: var(--color-primary-dark);
+  --color-primary-light: var(--color-primary-light);
 
   /* ── Semantic States ── */
   --color-success: #10b981;
@@ -53,8 +50,7 @@
   --color-warning-dark: #d97706;
   /* Amber 600   */
 
-  --color-primary-subtle: #eff6ff;
-  /* Blue 50     */
+  --color-primary-subtle: var(--color-primary-light);
 
   /* ── Surfaces / Cards ── */
   --color-surface: var(--card-background);
@@ -69,33 +65,241 @@
   --color-text-muted: var(--text-muted);
   --color-text-faint: var(--text-faint);
 
-  /* ── Accent (Amber) ── */
-  --color-accent: #f59e0b;
+  /* ── Accent ── */
+  --color-accent: var(--color-primary);
+}
+
+:root {
+  /* Variables default que actúan como fallback por si no se especifica clase */
+  --color-primary: #3b82f6;
+  --color-primary-light: #dbeafe; 
+  --color-primary-dark: #2563eb;  
+
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card-background: #1e293b;
+  --card-border: #334155;
+  --border-subtle: #1e293b;
+  --surface-alt: #0f172a;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
 }
 
 /* ═══════════════════════════════════════════════════
-   VALUES 
-═══════════════════════════════════════════════════ */
-:root {
+   CLASES DE TEMAS DINÁMICOS (Activados desde el Layout)
+   ═══════════════════════════════════════════════════ */
+
+/* --- TEMA 1: AZUL INDIGO (Corporativo / Azul Slate) --- */
+.theme-indigo {
+  --color-primary: #3b82f6;       
+  --color-primary-dark: #2563eb;  
+  --color-primary-light: #dbeafe; 
   --background: #0f172a;
-  /* slate-900  */
   --foreground: #f8fafc;
-  /* slate-50   */
-
   --card-background: #1e293b;
-  /* slate-800  */
   --card-border: #334155;
-  /* slate-700  */
   --border-subtle: #1e293b;
-  /* slate-800  */
   --surface-alt: #0f172a;
-  /* slate-900  */
-
   --text-muted: #94a3b8;
-  /* slate-400  */
   --text-faint: #64748b;
-  /* slate-500  */
 }
+
+/* --- TEMA 2: VERDE ESMERALDA (Alimentos / Eco / Verde Bosque) --- */
+.theme-emerald {
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+  --color-primary-light: #d1fae5;
+  --background: #061c15;
+  --foreground: #f0fdf4;
+  --card-background: #0a2f24;
+  --card-border: #114a39;
+  --border-subtle: #0a2f24;
+  --surface-alt: #061c15;
+  --text-muted: #86efac;
+  --text-faint: #4ade80;
+}
+
+/* --- TEMA 3: VIOLETA MODERNO (Tecnología / Neon Violet) --- */
+.theme-violet {
+  --color-primary: #8b5cf6;
+  --color-primary-dark: #7c3aed;
+  --color-primary-light: #f5f3ff;
+  --background: #120b24;
+  --foreground: #faf5ff;
+  --card-background: #1e1338;
+  --card-border: #331f5c;
+  --border-subtle: #1e1338;
+  --surface-alt: #120b24;
+  --text-muted: #d8b4fe;
+  --text-faint: #a78bfa;
+}
+
+/* --- TEMA 4: NARANJA/AMBAR (Comidas / Panaderías / Cálido) --- */
+.theme-amber {
+  --color-primary: #f97316;
+  --color-primary-dark: #ea580c;
+  --color-primary-light: #ffedd5;
+  --background: #1a0f0a;
+  --foreground: #fff7ed;
+  --card-background: #2e1a12;
+  --card-border: #4a2b1e;
+  --border-subtle: #2e1a12;
+  --surface-alt: #1a0f0a;
+  --text-muted: #ffedd5;
+  --text-faint: #fed7aa;
+}
+
+/* --- TEMA 5: CRIMSON ROSE (Moda / Estética / Premium Chic) --- */
+.theme-rose {
+  --color-primary: #e11d48;
+  --color-primary-dark: #be123c;
+  --color-primary-light: #ffe4e6;
+  --background: #180509;
+  --foreground: #fff1f2;
+  --card-background: #2a0b12;
+  --card-border: #44101b;
+  --border-subtle: #2a0b12;
+  --surface-alt: #180509;
+  --text-muted: #fda4af;
+  --text-faint: #f43f5e;
+}
+
+/* --- TEMA 6: MIDNIGHT CYBER (Tecnofuturista / Cyberlime & Carbon) --- */
+.theme-cyber {
+  --color-primary: #a3e635;
+  --color-primary-dark: #84cc16;
+  --color-primary-light: #f0fdf4;
+  --background: #090d16;
+  --foreground: #f8fafc;
+  --card-background: #111827;
+  --card-border: #1f2937;
+  --border-subtle: #111827;
+  --surface-alt: #090d16;
+  --text-muted: #9ca3af;
+  --text-faint: #6b7280;
+}
+
+/* --- TEMA 7: GOLDEN LUXURY (Boutique de Lujo / Joyerías / Chocolaterías) --- */
+.theme-gold {
+  --color-primary: #d97706;
+  --color-primary-dark: #b45309;
+  --color-primary-light: #fef3c7;
+  --background: #140d07;
+  --foreground: #fefbf6;
+  --card-background: #23180f;
+  --card-border: #382618;
+  --border-subtle: #23180f;
+  --surface-alt: #140d07;
+  --text-muted: #fcd34d;
+  --text-faint: #fbbf24;
+}
+
+/* --- TEMA 8: NORDIC LIGHT (Limpio / Minimalista / Claro) --- */
+.theme-nordic-light {
+  --color-primary: #0284c7;       /* Sky-600 */
+  --color-primary-dark: #0369a1;  /* Sky-700 */
+  --color-primary-light: #e0f2fe; /* Sky-100 */
+  --background: #f8fafc;          /* Slate-50 */
+  --foreground: #0f172a;          /* Slate-900 */
+  --card-background: #ffffff;
+  --card-border: #e2e8f0;         /* Slate-200 */
+  --border-subtle: #f1f5f9;       /* Slate-100 */
+  --surface-alt: #f1f5f9;         /* Slate-100 */
+  --text-muted: #475569;          /* Slate-600 */
+  --text-faint: #64748b;          /* Slate-500 */
+}
+
+/* --- TEMA 9: CORPORATE WHITE (Azul Clásico y Blanco Elegante) --- */
+.theme-corporate-white {
+  --color-primary: #2563eb;       /* Blue-600 */
+  --color-primary-dark: #1d4ed8;  /* Blue-700 */
+  --color-primary-light: #dbeafe; /* Blue-100 */
+  --background: #f3f4f6;          /* Gray-100 */
+  --foreground: #111827;          /* Gray-900 */
+  --card-background: #ffffff;
+  --card-border: #d1d5db;         /* Gray-300 */
+  --border-subtle: #e5e7eb;       /* Gray-200 */
+  --surface-alt: #f9fafb;         /* Gray-50 */
+  --text-muted: #4b5563;          /* Gray-600 */
+  --text-faint: #9ca3af;          /* Gray-400 */
+}
+
+/* --- TEMA 10: WARM SAND (Cálido / Panaderías / Orgánico Claro) --- */
+.theme-warm-sand {
+  --color-primary: #d97706;       /* Amber-600 */
+  --color-primary-dark: #b45309;  /* Amber-700 */
+  --color-primary-light: #fef3c7; /* Amber-100 */
+  --background: #fafaf9;          /* Stone-50 */
+  --foreground: #1c1917;          /* Stone-900 */
+  --card-background: #ffffff;
+  --card-border: #e7e5e4;         /* Stone-200 */
+  --border-subtle: #f5f5f4;       /* Stone-100 */
+  --surface-alt: #f5f5f4;         /* Stone-100 */
+  --text-muted: #57534e;          /* Stone-600 */
+  --text-faint: #78716c;          /* Stone-500 */
+}
+
+/* --- TEMA 11: MINT FRESH (Salud / Farmacias / Bienestar Verde Claro) --- */
+.theme-mint-fresh {
+  --color-primary: #059669;       /* Emerald-600 */
+  --color-primary-dark: #047857;  /* Emerald-700 */
+  --color-primary-light: #d1fae5; /* Emerald-100 */
+  --background: #f0fdf4;          /* Emerald-50 */
+  --foreground: #052e16;          /* Emerald-950 */
+  --card-background: #ffffff;
+  --card-border: #bbf7d0;         /* Emerald-200 */
+  --border-subtle: #dcfce7;       /* Emerald-100 */
+  --surface-alt: #dcfce7;         /* Emerald-100 */
+  --text-muted: #166534;          /* Emerald-800 */
+  --text-faint: #15803d;          /* Emerald-700 */
+}
+
+/* --- TEMA 12: LAVENDER SOFT (Spa / Belleza / Relajación) --- */
+.theme-lavender-soft {
+  --color-primary: #7c3aed;       /* Violet-600 */
+  --color-primary-dark: #6d28d9;  /* Violet-700 */
+  --color-primary-light: #ede9fe; /* Violet-100 */
+  --background: #faf5ff;          /* Violet-50 */
+  --foreground: #2e1065;          /* Violet-950 */
+  --card-background: #ffffff;
+  --card-border: #ddd6fe;         /* Violet-200 */
+  --border-subtle: #ede9fe;       /* Violet-100 */
+  --surface-alt: #f5f3ff;         /* Violet-50 suave */
+  --text-muted: #5b21b6;          /* Violet-800 */
+  --text-faint: #7c3aed;          /* Violet-600 */
+}
+
+/* --- TEMA 13: ROSE LIGHT (Florerías / Confiterías / Femenino Elegante) --- */
+.theme-rose-light {
+  --color-primary: #e11d48;       /* Rose-600 */
+  --color-primary-dark: #be123c;  /* Rose-700 */
+  --color-primary-light: #ffe4e6; /* Rose-100 */
+  --background: #fff1f2;          /* Rose-50 */
+  --foreground: #4c0519;          /* Rose-950 */
+  --card-background: #ffffff;
+  --card-border: #fecdd3;         /* Rose-200 */
+  --border-subtle: #ffe4e6;       /* Rose-100 */
+  --surface-alt: #fff1f2;         /* Rose-50 */
+  --text-muted: #9f1239;          /* Rose-800 */
+  --text-faint: #be123c;          /* Rose-700 */
+}
+
+/* --- TEMA 14: FOREST LIGHT (Jardinería / Viveros / Natural Terroso) --- */
+.theme-forest-light {
+  --color-primary: #16a34a;       /* Green-600 */
+  --color-primary-dark: #15803d;  /* Green-700 */
+  --color-primary-light: #bbf7d0; /* Green-200 */
+  --background: #f7faf7;          /* Verde muy suave */
+  --foreground: #14532d;          /* Green-950 */
+  --card-background: #ffffff;
+  --card-border: #d1fae5;         /* Emerald-100 */
+  --border-subtle: #ecfdf5;       /* Emerald-50 */
+  --surface-alt: #f0fdf4;         /* Green-50 */
+  --text-muted: #166534;          /* Green-800 */
+  --text-faint: #15803d;          /* Green-700 */
+}
+
+
 
 /* ═══════════════════════════════════════════════════
    BASE

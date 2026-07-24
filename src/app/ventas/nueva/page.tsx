@@ -435,14 +435,14 @@ export default function POSPage() {
     // --- CAJA CERRADA: pantalla de bloqueo ---
     if (registerOpen === false) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-950 z-10">
+            <div className="fixed inset-0 flex items-center justify-center bg-background z-10">
                 <div className="text-center max-w-sm px-8 space-y-6">
-                    <div className="w-20 h-20 bg-red-100 dark:bg-red-900/20 rounded-2xl flex items-center justify-center mx-auto">
+                    <div className="w-20 h-20 bg-danger-subtle rounded-2xl flex items-center justify-center mx-auto">
                         <AlertTriangle className="w-10 h-10 text-red-500" />
                     </div>
                     <div className="space-y-2">
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Caja Cerrada</h1>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                        <h1 className="text-2xl font-bold text-foreground">Caja Cerrada</h1>
+                        <p className="text-text-muted text-sm leading-relaxed">
                             No podés registrar ventas sin un turno activo. Abrí la caja diaria primero.
                         </p>
                     </div>
@@ -463,7 +463,7 @@ export default function POSPage() {
     }
 
     return (
-        <div className="fixed inset-0 flex flex-row overflow-hidden bg-slate-50 dark:bg-slate-950 z-10">
+        <div className="fixed inset-0 flex flex-row overflow-hidden bg-background z-10">
             <main className="flex-1 flex flex-col p-6 overflow-hidden">
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div className="flex items-center gap-4">
@@ -475,7 +475,7 @@ export default function POSPage() {
                                     router.push('/');
                                 }
                             }}
-                            className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                            className="p-2 text-text-muted hover:text-text-muted transition-colors rounded-lg hover:bg-surface"
                             title={auditLog.length > 0 ? 'Tenés una venta en curso' : 'Volver al inicio'}
                         >
                             <ArrowLeft className="w-5 h-5" />
@@ -483,13 +483,13 @@ export default function POSPage() {
                         <div>
                             <h1 className="text-2xl font-bold">Punto de Venta</h1>
                             {auditLog.length > 0 && (
-                                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Venta en curso • {auditLog.length} acción{auditLog.length !== 1 ? 'es' : ''}</p>
+                                <p className="text-[10px] font-bold text-warning uppercase tracking-wider">Venta en curso • {auditLog.length} acción{auditLog.length !== 1 ? 'es' : ''}</p>
                             )}
                         </div>
                     </div>
 
                     <div className="relative w-full md:w-80">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
                             <Icon name="Search" />
                         </span>
                         <input
@@ -497,7 +497,7 @@ export default function POSPage() {
                             autoFocus
                             type="text"
                             placeholder="Escribe o escanea código..."
-                            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -506,15 +506,15 @@ export default function POSPage() {
 
                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                     {loading ? (
-                        <div className="h-full flex items-center justify-center text-slate-400 animate-pulse">Cargando productos...</div>
+                        <div className="h-full flex items-center justify-center text-text-muted animate-pulse">Cargando productos...</div>
                     ) : error ? (
                         <div className="h-full flex flex-col items-center justify-center text-center gap-4 py-20">
                             <div className="p-4 bg-red-50 text-red-500 rounded-full">
                                 <Icon name="AlertTriangle" className="w-10 h-10" />
                             </div>
                             <div className="space-y-1">
-                                <p className="font-bold text-slate-900 dark:text-white">Error al cargar productos</p>
-                                <p className="text-sm text-slate-500">{error}</p>
+                                <p className="font-bold text-foreground">Error al cargar productos</p>
+                                <p className="text-sm text-text-muted">{error}</p>
                             </div>
                             <button onClick={fetchData} className="btn-secondary">Reintentar</button>
                         </div>
@@ -526,7 +526,7 @@ export default function POSPage() {
                                     onClick={() => setSelectedCategory(cat.id)}
                                     className="card-premium p-6 flex flex-col items-center justify-center gap-4 hover:border-primary group transition-all"
                                 >
-                                    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl group-hover:bg-primary group-hover:text-white transition-colors">
+                                    <div className="p-4 bg-surface-alt rounded-xl group-hover:bg-primary group-hover:text-white transition-colors">
                                         <Icon name={cat.icon} className="w-8 h-8" />
                                     </div>
                                     <span className="font-bold text-center">{cat.name}</span>
@@ -543,10 +543,10 @@ export default function POSPage() {
                                     <div key={p.id} className="card-premium p-4 flex flex-col justify-between hover:border-primary transition-all relative group">
                                         <div className="mb-4">
                                             <div className="flex justify-between items-start">
-                                                <p className="text-[10px] text-slate-400 font-bold uppercase">{p.category?.name || 'Sin categoría'}</p>
+                                                <p className="text-[10px] text-text-muted font-bold uppercase">{p.category?.name || 'Sin categoría'}</p>
                                                 <button
                                                     onClick={(e) => handleOpenQuickEdit(e, p)}
-                                                    className="p-1 text-slate-300 hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                                                    className="p-1 text-text-muted hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
                                                     title="Configurar Precio"
                                                 >
                                                     <Icon name="Edit" className="w-4 h-4" />
@@ -558,7 +558,7 @@ export default function POSPage() {
                                             <div className="text-xl font-bold">${Number(p.price).toLocaleString()}</div>
                                             <div className="flex gap-2">
                                                 <button onClick={() => handleAddToCart(p as any as Product, 1)} className="flex-1 bg-primary text-white py-2 rounded-lg text-xs font-bold hover:bg-primary-dark">SUMAR</button>
-                                                <button onClick={() => handleAddToCart(p as any as Product, -1)} className="px-3 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-lg hover:bg-red-500 hover:text-white transition-colors">
+                                                <button onClick={() => handleAddToCart(p as any as Product, -1)} className="px-3 bg-surface text-text-muted rounded-lg hover:bg-danger/100 hover:text-white transition-colors">
                                                     <Icon name="Minus" className="w-4 h-4" />
                                                 </button>
                                             </div>
@@ -566,7 +566,7 @@ export default function POSPage() {
                                     </div>
                                 ))}
                                 {filteredProducts.length === 0 && (
-                                    <div className="col-span-full py-20 text-center text-slate-400 font-medium italic">
+                                    <div className="col-span-full py-20 text-center text-text-muted font-medium italic">
                                         No se encontraron productos coincidentes
                                     </div>
                                 )}
@@ -579,13 +579,13 @@ export default function POSPage() {
             {/* Quick Edit Modal */}
             {quickEditModal.isOpen && (
                 <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
-                        <header className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                    <div className="bg-card rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
+                        <header className="p-6 border-b border-border flex justify-between items-center">
                             <div>
                                 <h2 className="text-lg font-bold">{quickEditModal.product?.name}</h2>
-                                <p className="text-xs text-slate-500 uppercase font-bold tracking-widest">Configuración de Precios</p>
+                                <p className="text-xs text-text-muted uppercase font-bold tracking-widest">Configuración de Precios</p>
                             </div>
-                            <button onClick={() => setQuickEditModal({ isOpen: false, product: null })} className="text-slate-400 hover:text-slate-600"><Icon name="X" /></button>
+                            <button onClick={() => setQuickEditModal({ isOpen: false, product: null })} className="text-text-muted hover:text-text-muted"><Icon name="X" /></button>
                         </header>
                         <div className="p-6 space-y-6">
                             <div className="grid grid-cols-2 gap-4">
@@ -593,7 +593,7 @@ export default function POSPage() {
                                     <label className="text-xs font-medium">Costo de Compra</label>
                                     <input
                                         type="number" step="0.01"
-                                        className="w-full p-2.5 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right font-medium"
+                                        className="w-full p-2.5 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary text-right font-medium"
                                         value={quickEditData.cost}
                                         onChange={e => setQuickEditData({ ...quickEditData, cost: e.target.value })}
                                     />
@@ -601,9 +601,9 @@ export default function POSPage() {
                                 <div className="space-y-1 flex flex-col justify-end">
                                     <label
                                         onClick={() => setQuickEditData({ ...quickEditData, hasIva: !quickEditData.hasIva })}
-                                        className="flex items-center gap-2 cursor-pointer p-2.5 h-[46px] bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800"
+                                        className="flex items-center gap-2 cursor-pointer p-2.5 h-[46px] bg-surface-alt rounded-lg border border-border-subtle"
                                     >
-                                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${quickEditData.hasIva ? 'bg-primary border-primary text-white' : 'border-slate-300 bg-white dark:bg-slate-800'}`}>
+                                        <div className={`w-4 h-4 rounded border flex items-center justify-center ${quickEditData.hasIva ? 'bg-primary border-primary text-white' : 'border-border bg-card'}`}>
                                             {quickEditData.hasIva && <Icon name="Check" className="w-3 h-3" />}
                                         </div>
                                         <span className="text-xs font-bold uppercase tracking-tighter">Compra con IVA</span>
@@ -613,7 +613,7 @@ export default function POSPage() {
                                     <label className="text-xs font-medium">Margen de Ganancia (%)</label>
                                     <input
                                         type="number" step="0.1"
-                                        className="w-full p-2.5 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right font-bold text-primary"
+                                        className="w-full p-2.5 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary text-right font-bold text-primary"
                                         value={quickEditData.margin}
                                         onChange={e => setQuickEditData({ ...quickEditData, margin: e.target.value })}
                                     />
@@ -622,16 +622,16 @@ export default function POSPage() {
                                     <label className="text-xs font-bold text-primary">Precio de Venta Final</label>
                                     <input
                                         required type="number" step="0.01"
-                                        className="w-full p-2.5 rounded-lg border-2 border-primary/30 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-primary text-right font-bold text-xl"
+                                        className="w-full p-2.5 rounded-lg border-2 border-primary/30 bg-background outline-none focus:ring-2 focus:ring-primary text-right font-bold text-xl"
                                         value={quickEditData.price}
                                         onChange={e => setQuickEditData({ ...quickEditData, price: e.target.value })}
                                     />
                                 </div>
                             </div>
 
-                            <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl flex gap-3 items-start">
+                            <div className="bg-primary/5 p-4 rounded-xl flex gap-3 items-start">
                                 <Icon name="Sparkles" className="w-5 h-5 text-blue-500 mt-0.5" />
-                                <div className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                                <div className="text-xs text-primary leading-relaxed">
                                     El precio final se calcula sumando el <span className="font-bold">IVA (21%)</span> al costo (si corresponde) y aplicando un <span className="font-bold">{quickEditData.margin}%</span> de margen sobre ese valor. Los cambios se guardarán en la base de datos de productos.
                                 </div>
                             </div>
@@ -647,7 +647,7 @@ export default function POSPage() {
                 </div>
             )}
 
-            <aside className="w-80 lg:w-96 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-xl h-full">
+            <aside className="w-80 lg:w-96 bg-card border-l border-border flex flex-col shadow-xl h-full">
 
                 <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar min-h-0">
                     {/* Cart Items with their removals */}
@@ -658,10 +658,10 @@ export default function POSPage() {
 
                         return (
                             <div key={item.productId} className="space-y-1">
-                                <div className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800 group shadow-sm">
+                                <div className="flex justify-between items-center p-3 bg-background rounded-xl border border-border-subtle group shadow-sm">
                                     <div className="flex-1 min-w-0 mr-2">
                                         <h4 className="font-bold text-sm truncate">{item.name}</h4>
-                                        <p className="text-xs text-slate-500">${Number(item.price).toLocaleString()} x {item.quantity}</p>
+                                        <p className="text-xs text-text-muted">${Number(item.price).toLocaleString()} x {item.quantity}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="font-bold text-sm">${(item.price * item.quantity).toLocaleString()}</p>
@@ -671,7 +671,7 @@ export default function POSPage() {
                                     </div>
                                 </div>
                                 {totalRemoved > 0 && (
-                                    <div className="mx-2 p-1.5 flex justify-between items-center bg-red-50/50 dark:bg-red-900/10 text-[10px] text-red-600 dark:text-red-400 border-l-2 border-red-300 dark:border-red-800">
+                                    <div className="mx-2 p-1.5 flex justify-between items-center bg-danger/5 text-[10px] text-danger-dark border-l-2 border-danger-light">
                                         <span className="font-bold uppercase tracking-tighter">Acumulado Quitado: -{totalRemoved.toFixed(item.sellByWeight ? 3 : 0)} {item.sellByWeight ? 'kg' : 'unid'}</span>
                                         <span className="opacity-50">{new Date(lastTimestamp!).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                     </div>
@@ -693,10 +693,10 @@ export default function POSPage() {
                                 return acc;
                             }, {})
                     ).map((ghost: any, i) => (
-                        <div key={`ghost-${i}`} className="p-3 bg-red-50/20 dark:bg-red-900/5 border border-dashed border-red-200 dark:border-red-900/20 rounded-xl opacity-60 flex flex-col gap-1 grayscale-[0.5]">
-                            <div className="flex justify-between items-center text-red-700 dark:text-red-500">
+                        <div key={`ghost-${i}`} className="p-3 bg-danger/5 border border-dashed border-danger/20 rounded-xl opacity-60 flex flex-col gap-1 grayscale-[0.5]">
+                            <div className="flex justify-between items-center text-danger-dark">
                                 <h4 className="font-bold text-xs line-through italic">{ghost.productName}</h4>
-                                <span className="text-[8px] font-bold px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 rounded uppercase tracking-tighter">ELIMINADO</span>
+                                <span className="text-[8px] font-bold px-1.5 py-0.5 bg-danger-subtle rounded uppercase tracking-tighter">ELIMINADO</span>
                             </div>
                             <div className="text-[9px] text-red-500/70 flex justify-between uppercase font-bold tracking-tighter">
                                 <span>Total quitado: -{ghost.totalQuantity.toFixed(ghost.totalQuantity % 1 !== 0 ? 3 : 0)}</span>
@@ -705,17 +705,17 @@ export default function POSPage() {
                         </div>
                     ))}
 
-                    {cart.length === 0 && auditLog.length === 0 && <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-2 opacity-50 py-20">
+                    {cart.length === 0 && auditLog.length === 0 && <div className="h-full flex flex-col items-center justify-center text-text-muted gap-2 opacity-50 py-20">
                         <Icon name="ShoppingCart" className="w-12 h-12" />
                         <span className="text-xs font-bold uppercase tracking-widest">Carrito vacío</span>
                     </div>}
 
                 </div>
 
-                <div className="p-6 bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-800 space-y-4 shrink-0">
-                    <button onClick={() => setIsPaymentModalOpen(true)} className="w-full h-12 flex items-center justify-between px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-primary group transition-all">
+                <div className="p-6 bg-surface-alt border-t border-border space-y-4 shrink-0">
+                    <button onClick={() => setIsPaymentModalOpen(true)} className="w-full h-12 flex items-center justify-between px-4 bg-card border border-border rounded-lg hover:border-primary group transition-all">
                         <span className="text-sm font-medium">{activePM?.name || 'Método de Pago'}</span>
-                        <Icon name="ChevronRight" className="w-4 h-4 text-slate-400 group-hover:text-primary" />
+                        <Icon name="ChevronRight" className="w-4 h-4 text-text-muted group-hover:text-primary" />
                     </button>
 
                     <div className="flex justify-between items-center text-2xl font-bold">
@@ -727,7 +727,7 @@ export default function POSPage() {
                         <button onClick={() => finalizarVenta('VENTA')} disabled={cart.length === 0 || processing} className="btn-primary w-full py-3 h-14 text-lg">
                             {processing ? 'Procesando...' : 'COBRAR'}
                         </button>
-                        <button onClick={() => confirm('¿Cancelar venta?') && finalizarVenta('VENTA_NO_REALIZADA')} disabled={cart.length === 0 || processing} className="w-full text-xs font-bold text-slate-400 hover:text-red-500 py-2 uppercase tracking-widest">
+                        <button onClick={() => confirm('¿Cancelar venta?') && finalizarVenta('VENTA_NO_REALIZADA')} disabled={cart.length === 0 || processing} className="w-full text-xs font-bold text-text-muted hover:text-danger py-2 uppercase tracking-widest">
                             Cancelar Operación
                         </button>
                     </div>
@@ -736,20 +736,20 @@ export default function POSPage() {
 
             {isPaymentModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
-                        <header className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                    <div className="bg-card rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
+                        <header className="p-6 border-b border-border flex justify-between items-center">
                             <h2 className="text-lg font-bold">Método de Pago</h2>
-                            <button onClick={() => setIsPaymentModalOpen(false)} className="text-slate-400 hover:text-slate-600"><Icon name="X" /></button>
+                            <button onClick={() => setIsPaymentModalOpen(false)} className="text-text-muted hover:text-text-muted"><Icon name="X" /></button>
                         </header>
                         <div className="p-6 gap-3 flex flex-col">
                             {paymentMethods.map(pm => (
                                 <button
                                     key={pm.id}
                                     onClick={() => { setSelectedPaymentMethod(pm.id); setIsPaymentModalOpen(false); }}
-                                    className={`p-4 rounded-lg border-2 text-left flex justify-between items-center transition-all ${selectedPaymentMethod === pm.id ? 'border-primary bg-primary/5 text-primary' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'}`}
+                                    className={`p-4 rounded-lg border-2 text-left flex justify-between items-center transition-all ${selectedPaymentMethod === pm.id ? 'border-primary bg-primary/5 text-primary' : 'border-border-subtle hover:border-border'}`}
                                 >
                                     <span className="font-bold">{pm.name}</span>
-                                    {pm.percentage !== 0 && <span className={`text-xs px-2 py-1 rounded-full ${pm.percentage > 0 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>{pm.percentage > 0 ? '+' : ''}{pm.percentage}%</span>}
+                                    {pm.percentage !== 0 && <span className={`text-xs px-2 py-1 rounded-full ${pm.percentage > 0 ? 'bg-danger-subtle text-danger' : 'bg-green-100 text-green-600'}`}>{pm.percentage > 0 ? '+' : ''}{pm.percentage}%</span>}
                                 </button>
                             ))}
                         </div>
@@ -759,10 +759,10 @@ export default function POSPage() {
 
             {weightModal.isOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95">
-                        <header className="p-6 border-b border-slate-200 dark:border-slate-800">
+                    <div className="bg-card rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95">
+                        <header className="p-6 border-b border-border">
                             <h2 className="text-lg font-bold">{weightModal.product?.name}</h2>
-                            <p className="text-sm text-slate-500">{weightModal.isRemoving ? 'Ingresa el peso a quitar' : 'Ingresa el peso en kg'}</p>
+                            <p className="text-sm text-text-muted">{weightModal.isRemoving ? 'Ingresa el peso a quitar' : 'Ingresa el peso en kg'}</p>
                         </header>
                         <div className="p-6 space-y-4">
                             <input
@@ -771,7 +771,7 @@ export default function POSPage() {
                                 step="0.001"
                                 inputMode="decimal"
                                 placeholder="0.000"
-                                className="w-full p-4 border rounded-lg text-4xl font-bold text-center outline-none focus:ring-2 focus:ring-primary dark:bg-slate-800"
+                                className="w-full p-4 border rounded-lg text-4xl font-bold text-center outline-none focus:ring-2 focus:ring-primary"
                                 value={weightInput}
                                 onChange={(e) => {
                                     const val = e.target.value.replace(',', '.');
@@ -789,7 +789,7 @@ export default function POSPage() {
                                             if (num === '.' && weightInput.includes('.')) return;
                                             setWeightInput(prev => prev + num.toString());
                                         }}
-                                        className="h-14 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl text-xl font-bold transition-colors active:scale-95"
+                                        className="h-14 bg-surface hover:bg-surface rounded-xl text-xl font-bold transition-colors active:scale-95"
                                     >
                                         {num}
                                     </button>
@@ -797,7 +797,7 @@ export default function POSPage() {
                                 <button
                                     type="button"
                                     onClick={() => setWeightInput(prev => prev.slice(0, -1))}
-                                    className="h-14 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl flex items-center justify-center hover:bg-red-100 transition-colors active:scale-95"
+                                    className="h-14 bg-danger-subtle text-danger rounded-xl flex items-center justify-center hover:bg-danger-subtle transition-colors active:scale-95"
                                 >
                                     <Icon name="Delete" className="w-6 h-6" />
                                 </button>
@@ -817,9 +817,9 @@ export default function POSPage() {
             {/* ── Modal Advertencia de Salida ── */}
             {showExitWarning && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden animate-in zoom-in-95 duration-200">
+                    <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden animate-in zoom-in-95 duration-200">
                         <div className="bg-amber-500 p-6 text-white">
-                            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-4">
+                            <div className="w-12 h-12 bg-card/20 rounded-xl flex items-center justify-center mb-4">
                                 <AlertTriangle className="w-7 h-7" />
                             </div>
                             <h2 className="text-xl font-bold">Venta en Curso</h2>
@@ -829,8 +829,8 @@ export default function POSPage() {
                         </div>
 
                         <div className="p-6 space-y-3">
-                            <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
-                                No podés salir con una venta iniciada. Debés <strong className="text-slate-800 dark:text-white">cobrar</strong> la operación o registrarla como <strong className="text-slate-800 dark:text-white">venta no realizada</strong> antes de salir.
+                            <p className="text-text-muted text-text-muted text-sm leading-relaxed">
+                                No podés salir con una venta iniciada. Debés <strong className="text-foreground">cobrar</strong> la operación o registrarla como <strong className="text-foreground">venta no realizada</strong> antes de salir.
                             </p>
 
                             <button
@@ -846,7 +846,7 @@ export default function POSPage() {
                                     await finalizarVenta('VENTA_NO_REALIZADA');
                                     router.push('/');
                                 }}
-                                className="w-full py-3 rounded-lg font-semibold border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-sm"
+                                className="w-full py-3 rounded-lg font-semibold border border-danger/40 text-danger-dark hover:bg-danger/10 transition-colors text-sm"
                             >
                                 Cancelar y Registrar como No Realizada
                             </button>

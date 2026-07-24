@@ -110,13 +110,13 @@ export default function WeeklyClosurePage() {
 
     if (loading) return (
         <div className="page-container animate-pulse space-y-8">
-            <div className="h-20 bg-slate-100 dark:bg-slate-800 rounded-2xl w-full"></div>
+            <div className="h-20 bg-surface rounded-2xl w-full"></div>
             <div className="grid grid-cols-3 gap-6">
-                <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
-                <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
-                <div className="h-32 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
+                <div className="h-32 bg-surface rounded-2xl"></div>
+                <div className="h-32 bg-surface rounded-2xl"></div>
+                <div className="h-32 bg-surface rounded-2xl"></div>
             </div>
-            <div className="h-96 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
+            <div className="h-96 bg-surface rounded-2xl"></div>
         </div>
     );
 
@@ -125,8 +125,8 @@ export default function WeeklyClosurePage() {
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
-                        <Link href="/caja" className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                            <ArrowLeft className="w-4 h-4 text-slate-500" />
+                        <Link href="/caja" className="p-1 hover:bg-surface rounded-lg transition-colors">
+                            <ArrowLeft className="w-4 h-4 text-text-muted" />
                         </Link>
                         <h1 className="text-title text-2xl font-bold">Cierre Semanal de Fondos</h1>
                     </div>
@@ -152,18 +152,18 @@ export default function WeeklyClosurePage() {
                             <Calendar className="w-5 h-5" />
                         </div>
                         <div>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Período Auditado</p>
+                            <p className="text-xs font-bold text-text-muted uppercase tracking-widest">Período Auditado</p>
                             <p className="text-sm font-black">{new Date(draft.startDate).toLocaleDateString()} al {new Date(draft.endDate).toLocaleDateString()}</p>
                         </div>
                     </div>
-                    <div className="flex gap-10 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex gap-10 pt-4 border-t border-border-subtle">
                         <div className="flex flex-col">
-                            <span className="text-xs text-slate-500 font-bold uppercase tracking-tighter">Cajas Cerradas</span>
+                            <span className="text-xs text-text-muted font-bold uppercase tracking-tighter">Cajas Cerradas</span>
                             <span className="text-xl font-black">{draft.registersCount}</span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-xs text-slate-500 font-bold uppercase tracking-tighter">Estado</span>
-                            <span className="badge-primary bg-emerald-100 text-emerald-700 border-emerald-200 w-fit mt-1">En Tiempo Real</span>
+                            <span className="text-xs text-text-muted font-bold uppercase tracking-tighter">Estado</span>
+                            <span className="badge-primary bg-success-light text-emerald-700 border-emerald-200 w-fit mt-1">En Tiempo Real</span>
                         </div>
                     </div>
                 </div>
@@ -171,13 +171,13 @@ export default function WeeklyClosurePage() {
                 <div className={`card-premium h-full border-l-8 ${totalDifference >= 0 ? 'border-l-emerald-500 bg-emerald-50/30' : 'border-l-rose-500 bg-rose-50/30'}`}>
                     <div className="flex justify-between items-start">
                         <div>
-                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Balance General</p>
+                            <p className="text-xs font-bold text-text-muted uppercase tracking-widest mb-1">Balance General</p>
                             <h3 className={`text-4xl font-black ${totalDifference >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                                 {totalDifference >= 0 ? '+' : ''}${totalDifference.toLocaleString()}
                             </h3>
-                            <p className="text-[10px] text-slate-400 mt-2 italic">Diferencia total entre lo esperado y lo real contado</p>
+                            <p className="text-[10px] text-text-muted mt-2 italic">Diferencia total entre lo esperado y lo real contado</p>
                         </div>
-                        <div className={`p-3 rounded-2xl ${totalDifference >= 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}>
+                        <div className={`p-3 rounded-2xl ${totalDifference >= 0 ? 'bg-success-light text-success-dark' : 'bg-rose-100 text-rose-600'}`}>
                             {totalDifference >= 0 ? <TrendingUp className="w-8 h-8" /> : <TrendingDown className="w-8 h-8" />}
                         </div>
                     </div>
@@ -187,14 +187,14 @@ export default function WeeklyClosurePage() {
             {/* Main Table Section */}
             <div className="space-y-6">
                 <div className="card-premium p-0 overflow-hidden">
-                    <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                        <h3 className="font-bold text-slate-400 uppercase text-xs tracking-widest flex items-center gap-2">
+                    <div className="p-6 border-b border-border-subtle flex justify-between items-center">
+                        <h3 className="font-bold text-text-muted uppercase text-xs tracking-widest flex items-center gap-2">
                             <Wallet className="w-4 h-4" /> Arqueo Consolidado por Método
                         </h3>
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
-                            <thead className="bg-slate-50 dark:bg-slate-900/50">
+                            <thead className="bg-surface-alt">
                                 <tr>
                                     <th className="table-header pl-6">Método de Pago</th>
                                     <th className="table-header text-right">Ventas de la Semana</th>
@@ -203,10 +203,10 @@ export default function WeeklyClosurePage() {
                                     <th className="table-header text-center pr-6" style={{ width: '220px' }}>Real en Mano</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tbody className="divide-y divide-border-subtle">
                                 {breakdown.map((item) => (
-                                    <tr key={item.paymentMethodId} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
-                                        <td className="px-6 py-5 font-bold text-slate-900 dark:text-white text-base">
+                                    <tr key={item.paymentMethodId} className="hover:bg-surface-alt/50 transition-colors">
+                                        <td className="px-6 py-5 font-bold text-foreground text-base">
                                             <div className="flex items-center gap-3">
                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${item.isArqueable ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
                                                     {item.isArqueable ? <Wallet className="w-5 h-5" /> : <CreditCard className="w-5 h-5" />}
@@ -214,21 +214,21 @@ export default function WeeklyClosurePage() {
                                                 {item.paymentMethodName}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-5 text-right font-medium text-emerald-600 text-base">
+                                        <td className="px-6 py-5 text-right font-medium text-success-dark text-base">
                                             +${item.salesTotal.toLocaleString()}
                                         </td>
                                         <td className="px-6 py-5 text-right font-medium text-rose-600 text-base">
                                             -${item.supplierPaymentsTotal.toLocaleString()}
                                         </td>
-                                        <td className="px-6 py-5 text-right font-black text-slate-900 dark:text-white text-lg">
+                                        <td className="px-6 py-5 text-right font-black text-foreground text-lg">
                                             ${item.expectedTotal.toLocaleString()}
                                         </td>
                                         <td className="px-6 py-5 pr-6">
                                             <div className="relative">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">$</span>
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-bold text-text-muted">$</span>
                                                 <input
                                                     type="number"
-                                                    className={`w-full pl-8 pr-4 py-3 rounded-2xl border outline-none text-right font-black text-lg transition-all ${item.realAmount !== item.expectedTotal ? 'border-primary ring-4 ring-primary/10 bg-primary/5' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900'}`}
+                                                    className={`w-full pl-8 pr-4 py-3 rounded-2xl border outline-none text-right font-black text-lg transition-all ${item.realAmount !== item.expectedTotal ? 'border-primary ring-4 ring-primary/10 bg-primary/5' : 'border-border bg-card'}`}
                                                     value={item.realAmount}
                                                     onChange={(e) => handleRealAmountChange(item.paymentMethodId, e.target.value)}
                                                 />
@@ -237,9 +237,9 @@ export default function WeeklyClosurePage() {
                                     </tr>
                                 ))}
                             </tbody>
-                            <tfoot className="bg-slate-900 text-white font-black">
+                            <tfoot className="bg-foreground text-background font-black">
                                 <tr>
-                                    <td className="px-6 py-8 text-sm uppercase tracking-widest text-slate-400">Balance Semanal Consolidado</td>
+                                    <td className="px-6 py-8 text-sm uppercase tracking-widest text-text-muted">Balance Semanal Consolidado</td>
                                     <td className="px-6 py-8 text-right text-emerald-400 text-lg">+${breakdown.reduce((acc, i) => acc + i.salesTotal, 0).toLocaleString()}</td>
                                     <td className="px-6 py-8 text-right text-rose-400 text-lg">-${breakdown.reduce((acc, i) => acc + i.supplierPaymentsTotal, 0).toLocaleString()}</td>
                                     <td className="px-6 py-8 text-right text-3xl font-black">${totalExpected.toLocaleString()}</td>
@@ -250,8 +250,8 @@ export default function WeeklyClosurePage() {
                     </div>
                 </div>
 
-                <div className="mt-8 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-6 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
-                    <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400">
+                <div className="mt-8 flex justify-between items-center bg-surface-alt p-6 rounded-3xl border border-dashed border-border">
+                    <div className="flex items-center gap-4 text-text-muted text-text-muted">
                         <AlertCircle className="w-6 h-6 text-primary shrink-0" />
                         <p className="text-sm font-medium italic">Al confirmar el cierre, se registrarán estos valores finales y se dará inicio al próximo ciclo contable.</p>
                     </div>

@@ -4,6 +4,7 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { ToastProvider } from "@/components/ToastProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import { SITE_CONFIG } from "@/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PWA Comercial - Sistema de Gestión",
-  description: "Sistema avanzado de gestión comercial, stock y ventas",
+  title: `${SITE_CONFIG.title} - Sistema de Gestión`,
+  description: SITE_CONFIG.description,
 };
 
 export default function RootLayout({
@@ -26,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es" className={`dark ${SITE_CONFIG.theme}`}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -44,3 +45,4 @@ export default function RootLayout({
     </html>
   );
 }
+

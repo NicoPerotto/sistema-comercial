@@ -36,7 +36,7 @@ export default function DashboardPage() {
                 <ShieldCheck className="w-3 h-3 mr-1" />
                 {user?.role ? (roleLabels[user.role] || user.role) : 'Personal'}
               </span>
-              <span className="text-xs text-slate-500 font-medium italic">Sesión activa correctamente</span>
+              <span className="text-xs text-text-faint font-medium italic">Sesión activa correctamente</span>
             </div>
           </div>
         </div>
@@ -100,19 +100,19 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <footer className="mt-12 p-8 rounded-3xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+      <footer className="mt-12 p-8 rounded-3xl bg-surface-alt border border-border-subtle flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex flex-col gap-1">
-          <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+          <h3 className="font-bold text-foreground flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-success" />
             Seguridad del Sistema
           </h3>
-          <p className="text-sm text-slate-500 max-w-md">
+          <p className="text-sm text-text-muted max-w-md">
             Recuerda que cada acción queda registrada bajo tu usuario. Mantén tu sesión segura y cierra la caja al finalizar tu turno.
           </p>
         </div>
         <button
           onClick={() => { localStorage.removeItem('user'); window.location.href = '/login'; }}
-          className="btn-secondary text-red-600 hover:bg-red-50 hover:border-red-100 px-6 py-3"
+          className="btn-secondary text-danger hover:bg-danger/10 px-6 py-3"
         >
           <LogOut className="w-4 h-4" />
           Cerrar Sesión Segura
@@ -125,11 +125,11 @@ export default function DashboardPage() {
 function QuickActionCard({ title, description, href, Icon, color }: any) {
   const colorClasses: any = {
     primary: 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white',
-    emerald: 'bg-emerald-100 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white',
-    amber: 'bg-amber-100 text-amber-600 group-hover:bg-amber-600 group-hover:text-white',
-    blue: 'bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white',
-    purple: 'bg-purple-100 text-purple-600 group-hover:bg-purple-600 group-hover:text-white',
-    slate: 'bg-slate-100 text-slate-600 group-hover:bg-slate-600 group-hover:text-white',
+    emerald: 'bg-success/10 text-success group-hover:bg-success group-hover:text-white',
+    amber: 'bg-warning/10 text-warning group-hover:bg-warning group-hover:text-white',
+    blue: 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white',
+    purple: 'bg-primary/15 text-primary group-hover:bg-primary group-hover:text-white',
+    slate: 'bg-surface text-text-muted group-hover:bg-primary group-hover:text-white',
   };
 
   return (
@@ -142,7 +142,7 @@ function QuickActionCard({ title, description, href, Icon, color }: any) {
           {title}
           <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
         </h3>
-        <p className="text-sm text-slate-500 leading-relaxed">
+        <p className="text-sm text-text-muted leading-relaxed">
           {description}
         </p>
       </div>

@@ -142,18 +142,18 @@ export default function EmployeeControlPage() {
                             <p className="text-sm font-bold text-zinc-400 mb-6">ID: {emp.id.slice(0, 8)}...</p>
 
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-white/50 dark:bg-white/5 p-3 rounded-xl border border-border/50">
+                                <div className="bg-card/50 p-3 rounded-xl border border-border/50">
                                     <p className="text-[9px] font-black text-zinc-400 uppercase mb-1 tracking-tight">Recaudado</p>
                                     <p className="text-lg font-black text-primary line-clamp-1">${emp.stats.totalRevenue.toLocaleString()}</p>
                                 </div>
-                                <div className="bg-white/50 dark:bg-white/5 p-3 rounded-xl border border-border/50">
+                                <div className="bg-card/50 p-3 rounded-xl border border-border/50">
                                     <p className="text-[9px] font-black text-zinc-400 uppercase mb-1 tracking-tight">Ventas</p>
                                     <p className="text-lg font-black text-primary">{emp.stats.completedCount}</p>
                                 </div>
                             </div>
 
                             {emp.stats.salesWithRemovals > 0 && (
-                                <div className="mt-4 flex items-center gap-2 bg-amber-100 text-amber-700 px-3 py-2 rounded-xl border border-amber-200 shadow-sm animate-bounce-subtle">
+                                <div className="mt-4 flex items-center gap-2 bg-warning-light text-amber-700 px-3 py-2 rounded-xl border border-amber-200 shadow-sm animate-bounce-subtle">
                                     <Icon className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></Icon>
                                     <span className="text-[10px] font-black uppercase tracking-tight">{emp.stats.salesWithRemovals} Ventas con quitas</span>
                                 </div>
@@ -174,7 +174,7 @@ export default function EmployeeControlPage() {
                                     });
                                     setIsModalOpen(true);
                                 }}
-                                className="p-2 bg-white/80 hover:bg-white rounded-xl shadow-lg border border-border text-primary transition-all"
+                                className="p-2 bg-card/80 hover:bg-card rounded-xl shadow-lg border border-border text-primary transition-all"
                             >
                                 <Icon className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></Icon>
                             </button>
@@ -183,7 +183,7 @@ export default function EmployeeControlPage() {
                                     e.stopPropagation();
                                     handleDelete(emp.id);
                                 }}
-                                className="p-2 bg-red-50 hover:bg-red-100 rounded-xl shadow-lg border border-red-200 text-red-600 transition-all"
+                                className="p-2 bg-red-50 hover:bg-danger-subtle rounded-xl shadow-lg border border-red-200 text-danger transition-all"
                             >
                                 <Icon className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></Icon>
                             </button>
@@ -193,7 +193,7 @@ export default function EmployeeControlPage() {
             </div>
 
             {selectedEmployee && (
-                <div className="glass border border-border rounded-3xl p-8 bg-white/50 animate-in slide-in-from-bottom-4 duration-300">
+                <div className="glass border border-border rounded-3xl p-8 bg-card/50 animate-in slide-in-from-bottom-4 duration-300">
                     <header className="flex justify-between items-center mb-8 pb-6 border-b border-border/50">
                         <div>
                             <h2 className="text-2xl font-black text-primary uppercase italic">Métricas de {selectedEmployee.name}</h2>
@@ -233,14 +233,14 @@ export default function EmployeeControlPage() {
                     </div>
 
                     <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <section className="bg-white/30 p-6 rounded-2xl border border-border/30">
+                        <section className="bg-card/30 p-6 rounded-2xl border border-border/30">
                             <h3 className="text-sm font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2">
                                 <Icon className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></Icon>
                                 Última Sesión / Turno
                             </h3>
                             {selectedEmployee.stats.lastShift ? (
                                 <div className="space-y-4">
-                                    <div className="flex justify-between items-center p-4 bg-white/50 rounded-xl border border-border/20">
+                                    <div className="flex justify-between items-center p-4 bg-card/50 rounded-xl border border-border/20">
                                         <div>
                                             <p className="text-[10px] font-bold text-zinc-400 uppercase mb-1">Entrada</p>
                                             <p className="font-black text-primary">{new Date(selectedEmployee.stats.lastShift.startTime).toLocaleString()}</p>
@@ -261,7 +261,7 @@ export default function EmployeeControlPage() {
                             )}
                         </section>
 
-                        <section className="bg-white/30 p-6 rounded-2xl border border-border/30">
+                        <section className="bg-card/30 p-6 rounded-2xl border border-border/30">
                             <h3 className="text-sm font-black uppercase tracking-widest text-zinc-500 mb-4 flex items-center gap-2">
                                 <Icon className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></Icon>
                                 Eficiencia de Caja
@@ -311,7 +311,7 @@ export default function EmployeeControlPage() {
                                     required
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full bg-white/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                    className="w-full bg-card/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                     placeholder="Ej: Juan Pérez"
                                 />
                             </div>
@@ -323,7 +323,7 @@ export default function EmployeeControlPage() {
                                     required
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full bg-white/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                    className="w-full bg-card/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                     placeholder="juan@sistema.com"
                                 />
                             </div>
@@ -335,7 +335,7 @@ export default function EmployeeControlPage() {
                                     required={!editingEmployee}
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full bg-white/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                    className="w-full bg-card/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                     placeholder="••••••••"
                                 />
                             </div>
@@ -350,7 +350,7 @@ export default function EmployeeControlPage() {
                                             onClick={() => setFormData({ ...formData, role })}
                                             className={`p-4 rounded-2xl border font-black text-[10px] uppercase tracking-tighter transition-all ${formData.role === role
                                                     ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
-                                                    : 'bg-white/50 text-zinc-400 border-border hover:border-primary/50'
+                                                    : 'bg-card/50 text-zinc-400 border-border hover:border-primary/50'
                                                 }`}
                                         >
                                             {role}
@@ -386,8 +386,8 @@ function StatBox({ label, value, icon, color, sublabel }: { label: string, value
     const colors: any = {
         primary: 'bg-primary/10 text-primary border-primary/20',
         green: 'bg-green-100 text-green-700 border-green-200',
-        red: 'bg-red-100 text-red-700 border-red-200',
-        amber: 'bg-amber-100 text-amber-700 border-amber-200',
+        red: 'bg-danger-subtle text-red-700 border-red-200',
+        amber: 'bg-warning-light text-amber-700 border-amber-200',
     };
 
     return (

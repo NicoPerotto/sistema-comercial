@@ -39,13 +39,13 @@ export default function MetricasPage() {
     if (loading && !data) {
         return (
             <div className="p-10 flex flex-col gap-6 animate-pulse">
-                <div className="h-20 bg-slate-100 dark:bg-slate-800 rounded-xl w-1/3"></div>
+                <div className="h-20 bg-surface rounded-xl w-1/3"></div>
                 <div className="grid grid-cols-4 gap-6">
-                    {Array(4).fill(0).map((_, i) => <div key={i} className="h-32 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>)}
+                    {Array(4).fill(0).map((_, i) => <div key={i} className="h-32 bg-surface rounded-xl"></div>)}
                 </div>
                 <div className="grid grid-cols-3 gap-6">
-                    <div className="col-span-2 h-80 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
-                    <div className="h-80 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+                    <div className="col-span-2 h-80 bg-surface rounded-xl"></div>
+                    <div className="h-80 bg-surface rounded-xl"></div>
                 </div>
             </div>
         );
@@ -60,7 +60,7 @@ export default function MetricasPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex bg-white dark:bg-slate-900 rounded-lg p-1 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div className="flex bg-card rounded-lg p-1 border border-border shadow-sm">
                         {[
                             { id: 'today', label: 'Hoy' },
                             { id: 'last7days', label: '7 Días' },
@@ -70,7 +70,7 @@ export default function MetricasPage() {
                             <button
                                 key={p.id}
                                 onClick={() => setPeriod(p.id)}
-                                className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${period === p.id ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${period === p.id ? 'bg-primary text-white shadow-sm' : 'text-text-muted hover:text-foreground'}`}
                             >
                                 {p.label}
                             </button>
@@ -111,7 +111,7 @@ export default function MetricasPage() {
                 <div className="lg:col-span-2 card-premium flex flex-col gap-6">
                     <div className="flex justify-between items-center">
                         <h3 className="font-bold text-lg">Evolución de Ventas</h3>
-                        <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{period === 'today' ? 'Ventas por Hora' : 'Ventas Diarias'}</div>
+                        <div className="text-[10px] text-text-muted font-bold uppercase tracking-widest">{period === 'today' ? 'Ventas por Hora' : 'Ventas Diarias'}</div>
                     </div>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
@@ -250,8 +250,8 @@ function StatCard({ title, value, Icon, trend, warning = false }: any) {
                 )}
             </div>
             <div>
-                <p className="text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">{title}</p>
-                <p className="text-2xl font-bold mt-1 text-slate-800 dark:text-white tracking-tight">{value}</p>
+                <p className="text-text-muted text-[10px] font-bold uppercase tracking-wider">{title}</p>
+                <p className="text-2xl font-bold mt-1 text-foreground tracking-tight">{value}</p>
             </div>
         </div>
     );

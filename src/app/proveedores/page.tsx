@@ -121,7 +121,7 @@ export default function SuppliersPage() {
         <main className="page-container">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div className="flex items-center gap-4">
-                    <Link href="/pago-proveedores" className="p-2 text-slate-400 hover:text-primary">
+                    <Link href="/pago-proveedores" className="p-2 text-text-muted hover:text-primary">
                         <ChevronLeft className="w-6 h-6" />
                     </Link>
                     <div>
@@ -131,13 +131,13 @@ export default function SuppliersPage() {
                 </div>
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                     <div className="relative flex-1 md:w-64">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
                             <Search className="w-5 h-5" />
                         </span>
                         <input
                             type="text"
                             placeholder="Buscar proveedor..."
-                            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -158,11 +158,11 @@ export default function SuppliersPage() {
                             <th className="table-header text-right pr-6">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody className="divide-y divide-border-subtle">
                         {loading ? (
                             Array(3).fill(0).map((_, i) => (
                                 <tr key={i} className="animate-pulse">
-                                    <td colSpan={3} className="px-6 py-8"><div className="h-8 bg-slate-100 dark:bg-slate-800 rounded w-full"></div></td>
+                                    <td colSpan={3} className="px-6 py-8"><div className="h-8 bg-surface rounded w-full"></div></td>
                                 </tr>
                             ))
                         ) : filteredSuppliers.length > 0 ? (
@@ -176,22 +176,22 @@ export default function SuppliersPage() {
                                             <div className="font-bold text-sm">{s.name}</div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-slate-500 text-sm">
+                                    <td className="px-6 py-4 text-text-muted text-sm">
                                         {s.contact ? (
                                             <div className="flex items-center gap-2">
                                                 <Phone className="w-3.5 h-3.5" />
                                                 {s.contact}
                                             </div>
                                         ) : (
-                                            <span className="italic text-slate-300">Sin contacto cargado</span>
+                                            <span className="italic text-text-muted">Sin contacto cargado</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 text-right pr-6">
                                         <div className="flex justify-end gap-2">
-                                            <button onClick={() => handleOpenModal(s)} className="p-2 text-slate-400 hover:text-primary transition-colors">
+                                            <button onClick={() => handleOpenModal(s)} className="p-2 text-text-muted hover:text-primary transition-colors">
                                                 <Pencil className="w-5 h-5" />
                                             </button>
-                                            <button onClick={() => handleDelete(s.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors">
+                                            <button onClick={() => handleDelete(s.id)} className="p-2 text-text-muted hover:text-danger transition-colors">
                                                 <Trash2 className="w-5 h-5" />
                                             </button>
                                         </div>
@@ -200,7 +200,7 @@ export default function SuppliersPage() {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={3} className="px-6 py-20 text-center text-slate-400">
+                                <td colSpan={3} className="px-6 py-20 text-center text-text-muted">
                                     {search ? 'No se encontraron proveedores para la búsqueda' : 'No hay proveedores registrados'}
                                 </td>
                             </tr>
@@ -211,19 +211,19 @@ export default function SuppliersPage() {
 
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
-                        <header className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+                    <div className="bg-card rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
+                        <header className="p-6 border-b border-border flex justify-between items-center bg-surface-alt">
                             <h2 className="text-xl font-bold">{editingSupplier ? 'Editar Proveedor' : 'Nuevo Proveedor'}</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><X className="w-6 h-6" /></button>
+                            <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text-muted"><X className="w-6 h-6" /></button>
                         </header>
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             <div className="space-y-1">
                                 <label className="text-sm font-medium">Nombre Completo / Razón Social</label>
-                                <input required autoFocus type="text" placeholder="Ej: Distribuidora Central" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                <input required autoFocus type="text" placeholder="Ej: Distribuidora Central" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                             </div>
                             <div className="space-y-1">
                                 <label className="text-sm font-medium">Contacto / Teléfono / Notas</label>
-                                <textarea placeholder="Ej: +54 9 11 1234-5678 - Atiende Martes y Jueves" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary h-24 resize-none" value={formData.contact} onChange={e => setFormData({ ...formData, contact: e.target.value })} />
+                                <textarea placeholder="Ej: +54 9 11 1234-5678 - Atiende Martes y Jueves" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary h-24 resize-none" value={formData.contact} onChange={e => setFormData({ ...formData, contact: e.target.value })} />
                             </div>
                             <div className="flex gap-3 pt-4">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary flex-1">CANCELAR</button>

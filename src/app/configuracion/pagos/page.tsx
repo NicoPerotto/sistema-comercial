@@ -119,32 +119,32 @@ export default function PaymentMethodsPage() {
                             <th className="table-header text-right pr-6">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody className="divide-y divide-border-subtle">
                         {loading ? (
                             Array(3).fill(0).map((_, i) => (
                                 <tr key={i} className="animate-pulse">
-                                    <td colSpan={4} className="px-6 py-4"><div className="h-6 bg-slate-100 dark:bg-slate-800 rounded w-full"></div></td>
+                                    <td colSpan={4} className="px-6 py-4"><div className="h-6 bg-surface rounded w-full"></div></td>
                                 </tr>
                             ))
                         ) : methods.map(m => (
                             <tr key={m.id} className="table-row">
                                 <td className="px-6 py-4 font-medium">{m.name}</td>
                                 <td className="px-6 py-4">
-                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${m.isArqueable ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
+                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${m.isArqueable ? 'bg-warning-light text-amber-700' : 'bg-surface text-text-muted'}`}>
                                         {m.isArqueable ? 'ARQUEABLE' : 'DIGITAL'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className={`text-sm font-bold ${m.percentage > 0 ? 'text-red-500' : m.percentage < 0 ? 'text-green-500' : 'text-slate-500'}`}>
+                                    <span className={`text-sm font-bold ${m.percentage > 0 ? 'text-red-500' : m.percentage < 0 ? 'text-green-500' : 'text-text-muted'}`}>
                                         {m.percentage > 0 ? `+${m.percentage}%` : m.percentage < 0 ? `${m.percentage}%` : '0%'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-right pr-6">
                                     <div className="flex justify-end gap-2">
-                                        <button onClick={() => { setEditingId(m.id); setFormData({ name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable }); setIsModalOpen(true); }} className="p-2 text-slate-400 hover:text-primary transition-colors">
+                                        <button onClick={() => { setEditingId(m.id); setFormData({ name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable }); setIsModalOpen(true); }} className="p-2 text-text-muted hover:text-primary transition-colors">
                                             <Icon name="Edit" />
                                         </button>
-                                        <button onClick={() => deleteMethod(m.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors">
+                                        <button onClick={() => deleteMethod(m.id)} className="p-2 text-text-muted hover:text-danger transition-colors">
                                             <Icon name="Trash" />
                                         </button>
                                     </div>
@@ -157,25 +157,25 @@ export default function PaymentMethodsPage() {
 
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
-                        <header className="p-6 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center">
+                    <div className="bg-card rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
+                        <header className="p-6 border-b border-border bg-surface-alt flex justify-between items-center">
                             <h2 className="text-xl font-bold">{editingId ? 'Editar' : 'Nuevo'} Método</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><Icon name="X" /></button>
+                            <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text-muted"><Icon name="X" /></button>
                         </header>
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             <div className="space-y-1">
                                 <label className="text-sm font-medium">Nombre</label>
-                                <input required type="text" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                <input required type="text" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                             </div>
                             <div className="space-y-1">
                                 <label className="text-sm font-medium">Porcentaje de Ajuste</label>
                                 <div className="relative">
-                                    <input required type="number" step="0.1" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right pr-8" value={formData.percentage} onChange={e => setFormData({ ...formData, percentage: e.target.value })} />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">%</span>
+                                    <input required type="number" step="0.1" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary text-right pr-8" value={formData.percentage} onChange={e => setFormData({ ...formData, percentage: e.target.value })} />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted">%</span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg cursor-pointer" onClick={() => setFormData({ ...formData, isArqueable: !formData.isArqueable })}>
-                                <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.isArqueable ? 'bg-primary border-primary text-white' : 'border-slate-300'}`}>
+                            <div className="flex items-center gap-3 p-4 bg-surface-alt rounded-lg cursor-pointer" onClick={() => setFormData({ ...formData, isArqueable: !formData.isArqueable })}>
+                                <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.isArqueable ? 'bg-primary border-primary text-white' : 'border-border'}`}>
                                     {formData.isArqueable && <Icon name="Check" className="w-3 h-3" />}
                                 </div>
                                 <span className="text-sm font-medium">Método Arqueable (Efectivo)</span>

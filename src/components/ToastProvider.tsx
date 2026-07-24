@@ -78,7 +78,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
                         <button
                             onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}
-                            className="ml-auto p-1 hover:bg-black/5 dark:hover:bg-white/5 rounded-lg transition-colors"
+                            className="ml-auto p-1 hover:bg-foreground/5 rounded-lg transition-colors"
                         >
                             <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />

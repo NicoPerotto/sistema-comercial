@@ -162,7 +162,7 @@ export default function CategoriesPage() {
         <main className="page-container">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div className="flex items-center gap-4">
-                    <Link href="/productos" className="p-2 text-slate-400 hover:text-primary">
+                    <Link href="/productos" className="p-2 text-text-muted hover:text-primary">
                         <Icon name="ArrowLeft" />
                     </Link>
                     <div>
@@ -185,30 +185,30 @@ export default function CategoriesPage() {
                             <th className="table-header text-right pr-6">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody className="divide-y divide-border-subtle">
                         {loading ? (
                             Array(3).fill(0).map((_, i) => (
                                 <tr key={i} className="animate-pulse">
-                                    <td colSpan={3} className="px-6 py-4"><div className="h-6 bg-slate-100 dark:bg-slate-800 rounded w-full"></div></td>
+                                    <td colSpan={3} className="px-6 py-4"><div className="h-6 bg-surface rounded w-full"></div></td>
                                 </tr>
                             ))
                         ) : categories.map((cat) => (
                             <tr key={cat.id} className="table-row">
                                 <td className="px-6 py-4">
-                                    <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 text-primary flex items-center justify-center">
+                                    <div className="w-10 h-10 rounded-lg bg-surface text-primary flex items-center justify-center">
                                         <Icon name={cat.icon} className="w-6 h-6" />
                                     </div>
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="font-medium text-sm">{cat.name}</div>
-                                    <div className="text-[10px] text-slate-400 font-mono">{cat.id.substring(0, 8)}</div>
+                                    <div className="text-[10px] text-text-muted font-mono">{cat.id.substring(0, 8)}</div>
                                 </td>
                                 <td className="px-6 py-4 text-right pr-6">
                                     <div className="flex justify-end gap-2">
-                                        <button onClick={() => handleOpenModal(cat)} className="p-2 text-slate-400 hover:text-primary transition-colors">
+                                        <button onClick={() => handleOpenModal(cat)} className="p-2 text-text-muted hover:text-primary transition-colors">
                                             <Icon name="Edit" />
                                         </button>
-                                        <button onClick={() => handleDelete(cat.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors">
+                                        <button onClick={() => handleDelete(cat.id)} className="p-2 text-text-muted hover:text-danger transition-colors">
                                             <Icon name="Trash" />
                                         </button>
                                     </div>
@@ -221,21 +221,21 @@ export default function CategoriesPage() {
 
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
-                        <header className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+                    <div className="bg-card rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
+                        <header className="p-6 border-b border-border flex justify-between items-center bg-surface-alt">
                             <h2 className="text-xl font-bold">{editingCategory ? 'Editar Categoría' : 'Nueva Categoría'}</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><Icon name="X" /></button>
+                            <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text-muted"><Icon name="X" /></button>
                         </header>
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             <div className="space-y-1">
                                 <label className="text-sm font-medium">Nombre de la Categoría</label>
-                                <input required autoFocus type="text" placeholder="Ej: Bebidas" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary" value={name} onChange={e => setName(e.target.value)} />
+                                <input required autoFocus type="text" placeholder="Ej: Bebidas" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary" value={name} onChange={e => setName(e.target.value)} />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Seleccionar Icono</label>
-                                <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-2 border border-slate-100 dark:border-slate-800 rounded-lg">
+                                <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-48 overflow-y-auto p-2 border border-border-subtle rounded-lg">
                                     {Object.keys(AVAILABLE_ICONS).filter(k => AVAILABLE_ICONS[k] && k !== 'X' && k !== 'Trash' && k !== 'Edit' && k !== 'Plus' && k !== 'Minus' && k !== 'ArrowLeft' && k !== 'Search').map((iconName) => (
-                                        <button key={iconName} type="button" onClick={() => setIcon(iconName)} className={`p-3 rounded-lg border flex items-center justify-center transition-all ${icon === iconName ? 'border-primary bg-primary text-white shadow-md' : 'border-slate-200 hover:border-primary/50 text-slate-400'}`}>
+                                        <button key={iconName} type="button" onClick={() => setIcon(iconName)} className={`p-3 rounded-lg border flex items-center justify-center transition-all ${icon === iconName ? 'border-primary bg-primary text-white shadow-md' : 'border-border hover:border-primary/50 text-text-muted'}`}>
                                             <Icon name={iconName} className="w-6 h-6" />
                                         </button>
                                     ))}

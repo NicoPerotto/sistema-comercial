@@ -87,13 +87,13 @@ export default function CajaHistorialPage() {
                 </div>
 
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                     <input
                         type="text"
                         placeholder="Buscar por sesión o responsable…"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="pl-9 pr-4 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-72"
+                        className="pl-9 pr-4 py-2 text-sm bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-72"
                     />
                 </div>
             </header>
@@ -103,7 +103,7 @@ export default function CajaHistorialPage() {
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead>
-                            <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+                            <tr className="border-b border-border bg-surface-alt">
                                 <th className="table-header text-left w-28">
                                     <ThBtn col="shortId">Sesión</ThBtn>
                                 </th>
@@ -128,10 +128,10 @@ export default function CajaHistorialPage() {
                         <tbody>
                             {loading ? (
                                 Array(6).fill(0).map((_, i) => (
-                                    <tr key={i} className="border-b border-slate-100 dark:border-slate-800">
+                                    <tr key={i} className="border-b border-border-subtle">
                                         {Array(9).fill(0).map((_, j) => (
                                             <td key={j} className="px-6 py-4">
-                                                <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded animate-pulse"></div>
+                                                <div className="h-4 bg-surface rounded animate-pulse"></div>
                                             </td>
                                         ))}
                                     </tr>
@@ -139,7 +139,7 @@ export default function CajaHistorialPage() {
                             ) : filtered.length === 0 ? (
                                 <tr>
                                     <td colSpan={9} className="px-6 py-24 text-center">
-                                        <div className="flex flex-col items-center gap-3 text-slate-400">
+                                        <div className="flex flex-col items-center gap-3 text-text-muted">
                                             <Archive className="w-12 h-12 opacity-20" />
                                             <p className="font-medium">Sin sesiones encontradas</p>
                                         </div>
@@ -153,7 +153,7 @@ export default function CajaHistorialPage() {
                                     return (
                                         <tr
                                             key={session.id}
-                                            className={`table-row ${idx % 2 === 0 ? '' : 'bg-slate-50/50 dark:bg-slate-900/30'}`}
+                                            className={`table-row ${idx % 2 === 0 ? '' : 'bg-surface-alt/50 bg-surface-alt/30'}`}
                                         >
                                             {/* Sesión */}
                                             <td className="px-6 py-4">
@@ -164,10 +164,10 @@ export default function CajaHistorialPage() {
 
                                             {/* Fecha */}
                                             <td className="px-6 py-4">
-                                                <p className="font-medium text-slate-800 dark:text-white">
+                                                <p className="font-medium text-foreground">
                                                     {closedDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                                                 </p>
-                                                <p className="text-xs text-slate-400">
+                                                <p className="text-xs text-text-muted">
                                                     {new Date(session.openedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     {' → '}
                                                     {closedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -195,12 +195,12 @@ export default function CajaHistorialPage() {
                                             </td>
 
                                             {/* Fondo */}
-                                            <td className="px-6 py-4 text-right font-semibold text-slate-700 dark:text-slate-200">
+                                            <td className="px-6 py-4 text-right font-semibold text-foreground">
                                                 ${Number(session.openingAmount).toLocaleString()}
                                             </td>
 
                                             {/* Depositado */}
-                                            <td className="px-6 py-4 text-right font-bold text-slate-900 dark:text-white">
+                                            <td className="px-6 py-4 text-right font-bold text-foreground">
                                                 ${Number(session.depositAmount).toLocaleString()}
                                             </td>
 
@@ -241,10 +241,10 @@ export default function CajaHistorialPage() {
 
                 {/* Table Footer */}
                 {!loading && filtered.length > 0 && (
-                    <div className="px-6 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400 bg-slate-50 dark:bg-slate-900/30">
+                    <div className="px-6 py-3 border-t border-border-subtle flex items-center justify-between text-xs text-text-muted bg-surface-alt">
                         <span>{filtered.length} sesiones encontradas</span>
                         <span>
-                            Total depositado: <span className="font-black text-slate-700 dark:text-slate-200 text-sm ml-1">
+                            Total depositado: <span className="font-black text-foreground text-sm ml-1">
                                 ${filtered.reduce((s, x) => s + Number(x.depositAmount), 0).toLocaleString()}
                             </span>
                         </span>
@@ -255,17 +255,17 @@ export default function CajaHistorialPage() {
             {/* ── Modal de Arqueo ── */}
             {selected && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                    <div className="bg-card rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
                         {/* Modal header */}
-                        <div className="bg-slate-900 p-8 text-white flex justify-between items-start">
+                        <div className="bg-foreground p-8 text-background flex justify-between items-start">
                             <div>
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arqueo Detallado</p>
+                                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Arqueo Detallado</p>
                                 <h2 className="text-3xl font-bold mt-1">Sesión #{selected.shortId}</h2>
-                                <p className="text-slate-400 text-sm mt-1">
+                                <p className="text-text-muted text-sm mt-1">
                                     {new Date(selected.closedAt).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                 </p>
                             </div>
-                            <button onClick={() => setSelected(null)} className="text-slate-400 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg">
+                            <button onClick={() => setSelected(null)} className="text-text-muted hover:text-white transition-colors p-2 hover:bg-card/10 rounded-lg">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -275,14 +275,14 @@ export default function CajaHistorialPage() {
                             <div className="grid grid-cols-2 gap-6">
                                 {/* Ventas por método */}
                                 <div className="space-y-2">
-                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Ventas por Método</h3>
+                                    <h3 className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3">Ventas por Método</h3>
                                     {Object.entries(selected.breakdown || {}).map(([method, total]: [string, any]) => (
-                                        <div key={method} className="flex justify-between px-4 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                                        <div key={method} className="flex justify-between px-4 py-2.5 bg-surface-alt rounded-lg">
                                             <span className="text-sm font-medium">{method}</span>
                                             <span className="text-sm font-bold">${Number(total).toLocaleString()}</span>
                                         </div>
                                     ))}
-                                    <div className="flex justify-between px-4 py-3 bg-slate-900 text-white rounded-lg mt-2">
+                                    <div className="flex justify-between px-4 py-3 bg-foreground text-background rounded-lg mt-2">
                                         <span className="text-sm">Total Esperado</span>
                                         <span className="font-bold">${Number(selected.expectedAmount).toLocaleString()}</span>
                                     </div>
@@ -290,7 +290,7 @@ export default function CajaHistorialPage() {
 
                                 {/* Resultado */}
                                 <div className="space-y-3">
-                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Resultado</h3>
+                                    <h3 className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3">Resultado</h3>
                                     <div className={`p-5 rounded-xl ${Number(selected.difference) >= 0 ? 'bg-success-subtle text-success-dark' : 'bg-danger-subtle text-danger-dark'}`}>
                                         <p className="text-[10px] font-bold uppercase mb-1">Diferencia</p>
                                         <p className="text-3xl font-black">
@@ -301,9 +301,9 @@ export default function CajaHistorialPage() {
                                         <p className="text-[10px] font-bold uppercase mb-1">En Caja Fuerte</p>
                                         <p className="text-3xl font-black">${Number(selected.depositAmount).toLocaleString()}</p>
                                     </div>
-                                    <div className="text-[10px] text-slate-400 font-medium pl-1 flex flex-col gap-0.5">
-                                        <span>Abierto por: <span className="text-slate-600 dark:text-slate-300 font-bold">{selected.openedBy?.name || '—'}</span></span>
-                                        <span>Cerrado por: <span className="text-slate-600 dark:text-slate-300 font-bold">{selected.closedBy?.name || 'Sistema'}</span></span>
+                                    <div className="text-[10px] text-text-muted font-medium pl-1 flex flex-col gap-0.5">
+                                        <span>Abierto por: <span className="text-text-muted font-bold">{selected.openedBy?.name || '—'}</span></span>
+                                        <span>Cerrado por: <span className="text-text-muted font-bold">{selected.closedBy?.name || 'Sistema'}</span></span>
                                     </div>
                                 </div>
                             </div>

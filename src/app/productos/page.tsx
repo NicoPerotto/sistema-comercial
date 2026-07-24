@@ -270,13 +270,13 @@ export default function ProductsPage() {
 
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                     <div className="relative flex-1 md:w-64">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
                             <Icon name="Search" />
                         </span>
                         <input
                             type="text"
                             placeholder="Buscar producto..."
-                            className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
@@ -288,7 +288,7 @@ export default function ProductsPage() {
                             <span className="hidden sm:inline">Categorías</span>
                         </Link>
                         <button onClick={handleExportExcel} className="btn-secondary" title="Exportar a Excel">
-                            <Icon name="Download" className="w-5 h-5 text-emerald-600" />
+                            <Icon name="Download" className="w-5 h-5 text-success-dark" />
                             <span className="hidden sm:inline">Exportar</span>
                         </button>
                         <button onClick={() => fileInputRef.current?.click()} className="btn-secondary" title="Importar desde Excel">
@@ -317,24 +317,24 @@ export default function ProductsPage() {
                                 <th className="table-header text-right pr-6">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <tbody className="divide-y divide-border-subtle">
                             {loading ? (
                                 Array(5).fill(0).map((_, i) => (
                                     <tr key={i} className="animate-pulse">
-                                        <td colSpan={6} className="px-6 py-4"><div className="h-6 bg-slate-100 dark:bg-slate-800 rounded w-full"></div></td>
+                                        <td colSpan={6} className="px-6 py-4"><div className="h-6 bg-surface rounded w-full"></div></td>
                                     </tr>
                                 ))
                             ) : filteredProducts.length > 0 ? (
                                 filteredProducts.map((p: any) => (
                                     <tr key={p.id} className="table-row">
                                         <td className="px-6 py-4">
-                                            <span className="font-mono text-xs text-slate-500 bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded">
+                                            <span className="font-mono text-xs text-text-muted bg-surface-alt px-2 py-1 rounded">
                                                 {p.barcode || p.id.substring(0, 8)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="font-medium text-sm">{p.name}</div>
-                                            {p.description && <div className="text-xs text-slate-500 truncate max-w-xs">{p.description}</div>}
+                                            {p.description && <div className="text-xs text-text-muted truncate max-w-xs">{p.description}</div>}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="badge-primary">
@@ -351,10 +351,10 @@ export default function ProductsPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right pr-6">
                                             <div className="flex justify-end gap-2">
-                                                <button onClick={() => handleOpenModal(p)} className="p-2 text-slate-400 hover:text-primary transition-colors">
+                                                <button onClick={() => handleOpenModal(p)} className="p-2 text-text-muted hover:text-primary transition-colors">
                                                     <Icon name="Edit" />
                                                 </button>
-                                                <button onClick={() => handleDelete(p.id)} className="p-2 text-slate-400 hover:text-red-600 transition-colors">
+                                                <button onClick={() => handleDelete(p.id)} className="p-2 text-text-muted hover:text-danger transition-colors">
                                                     <Icon name="Trash" />
                                                 </button>
                                             </div>
@@ -363,7 +363,7 @@ export default function ProductsPage() {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-20 text-center text-slate-400">
+                                    <td colSpan={6} className="px-6 py-20 text-center text-text-muted">
                                         No se encontraron productos
                                     </td>
                                 </tr>
@@ -377,43 +377,43 @@ export default function ProductsPage() {
 
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95">
-                        <header className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+                    <div className="bg-card rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95">
+                        <header className="p-6 border-b border-border flex justify-between items-center bg-surface-alt">
                             <h2 className="text-xl font-bold">{editingProduct ? 'Editar Producto' : 'Nuevo Producto'}</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600"><Icon name="X" className="w-6 h-6" /></button>
+                            <button onClick={() => setIsModalOpen(false)} className="text-text-muted hover:text-text-muted"><Icon name="X" className="w-6 h-6" /></button>
                         </header>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="md:col-span-2 space-y-1">
                                     <label className="text-sm font-medium">Nombre</label>
-                                    <input required type="text" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                    <input required type="text" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
                                 </div>
                                 <div className="space-y-1">
                                     <div className="flex justify-between items-center">
                                         <label className="text-sm font-medium">Categoría</label>
                                         <Link href="/categorias" className="text-[10px] font-bold text-primary hover:underline uppercase tracking-wider">Gestionar</Link>
                                     </div>
-                                    <select required className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary" value={formData.categoryId} onChange={e => setFormData({ ...formData, categoryId: e.target.value })}>
+                                    <select required className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary" value={formData.categoryId} onChange={e => setFormData({ ...formData, categoryId: e.target.value })}>
                                         <option value="">Seleccionar...</option>
                                         {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-sm font-medium">Código / Barcode</label>
-                                    <input type="text" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary" value={formData.barcode} onChange={e => setFormData({ ...formData, barcode: e.target.value })} />
+                                    <input type="text" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary" value={formData.barcode} onChange={e => setFormData({ ...formData, barcode: e.target.value })} />
                                 </div>
 
                                 {/* Cálculo de Precio */}
-                                <div className="md:col-span-2 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-4">
-                                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Configuración de Precio</h3>
+                                <div className="md:col-span-2 p-4 bg-surface-alt rounded-xl border border-border space-y-4">
+                                    <h3 className="text-xs font-bold text-text-muted uppercase tracking-widest">Configuración de Precio</h3>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-xs font-medium">Costo</label>
-                                            <input type="number" step="0.01" className="w-full px-3 py-1.5 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right" value={formData.cost} onChange={e => setFormData({ ...formData, cost: e.target.value })} />
+                                            <input type="number" step="0.01" className="w-full px-3 py-1.5 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary text-right" value={formData.cost} onChange={e => setFormData({ ...formData, cost: e.target.value })} />
                                         </div>
                                         <div className="space-y-1 flex flex-col justify-end">
                                             <label onClick={() => setFormData({ ...formData, hasIva: !formData.hasIva })} className="flex items-center gap-2 cursor-pointer p-1.5 h-[38px]">
-                                                <div className={`w-4 h-4 rounded border flex items-center justify-center ${formData.hasIva ? 'bg-primary border-primary text-white' : 'border-slate-300 bg-white dark:bg-slate-800'}`}>
+                                                <div className={`w-4 h-4 rounded border flex items-center justify-center ${formData.hasIva ? 'bg-primary border-primary text-white' : 'border-border bg-white'}`}>
                                                     {formData.hasIva && <Icon name="Check" className="w-3 h-3" />}
                                                 </div>
                                                 <span className="text-xs font-bold uppercase tracking-tighter">Compra con IVA</span>
@@ -421,25 +421,25 @@ export default function ProductsPage() {
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-xs font-medium">Margen %</label>
-                                            <input type="number" step="0.1" className="w-full px-3 py-1.5 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right font-bold text-primary" value={formData.margin} onChange={e => setFormData({ ...formData, margin: e.target.value })} />
+                                            <input type="number" step="0.1" className="w-full px-3 py-1.5 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary text-right font-bold text-primary" value={formData.margin} onChange={e => setFormData({ ...formData, margin: e.target.value })} />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-xs font-bold text-primary">Precio Final</label>
-                                            <input required type="number" step="0.01" className="w-full px-3 py-1.5 rounded-lg border-2 border-primary/30 dark:bg-slate-900 outline-none focus:ring-2 focus:ring-primary text-right font-bold text-lg" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
+                                            <input required type="number" step="0.01" className="w-full px-3 py-1.5 rounded-lg border-2 border-primary/30 bg-background outline-none focus:ring-2 focus:ring-primary text-right font-bold text-lg" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
                                         </div>
                                     </div>
-                                    <p className="text-[10px] text-slate-400 italic">
+                                    <p className="text-[10px] text-text-muted italic">
                                         El precio se calcula: (Costo {formData.hasIva ? '+ 21%' : ''}) + {formData.margin}% de margen. Puedes sobrescribir el precio final manualmente.
                                     </p>
                                 </div>
 
                                 <div className="space-y-1">
                                     <label className="text-sm font-medium">Stock Inicial</label>
-                                    <input required type="number" step="0.01" className="w-full px-4 py-2 rounded-lg border dark:bg-slate-800 border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-primary text-right" value={formData.stock} onChange={e => setFormData({ ...formData, stock: e.target.value })} />
+                                    <input required type="number" step="0.01" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary text-right" value={formData.stock} onChange={e => setFormData({ ...formData, stock: e.target.value })} />
                                 </div>
 
-                                <div className="flex items-center gap-2 p-4 bg-slate-50 dark:bg-slate-800 rounded-lg cursor-pointer h-fit self-end" onClick={() => setFormData({ ...formData, sellByWeight: !formData.sellByWeight })}>
-                                    <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.sellByWeight ? 'bg-primary border-primary text-white' : 'border-slate-300 bg-white dark:bg-slate-800'}`}>
+                                <div className="flex items-center gap-2 p-4 bg-surface-alt rounded-lg cursor-pointer h-fit self-end" onClick={() => setFormData({ ...formData, sellByWeight: !formData.sellByWeight })}>
+                                    <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.sellByWeight ? 'bg-primary border-primary text-white' : 'border-border bg-white'}`}>
                                         {formData.sellByWeight && <Icon name="Check" className="w-3 h-3" />}
                                     </div>
                                     <span className="text-sm font-medium">Venta por peso (kg)</span>
