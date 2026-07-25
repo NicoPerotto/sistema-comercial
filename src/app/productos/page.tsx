@@ -25,6 +25,8 @@ interface Category {
 interface Product {
     id: string;
     name: string;
+    brand?: string;
+    subcategory?: string;
     price: number;
     stock: number;
     categoryId: string;
@@ -50,6 +52,8 @@ export default function ProductsPage() {
 
     const [formData, setFormData] = useState({
         name: '',
+        brand: '',
+        subcategory: '',
         categoryId: '',
         price: '',
         stock: '',
@@ -110,6 +114,8 @@ export default function ProductsPage() {
 
         const exportData = products.map(p => ({
             'Nombre': p.name,
+            'Marca': p.brand || '',
+            'Subcategoría': p.subcategory || '',
             'Código': p.barcode || '',
             'Categoría': p.category?.name || 'Sin Categoría',
             'Precio': p.price,
@@ -177,6 +183,8 @@ export default function ProductsPage() {
             setEditingProduct(product);
             setFormData({
                 name: product.name,
+                brand: product.brand || '',
+                subcategory: product.subcategory || '',
                 categoryId: product.categoryId,
                 price: product.price.toString(),
                 stock: product.stock.toString(),
@@ -191,6 +199,8 @@ export default function ProductsPage() {
             setEditingProduct(null);
             setFormData({
                 name: '',
+                brand: '',
+                subcategory: '',
                 categoryId: categories.length > 0 ? categories[0].id : '',
                 price: '',
                 stock: '0',
@@ -219,7 +229,7 @@ export default function ProductsPage() {
             });
             if (res.ok) {
                 setIsModalOpen(false);
-                setFormData({ name: '', categoryId: '', price: '', stock: '', barcode: '', description: '', cost: '', hasIva: false, margin: '0', sellByWeight: false });
+                setFormData({ name: '', brand: '', subcategory: '', categoryId: '', price: '', stock: '', barcode: '', description: '', cost: '', hasIva: false, margin: '0', sellByWeight: false });
                 showToast(editingProduct ? 'Producto actualizado' : 'Producto creado', 'success');
                 fetchData();
             } else {
@@ -256,6 +266,8 @@ export default function ProductsPage() {
 
     const filteredProducts = products.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
+        (p.brand || '').toLowerCase().includes(search.toLowerCase()) ||
+        (p.subcategory || '').toLowerCase().includes(search.toLowerCase()) ||
         (p.category?.name || '').toLowerCase().includes(search.toLowerCase()) ||
         (p.barcode && p.barcode.includes(search))
     );
@@ -333,7 +345,7 @@ export default function ProductsPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="font-medium text-sm">{p.name}</div>
+                                            <div className="font-medium text-sm">{p.brand ? `${p.brand} - ${p.name}` : p.name}</div>
                                             {p.description && <div className="text-xs text-text-muted truncate max-w-xs">{p.description}</div>}
                                         </td>
                                         <td className="px-6 py-4">
@@ -387,6 +399,14 @@ export default function ProductsPage() {
                                 <div className="md:col-span-2 space-y-1">
                                     <label className="text-sm font-medium">Nombre</label>
                                     <input required type="text" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium">Marca</label>
+                                    <input type="text" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium">Subcategoría</label>
+                                    <input type="text" className="w-full px-4 py-2 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary" value={formData.subcategory} onChange={e => setFormData({ ...formData, subcategory: e.target.value })} />
                                 </div>
                                 <div className="space-y-1">
                                     <div className="flex justify-between items-center">

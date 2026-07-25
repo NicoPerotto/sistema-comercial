@@ -40,6 +40,8 @@ export async function POST(request: Request) {
             for (const item of products) {
                 try {
                     const name = (item.Nombre || '').toString().trim();
+                    const brand = (item.Marca || item.brand || '').toString().trim();
+                    const subcategory = (item.Subcategoría || item.Subcategoria || item.subcategory || '').toString().trim();
                     const barcode = item.Código?.toString().trim() || item.Barcode?.toString().trim() || null;
                     const categoryName = item.Categoría?.toString().trim() || item.Categoria?.toString().trim() || 'Sin Categoría';
                     const price = parseFloat(item.Precio) || 0;
@@ -60,6 +62,8 @@ export async function POST(request: Request) {
                         await (tx as any).product.update({
                             where: { id: existingProduct.id },
                             data: {
+                                ...(brand !== '' ? { brand } : {}),
+                                ...(subcategory !== '' ? { subcategory } : {}),
                                 price,
                                 cost,
                                 hasIva,
@@ -74,6 +78,8 @@ export async function POST(request: Request) {
                         await (tx as any).product.create({
                             data: {
                                 name,
+                                brand,
+                                subcategory,
                                 barcode,
                                 price,
                                 cost,

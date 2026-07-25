@@ -31,5 +31,5 @@ export const SITE_CONFIG = {
   // - 'theme-lavender-soft'   → Lavender Soft (spa/belleza/relajación)
   // - 'theme-rose-light'      → Rose Light (florerías/confiterías/femenino)
   // - 'theme-forest-light'    → Forest Light (jardinería/viveros/natural)
-  theme: "theme-nordic-light" as const,
+  theme: "theme-warm-sand" as const,
 };

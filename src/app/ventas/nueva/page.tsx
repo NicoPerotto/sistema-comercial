@@ -83,6 +83,7 @@ interface Category {
 interface Product {
     id: string;
     name: string;
+    brand?: string;
     price: number;
     stock: number;
     categoryId: string;
@@ -426,7 +427,7 @@ export default function POSPage() {
 
     const filteredProducts = products.filter(p => {
         const searchTerm = search.toLowerCase();
-        const matchesSearch = p.name.toLowerCase().includes(searchTerm) || (p.barcode && p.barcode.includes(search));
+        const matchesSearch = `${p.brand ? `${p.brand} - ` : ''}${p.name}`.toLowerCase().includes(searchTerm) || (p.barcode && p.barcode.includes(search));
         const matchesCategory = selectedCategory ? p.categoryId === selectedCategory : true;
         const hasStock = p.stock > 0;
         return matchesSearch && matchesCategory && hasStock;
@@ -552,7 +553,7 @@ export default function POSPage() {
                                                     <Icon name="Edit" className="w-4 h-4" />
                                                 </button>
                                             </div>
-                                            <h3 className="font-bold text-sm line-clamp-2">{p.name}</h3>
+                                            <h3 className="font-bold text-sm line-clamp-2">{p.brand ? `${p.brand} - ${p.name}` : p.name}</h3>
                                         </div>
                                         <div className="space-y-3">
                                             <div className="text-xl font-bold">${Number(p.price).toLocaleString()}</div>
@@ -582,7 +583,7 @@ export default function POSPage() {
                     <div className="bg-card rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
                         <header className="p-6 border-b border-border flex justify-between items-center">
                             <div>
-                                <h2 className="text-lg font-bold">{quickEditModal.product?.name}</h2>
+                        <h2 className="text-lg font-bold">{quickEditModal.product?.brand ? `${quickEditModal.product.brand} - ${quickEditModal.product.name}` : quickEditModal.product?.name}</h2>
                                 <p className="text-xs text-text-muted uppercase font-bold tracking-widest">Configuración de Precios</p>
                             </div>
                             <button onClick={() => setQuickEditModal({ isOpen: false, product: null })} className="text-text-muted hover:text-text-muted"><Icon name="X" /></button>
@@ -660,7 +661,7 @@ export default function POSPage() {
                             <div key={item.productId} className="space-y-1">
                                 <div className="flex justify-between items-center p-3 bg-background rounded-xl border border-border-subtle group shadow-sm">
                                     <div className="flex-1 min-w-0 mr-2">
-                                        <h4 className="font-bold text-sm truncate">{item.name}</h4>
+                                        <h4 className="font-bold text-sm truncate">{item.brand ? `${item.brand} - ${item.name}` : item.name}</h4>
                                         <p className="text-xs text-text-muted">${Number(item.price).toLocaleString()} x {item.quantity}</p>
                                     </div>
                                     <div className="text-right">

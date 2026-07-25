@@ -14,7 +14,7 @@ interface Sale {
     createdAt: string;
     user: { name: string; role: string; };
     paymentMethod?: { name: string; percentage: number; };
-    items: { id: string; quantity: number; price: number; product: { name: string; }; }[];
+    items: { id: string; quantity: number; price: number; product: { name: string; brand?: string; }; }[];
 }
 
 export default function SalesHistoryPage() {
@@ -281,7 +281,7 @@ export default function SalesHistoryPage() {
                                     <div className="space-y-1.5">
                                         {selectedSale.items.map(item => (
                                             <div key={item.id} className="flex justify-between items-center px-4 py-2.5 bg-surface-alt rounded-lg">
-                                                <span className="font-medium text-sm">{item.product.name}</span>
+                                                                <span className="font-medium text-sm">{item.product.brand ? `${item.product.brand} - ${item.product.name}` : item.product.name}</span>
                                                 <div className="flex items-center gap-4">
                                                     <span className="text-xs text-text-muted">{item.quantity} uni.</span>
                                                     <span className="font-bold text-primary text-sm">${Number(item.price * item.quantity).toLocaleString()}</span>

@@ -48,6 +48,8 @@ model Category {
 model Product {
   id           String    @id @default(cuid())
   name         String
+  brand        String    @default("")
+  subcategory  String    @default("")
   description  String?
   categoryId   String
   category     Category  @relation(fields: [categoryId], references: [id])
@@ -180,4 +182,3 @@ model WeeklyClosureDetail {
   realAmount       Decimal
   difference       Decimal
 }
-

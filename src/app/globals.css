@@ -53,6 +53,7 @@
   --color-primary-subtle: var(--color-primary-light);
 
   /* ── Surfaces / Cards ── */
+  --color-card: var(--card-background);
   --color-surface: var(--card-background);
   --color-surface-alt: var(--surface-alt);
   /* Fila alterna, inputs */

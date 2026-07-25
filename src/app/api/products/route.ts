@@ -17,7 +17,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, categoryId, price, stock, barcode, description, cost, hasIva, margin, sellByWeight } = body;
+        const { name, brand, subcategory, categoryId, price, stock, barcode, description, cost, hasIva, margin, sellByWeight } = body;
 
         if (!name || !categoryId) {
             return NextResponse.json({ error: 'Campos requeridos faltantes' }, { status: 400 });
@@ -39,6 +39,8 @@ export async function POST(request: Request) {
         const product = await (prisma.product as any).create({
             data: {
                 name,
+                brand: brand?.trim() || '',
+                subcategory: subcategory?.trim() || '',
                 category: { connect: { id: categoryId } },
                 price: isNaN(calculatedPrice) ? 0 : calculatedPrice,
                 stock: isNaN(parsedStock) ? 0 : parsedStock,
@@ -70,7 +72,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { id, name, categoryId, price, stock, barcode, description, cost, hasIva, margin, sellByWeight } = body;
+        const { id, name, brand, subcategory, categoryId, price, stock, barcode, description, cost, hasIva, margin, sellByWeight } = body;
 
         if (!id) {
             return NextResponse.json({ error: 'Falta el ID del producto' }, { status: 400 });
@@ -92,6 +94,8 @@ export async function PUT(request: Request) {
             where: { id: id },
             data: {
                 name,
+                brand: brand?.trim() || '',
+                subcategory: subcategory?.trim() || '',
                 category: { connect: { id: categoryId } },
                 price: isNaN(calculatedPrice) ? 0 : calculatedPrice,
                 stock: isNaN(parsedStock) ? 0 : parsedStock,
