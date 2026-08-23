@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import { jsonSafe } from '@/lib/json';
 
 export async function GET() {
     try {
@@ -7,7 +8,7 @@ export async function GET() {
             include: { category: true },
             orderBy: { createdAt: 'desc' }
         });
-        return NextResponse.json(products);
+        return NextResponse.json(jsonSafe(products));
     } catch (error: any) {
         console.error('API Error:', error);
         return NextResponse.json({ error: error.message || 'Unknown error' }, { status: 500 });
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
             useHasIva ? 1 : 0, parsedMargin, product.id
         );
 
-        return NextResponse.json({ ...product, hasIva: useHasIva, margin: parsedMargin });
+        return NextResponse.json(jsonSafe({ ...product, hasIva: useHasIva, margin: parsedMargin }));
     } catch (error: any) {
         console.error('API Error POST:', error);
         const errorMessage = error.code === 'P2002'
@@ -113,7 +114,7 @@ export async function PUT(request: Request) {
             useHasIva ? 1 : 0, parsedMargin, id
         );
 
-        return NextResponse.json({ ...product, hasIva: useHasIva, margin: parsedMargin });
+        return NextResponse.json(jsonSafe({ ...product, hasIva: useHasIva, margin: parsedMargin }));
     } catch (error: any) {
         console.error('API Error PUT:', error);
         const errorMessage = error.code === 'P2002'

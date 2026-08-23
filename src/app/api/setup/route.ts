@@ -1,5 +1,8 @@
 import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+
+const DEFAULT_ADMIN_PASSWORD = 'admin';
 
 export async function GET() {
     try {
@@ -12,7 +15,7 @@ export async function GET() {
                 email: 'admin@sistema.com',
                 name: 'Administrador',
                 role: 'ADMIN',
-                password: 'admin',
+                password: await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 10),
             },
         });
 

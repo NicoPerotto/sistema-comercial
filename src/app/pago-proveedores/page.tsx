@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/components/ToastProvider';
 import Link from 'next/link';
+import { useAuth } from '@/components/AuthProvider';
 import {
     Truck,
     Plus,
@@ -43,6 +44,7 @@ interface SupplierPayment {
 
 export default function SupplierPaymentsPage() {
     const { showToast } = useToast();
+    const { user } = useAuth();
     const [suppliers, setSuppliers] = useState<Supplier[]>([]);
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
     const [recentPayments, setRecentPayments] = useState<SupplierPayment[]>([]);
@@ -50,7 +52,6 @@ export default function SupplierPaymentsPage() {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [user, setUser] = useState<any>(null);
 
     const [formData, setFormData] = useState({
         supplierId: '',
@@ -84,8 +85,6 @@ export default function SupplierPaymentsPage() {
             if (Array.isArray(paymentsData)) setRecentPayments(paymentsData.slice(0, 5));
             if (activeRegData && !activeRegData.error) setActiveRegister(activeRegData);
 
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) setUser(JSON.parse(storedUser));
         } catch (error) {
             showToast('Error al cargar datos', 'error');
         } finally {

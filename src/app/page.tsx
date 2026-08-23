@@ -11,7 +11,7 @@ import {
 import { useAuth } from '@/components/AuthProvider';
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const roleLabels: Record<string, string> = {
     'ADMIN': 'Administrador del Sistema',
@@ -111,7 +111,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <button
-          onClick={() => { localStorage.removeItem('user'); window.location.href = '/login'; }}
+          onClick={() => { logout(); }}
           className="btn-secondary text-danger hover:bg-danger/10 px-6 py-3"
         >
           <LogOut className="w-4 h-4" />

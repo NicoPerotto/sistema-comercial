@@ -4,18 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Calendar, ArrowDownToLine, History, Printer, TrendingUp } from 'lucide-react';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function CajaPage() {
     const [registerData, setRegisterData] = useState<any>(null);
     const [suggestedOpening, setSuggestedOpening] = useState(0);
     const [loading, setLoading] = useState(true);
     const [amount, setAmount] = useState('');
-    const [user, setUser] = useState<any>(null);
+    const { user } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) setUser(JSON.parse(storedUser));
         fetchRegisterStatus();
     }, []);
 
@@ -44,7 +43,7 @@ export default function CajaPage() {
             const res = await fetch('/api/cash-register/open', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ openingAmount: amount, openedById: user.id }),
+                body: JSON.stringify({ openingAmount: amount, openedById: user?.id }),
             });
             if (res.ok) { setAmount(''); fetchRegisterStatus(); }
         } catch (error) {
@@ -58,7 +57,7 @@ export default function CajaPage() {
             const res = await fetch('/api/cash-register/close', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ closingAmount: amount, closedById: user.id }),
+                body: JSON.stringify({ closingAmount: amount, closedById: user?.id }),
             });
             if (res.ok) {
                 const data = await res.json();

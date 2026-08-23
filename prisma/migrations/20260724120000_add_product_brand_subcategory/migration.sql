@@ -1,3 +1,0 @@
-ALTER TABLE "Product" ADD COLUMN "brand" TEXT NOT NULL DEFAULT '';
-
-ALTER TABLE "Product" ADD COLUMN "subcategory" TEXT NOT NULL DEFAULT '';

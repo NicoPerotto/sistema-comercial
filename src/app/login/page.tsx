@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
 
 const Icon = ({ children, className = "w-5 h-5" }: { children: React.ReactNode, className?: string }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -15,6 +16,7 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const router = useRouter();
+    const { login } = useAuth();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,7 +33,7 @@ export default function LoginPage() {
             const data = await res.json();
 
             if (res.ok) {
-                localStorage.setItem('user', JSON.stringify(data.user));
+                login(data.user); // el backend ya seteó la cookie firmada
                 router.push('/');
                 router.refresh();
             } else {

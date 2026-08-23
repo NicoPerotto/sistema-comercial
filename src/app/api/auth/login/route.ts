@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { signSession, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/session';
 
 export async function POST(request: Request) {
     try {
@@ -10,11 +12,12 @@ export async function POST(request: Request) {
             where: { email }
         });
 
-        if (!user || user.password !== password) {
+        // 2. Verify password (hashed). Usuario o clave inválidos -> 401 genérico.
+        if (!user || !user.password || !bcrypt.compareSync(password, user.password)) {
             return NextResponse.json({ error: 'Credenciales inválidas' }, { status: 401 });
         }
 
-        // 2. Close any previous open shifts (cleanup)
+        // 3. Close any previous open shifts (cleanup)
         await prisma.shift.updateMany({
             where: {
                 userId: user.id,
@@ -25,7 +28,7 @@ export async function POST(request: Request) {
             }
         });
 
-        // 3. Create new shift
+        // 4. Create new shift
         const shift = await prisma.shift.create({
             data: {
                 userId: user.id,
@@ -33,19 +36,27 @@ export async function POST(request: Request) {
             }
         });
 
-        // 4. Return user info (excluding password)
+        // 5. Return user info (excluding password) + signed session cookie
         const { password: _, ...userWithoutPassword } = user;
+
+        const token = await signSession({
+            id: userWithoutPassword.id,
+            name: userWithoutPassword.name,
+            email: userWithoutPassword.email,
+            role: userWithoutPassword.role,
+        });
 
         const response = NextResponse.json({
             user: userWithoutPassword,
             shiftId: shift.id
         });
 
-        // Set a basic cookie for session (simplistic for this demo)
-        response.cookies.set('user_session', JSON.stringify(userWithoutPassword), {
+        response.cookies.set(SESSION_COOKIE_NAME, token, {
             path: '/',
-            maxAge: 60 * 60 * 24, // 1 day
-            httpOnly: false, // Accessible by client for UI
+            maxAge: SESSION_MAX_AGE,
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
         });
 
         return response;

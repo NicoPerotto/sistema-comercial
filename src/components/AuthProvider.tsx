@@ -25,23 +25,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const router = useRouter();
     const pathname = usePathname();
 
+    // Al montar, validamos la sesión firmada contra el backend (/api/auth/me).
+    // La cookie httpOnly viaja automáticamente en el fetch; no usamos localStorage.
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        } else if (pathname !== '/login') {
-            router.push('/login');
+        let cancelled = false;
+
+        async function loadSession() {
+            try {
+                const res = await fetch('/api/auth/me', { cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (!cancelled) setUser(data.user ?? null);
+                } else if (!cancelled) {
+                    setUser(null);
+                }
+            } catch {
+                if (!cancelled) setUser(null);
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
         }
-        setLoading(false);
-    }, [pathname, router]);
+
+        loadSession();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    // Redirección por ruta (después de cargar la sesión)
+    useEffect(() => {
+        if (loading) return;
+        if (!user && pathname !== '/login') {
+            router.push('/login');
+        } else if (user && pathname === '/login') {
+            router.push('/');
+        }
+    }, [user, loading, pathname, router]);
 
     const login = (userData: User) => {
-        localStorage.setItem('user', JSON.stringify(userData));
+        // El backend ya seteó la cookie firmada en el POST /login.
         setUser(userData);
     };
 
-    const logout = () => {
-        localStorage.removeItem('user');
+    const logout = async () => {
+        try {
+            await fetch('/api/auth/logout', { method: 'POST', cache: 'no-store' });
+        } catch {
+            // ignore network errors on logout
+        }
         setUser(null);
         router.push('/login');
     };

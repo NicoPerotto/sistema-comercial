@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
 
 interface BreakdownItem {
     paymentMethodId: string;
@@ -31,10 +32,10 @@ interface BreakdownItem {
 export default function WeeklyClosurePage() {
     const { showToast } = useToast();
     const router = useRouter();
+    const { user } = useAuth();
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [draft, setDraft] = useState<any>(null);
-    const [user, setUser] = useState<any>(null);
     const [breakdown, setBreakdown] = useState<BreakdownItem[]>([]);
 
     const fetchData = async () => {
@@ -49,9 +50,6 @@ export default function WeeklyClosurePage() {
                 ...b,
                 realAmount: b.expectedTotal // Initialize real with expected
             })));
-
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) setUser(JSON.parse(storedUser));
         } catch (error: any) {
             showToast(error.message || 'Error al cargar borrador', 'error');
         } finally {

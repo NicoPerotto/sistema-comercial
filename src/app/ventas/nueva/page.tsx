@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useToast } from '@/components/ToastProvider';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/AuthProvider';
+import { enqueueSale, pendingSales, flushAll } from '@/lib/offlineQueue';
 
 import {
     Package, ShoppingCart, ShoppingBag, Tag, Star, Store, Sparkles, Coffee, Heart,
@@ -100,6 +102,7 @@ interface CartItem extends Product {
 export default function POSPage() {
     const { showToast } = useToast();
     const router = useRouter();
+    const { user } = useAuth();
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [cart, setCart] = useState<CartItem[]>([]);
@@ -380,23 +383,20 @@ export default function POSPage() {
         if (cart.length === 0) return;
         setProcessing(true);
 
+        const saleData = {
+            userId: user?.id,
+            items: cart.map(item => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                price: item.price
+            })),
+            paymentMethodId: selectedPaymentMethod,
+            total: total,
+            type: type,
+            auditLog: auditLog
+        };
+
         try {
-            const storedUser = localStorage.getItem('user');
-            const user = storedUser ? JSON.parse(storedUser) : null;
-
-            const saleData = {
-                userId: user?.id,
-                items: cart.map(item => ({
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    price: item.price
-                })),
-                paymentMethodId: selectedPaymentMethod,
-                total: total,
-                type: type,
-                auditLog: auditLog
-            };
-
             const res = await fetch('/api/sales', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -419,11 +419,42 @@ export default function POSPage() {
                 showToast('Error: ' + result.error, 'error');
             }
         } catch (err) {
-            showToast('Error de conexión', 'error');
+            // Sin red: encolar la venta para enviarla al reconectar.
+            try {
+                const queued = await enqueueSale(saleData);
+                showToast(`Sin conexión: venta guardada localmente (${queued.id.slice(0, 8)}). Se enviará al reconectar.`, 'error');
+                setCart([]);
+                setAuditLog([]);
+                localStorage.removeItem('active_cart');
+                await refreshPending();
+            } catch {
+                showToast('Error de conexión y no se pudo guardar la venta', 'error');
+            }
         } finally {
             setProcessing(false);
         }
     };
+
+    const [pendingCount, setPendingCount] = useState(0);
+    const refreshPending = async () => {
+        const q = await pendingSales();
+        setPendingCount(q.length);
+    };
+
+    useEffect(() => {
+        refreshPending();
+        const onOnline = async () => {
+            const sent = await flushAll();
+            if (sent > 0) {
+                showToast(`${sent} venta(s) pendiente(s) enviada(s) al servidor`, 'success');
+                await refreshPending();
+                fetchData();
+            }
+        };
+        window.addEventListener('online', onOnline);
+        return () => window.removeEventListener('online', onOnline);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const filteredProducts = products.filter(p => {
         const searchTerm = search.toLowerCase();
@@ -466,6 +497,11 @@ export default function POSPage() {
     return (
         <div className="fixed inset-0 flex flex-row overflow-hidden bg-background z-10">
             <main className="flex-1 flex flex-col p-6 overflow-hidden">
+                {pendingCount > 0 && (
+                    <div className="mb-4 flex items-center gap-3 bg-amber-500/15 border border-amber-500/40 text-amber-300 rounded-lg px-4 py-2 text-sm">
+                        <span className="font-bold">{pendingCount}</span> venta(s) pendiente(s) sin enviar (offline). Se enviarán automáticamente al recuperar la conexión.
+                    </div>
+                )}
                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <div className="flex items-center gap-4">
                         <button

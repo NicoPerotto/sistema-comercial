@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { ToastProvider } from "@/components/ToastProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import { SITE_CONFIG } from "@/config";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,6 +20,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: `${SITE_CONFIG.title} - Sistema de Gestión`,
   description: SITE_CONFIG.description,
+  manifest: "/manifest.json",
+  applicationName: "Sistema Comercial",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Comercial",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({
@@ -41,6 +53,7 @@ export default function RootLayout({
             </div>
           </ToastProvider>
         </AuthProvider>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

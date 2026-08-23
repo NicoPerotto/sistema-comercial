@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import 'dotenv/config'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -9,24 +10,24 @@ async function main() {
     // Create Admin
     const admin = await prisma.user.upsert({
         where: { email: 'admin@sistema.com' },
-        update: {},
+        update: { password: await bcrypt.hash('admin', 10) },
         create: {
             email: 'admin@sistema.com',
             name: 'Administrador',
             role: 'ADMIN',
-            password: 'admin',
+            password: await bcrypt.hash('admin', 10),
         },
     })
 
     // Create Preventista
     await prisma.user.upsert({
         where: { email: 'prev@sistema.com' },
-        update: {},
+        update: { password: await bcrypt.hash('123', 10) },
         create: {
             email: 'prev@sistema.com',
             name: 'Preventista Juan',
             role: 'PREVENTISTA',
-            password: '123',
+            password: await bcrypt.hash('123', 10),
         },
     })
 

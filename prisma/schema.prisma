@@ -1,11 +1,13 @@
 datasource db {
-  provider = "postgres"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled (pgbouncer) — runtime en Vercel
+  directUrl = env("DIRECT_URL")   // directo (5432) — para prisma migrate
 }
 
 generator client {
-  provider   = "prisma-client-js"
-  engineType = "library"
+  provider      = "prisma-client-js"
+  engineType    = "library"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"] // build de Vercel (linux)
 }
 
 // SQLite doesn't support Enums natively, so we use String
