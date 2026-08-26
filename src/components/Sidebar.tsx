@@ -8,7 +8,7 @@ import { SITE_CONFIG } from '@/config';
 import {
     LayoutGrid, Package, Tag, ShoppingCart, ClipboardList,
     Wallet, CreditCard, Users, BarChart3, Zap, LogOut, Archive, Truck, LucideIcon,
-    Calendar
+    Calendar, ShieldCheck
 } from 'lucide-react';
 
 
@@ -47,6 +47,37 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
     </div>
 );
 
+// Catálogo de ventanas del sidebar (debe coincidir con src/lib/windows.ts)
+interface NavDef {
+    href: string;
+    label: string;
+    Icon: LucideIcon;
+    section: 'Inicio' | 'Operaciones' | 'Catálogo' | 'Administración' | 'Sistema';
+}
+
+const NAV: NavDef[] = [
+    { href: '/', label: 'Dashboard', Icon: LayoutGrid, section: 'Inicio' },
+
+    { href: '/ventas/nueva', label: 'Nueva Venta', Icon: ShoppingCart, section: 'Operaciones' },
+    { href: '/caja', label: 'Caja Diaria', Icon: Wallet, section: 'Operaciones' },
+    { href: '/pago-proveedores', label: 'Pago Proveedores', Icon: CreditCard, section: 'Operaciones' },
+
+    { href: '/productos', label: 'Productos', Icon: Package, section: 'Catálogo' },
+    { href: '/categorias', label: 'Categorías', Icon: Tag, section: 'Catálogo' },
+    { href: '/proveedores', label: 'Proveedores', Icon: Truck, section: 'Catálogo' },
+
+    { href: '/metricas', label: 'Métricas', Icon: BarChart3, section: 'Administración' },
+    { href: '/caja/semanal', label: 'Cierre Semanal', Icon: Calendar, section: 'Administración' },
+    { href: '/ventas', label: 'Historial de Ventas', Icon: ClipboardList, section: 'Administración' },
+    { href: '/pago-proveedores/historial', label: 'Historial de Pagos', Icon: Archive, section: 'Administración' },
+    { href: '/caja/historial', label: 'Historial de Caja', Icon: Archive, section: 'Administración' },
+    { href: '/empleados', label: 'Empleados', Icon: Users, section: 'Administración' },
+    { href: '/configuracion/pagos', label: 'Métodos de Pago', Icon: CreditCard, section: 'Administración' },
+
+    { href: '/sistema', label: 'Sistema', Icon: ShieldCheck, section: 'Sistema' },
+    { href: '/sistema/roles', label: 'Gestor de Roles', Icon: ShieldCheck, section: 'Sistema' },
+];
+
 export default function Sidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
@@ -67,7 +98,18 @@ export default function Sidebar() {
 
     if (pathname === '/ventas/nueva' || pathname === '/login') return null;
 
-    const isAdminOrManager = user?.role === 'ADMIN' || user?.role === 'MANAGER';
+    // Ventanas permitidas para este usuario (ADMIN recibe todas desde /api/auth/me)
+    const allowed = new Set<string>(user?.windows ?? []);
+    const isAdmin = user?.role === 'ADMIN';
+
+    // Filtra el catálogo según permisos. ADMIN siempre ve todo.
+    const visible = NAV.filter((item) => isAdmin || allowed.has(item.href));
+
+    // Agrupa por sección preservando el orden de aparición
+    const sectionsOrder: NavDef['section'][] = ['Inicio', 'Operaciones', 'Catálogo', 'Administración', 'Sistema'];
+    const sections = sectionsOrder
+        .map((sec) => ({ section: sec, items: visible.filter((i) => i.section === sec) }))
+        .filter((g) => g.items.length > 0);
 
     return (
         <aside className="w-64 border-r border-border bg-surface hidden md:flex flex-col h-screen sticky top-0 z-50">
@@ -86,32 +128,21 @@ export default function Sidebar() {
 
             {/* Navigation */}
             <nav className="flex-1 px-3 overflow-y-auto custom-scrollbar py-2">
-
-                <SectionLabel>Inicio</SectionLabel>
-                <NavItem href="/" Icon={LayoutGrid} pathname={pathname}>Dashboard</NavItem>
-
-                <SectionLabel>Operaciones</SectionLabel>
-                <NavItem href="/ventas/nueva" Icon={ShoppingCart} pathname={pathname}>Nueva Venta</NavItem>
-                <NavItem href="/caja" Icon={Wallet} pathname={pathname}>Caja Diaria</NavItem>
-                <NavItem href="/pago-proveedores" Icon={CreditCard} pathname={pathname}>Pago Proveedores</NavItem>
-
-                <SectionLabel>Catálogo</SectionLabel>
-                <NavItem href="/productos" Icon={Package} pathname={pathname}>Productos</NavItem>
-                <NavItem href="/categorias" Icon={Tag} pathname={pathname}>Categorías</NavItem>
-                <NavItem href="/proveedores" Icon={Truck} pathname={pathname}>Proveedores</NavItem>
-
-                {isAdminOrManager && (
-                    <>
-                         <SectionLabel>Administración</SectionLabel>
-                        <NavItem href="/metricas" Icon={BarChart3} pathname={pathname}>Métricas</NavItem>
-                        <NavItem href="/caja/semanal" Icon={Calendar} pathname={pathname}>Cierre Semanal</NavItem>
-                        <NavItem href="/ventas" Icon={ClipboardList} pathname={pathname}>Historial de Ventas</NavItem>
-                        <NavItem href="/pago-proveedores/historial" Icon={Archive} pathname={pathname}>Historial de Pagos</NavItem>
-                        <NavItem href="/caja/historial" Icon={Archive} pathname={pathname}>Historial de Caja</NavItem>
-                        <NavItem href="/empleados" Icon={Users} pathname={pathname}>Empleados</NavItem>
-                        <NavItem href="/configuracion/pagos" Icon={CreditCard} pathname={pathname}>Métodos de Pago</NavItem>
-                    </>
-                )}
+                {sections.map((group) => (
+                    <div key={group.section}>
+                        <SectionLabel>{group.section}</SectionLabel>
+                        {group.items.map((item) => (
+                            <NavItem
+                                key={item.href}
+                                href={item.href}
+                                Icon={item.Icon}
+                                pathname={pathname}
+                            >
+                                {item.label}
+                            </NavItem>
+                        ))}
+                    </div>
+                ))}
             </nav>
 
             {/* User Panel */}

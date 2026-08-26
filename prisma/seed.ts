@@ -4,17 +4,63 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+const ALL_WINDOWS = [
+  '/', '/ventas/nueva', '/caja', '/pago-proveedores',
+  '/productos', '/categorias', '/proveedores',
+  '/metricas', '/caja/semanal', '/ventas', '/pago-proveedores/historial',
+  '/caja/historial', '/empleados', '/configuracion/pagos',
+  '/sistema', '/sistema/roles',
+]
+
 async function main() {
     console.log('Starting seed...')
 
-    // Create Admin
+    // Roles del sistema (no editables/eliminables desde la UI)
+    const ownerRole = await prisma.role.upsert({
+        where: { slug: 'OWNER' },
+        update: { permissions: JSON.stringify({ windows: ALL_WINDOWS }) },
+        create: {
+            name: 'Owner',
+            slug: 'OWNER',
+            description: 'Dueño del sistema: acceso total a todas las ventanas y configuración.',
+            isSystem: true,
+            permissions: JSON.stringify({ windows: ALL_WINDOWS }),
+        },
+    })
+
+    const adminRole = await prisma.role.upsert({
+        where: { slug: 'ADMIN' },
+        update: {},
+        create: {
+            name: 'Administrador',
+            slug: 'ADMIN',
+            description: 'Administrador: acceso total a operaciones y administración.',
+            isSystem: true,
+            permissions: JSON.stringify({ windows: ALL_WINDOWS }),
+        },
+    })
+
+    const managerRole = await prisma.role.upsert({
+        where: { slug: 'MANAGER' },
+        update: {},
+        create: {
+            name: 'Encargado',
+            slug: 'MANAGER',
+            description: 'Encargado: control de stock y ventas.',
+            isSystem: true,
+            permissions: JSON.stringify({ windows: ALL_WINDOWS.filter((w) => !w.startsWith('/sistema')) }),
+        },
+    })
+
+    // Create Admin (asociado al rol OWNER)
     const admin = await prisma.user.upsert({
         where: { email: 'admin@sistema.com' },
-        update: { password: await bcrypt.hash('admin', 10) },
+        update: { password: await bcrypt.hash('admin', 10), roleId: ownerRole.id },
         create: {
             email: 'admin@sistema.com',
             name: 'Administrador',
             role: 'ADMIN',
+            roleId: ownerRole.id,
             password: await bcrypt.hash('admin', 10),
         },
     })
@@ -54,7 +100,11 @@ async function main() {
         },
     })
 
-    console.log('Seed completed:', { admin: admin.email, product: product.name })
+    console.log('Seed completed:', {
+        admin: admin.email,
+        roles: [ownerRole.slug, adminRole.slug, managerRole.slug],
+        product: product.name,
+    })
 }
 
 main()
