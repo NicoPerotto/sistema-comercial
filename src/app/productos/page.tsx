@@ -171,7 +171,11 @@ export default function ProductsPage() {
                     showToast(result.summary, 'success');
                     fetchData();
                 } else {
-                    showToast(result.error || 'Error al importar excel', 'error');
+                    let msg = result.error || result.summary || 'Error al importar excel';
+                    if (Array.isArray(result.details) && result.details.length) {
+                        msg += ' — ' + result.details.join(' | ');
+                    }
+                    showToast(msg, 'error');
                 }
             } catch (err) {
                 console.error('Error reading excel:', err);
