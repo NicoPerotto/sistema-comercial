@@ -9,10 +9,11 @@ export async function GET() {
         // 1. Create Admin
         const admin = await prisma.user.upsert({
             where: { email: 'admin@sistema.com' },
-            update: {},
+            update: { username: 'admin' },
             create: {
                 id: 'admin-id',
                 email: 'admin@sistema.com',
+                username: 'admin',
                 name: 'Administrador',
                 role: 'ADMIN',
                 password: await bcrypt.hash(DEFAULT_ADMIN_PASSWORD, 10),

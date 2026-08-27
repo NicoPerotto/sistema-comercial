@@ -59,12 +59,17 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, email, password, role } = body;
+        const { name, email, username, password, role } = body;
+
+        if (!username) {
+            return NextResponse.json({ error: 'El nombre de usuario es obligatorio' }, { status: 400 });
+        }
 
         const user = await prisma.user.create({
             data: {
                 name,
                 email,
+                username,
                 password: await bcrypt.hash(password, 10),
                 role: role || 'SELLER'
             }
@@ -79,11 +84,12 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { id, name, email, password, role } = body;
+        const { id, name, email, username, password, role } = body;
 
         const updateData: any = {
             name,
             email,
+            username,
             role
         };
 

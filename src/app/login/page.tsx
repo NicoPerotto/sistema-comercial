@@ -11,7 +11,7 @@ const Icon = ({ children, className = "w-5 h-5" }: { children: React.ReactNode, 
 );
 
 export default function LoginPage() {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -27,7 +27,7 @@ export default function LoginPage() {
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ username, password }),
             });
 
             const data = await res.json();
@@ -69,13 +69,13 @@ export default function LoginPage() {
                         )}
 
                         <div className="space-y-1">
-                            <label className="text-sm font-medium text-text-muted">Email</label>
+                            <label className="text-sm font-medium text-text-muted">Usuario</label>
                             <input
-                                type="email"
+                                type="text"
                                 required
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="admin@sistema.com"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="admin"
                                 className="w-full bg-surface-alt border border-border rounded-lg p-3 outline-none focus:ring-2 focus:ring-primary transition-all shadow-sm"
                             />
                         </div>

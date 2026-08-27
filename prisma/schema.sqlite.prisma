@@ -1,17 +1,13 @@
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL") // pooled (pgbouncer) — runtime en Vercel
-  directUrl = env("DIRECT_URL")   // directo (5432) — para prisma migrate
+  provider = "sqlite"
+  url      = env("DATABASE_URL") // local: file:./dev.db
 }
 
 generator client {
   provider      = "prisma-client-js"
   engineType    = "library"
-  binaryTargets = ["native", "rhel-openssl-3.0.x"] // build de Vercel (linux)
 }
 
-// SQLite doesn't support Enums natively, so we use String
-// Allowed values logic should be handled in application layer: ADMIN, MANAGER, SELLER, PREVENTISTA
 model User {
   id        String   @id @default(cuid())
   name      String
@@ -31,17 +27,13 @@ model User {
   weeklyClosures   WeeklyClosure[]
 }
 
-// Roles configurables en el módulo "Sistema". Cada rol define qué ventanas
-// del sidebar puede ver su usuario. `permissions` guarda JSON:
-//   { "windows": ["/", "/ventas/nueva", "/productos", ...] }
-// `isSystem` protege los roles base (ADMIN/MANAGER) de ser borrados.
 model Role {
   id          String   @id @default(cuid())
   name        String   @unique
-  slug        String   @unique // ADMIN, MANAGER, OWNER, VENDEDOR, ...
+  slug        String   @unique
   description String?
   isSystem    Boolean  @default(false)
-  permissions String   @default("{\"windows\":[]}") // JSON: { windows: string[] }
+  permissions String   @default("{\"windows\":[]}")
   users       User[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -89,8 +81,8 @@ model Product {
 model PaymentMethod {
   id               String            @id @default(cuid())
   name             String            @unique
-  percentage       Float             @default(0) // e.g., 10 for +10%, -5 for -5%
-  isArqueable      Boolean           @default(true) // If true, it is included in cash count/arqueo
+  percentage       Float             @default(0)
+  isArqueable      Boolean           @default(true)
   sales            Sale[]
   supplierPayments     SupplierPayment[]
   weeklyClosureDetails WeeklyClosureDetail[]
@@ -100,13 +92,13 @@ model PaymentMethod {
 
 model CashRegister {
   id               String            @id @default(cuid())
-  shortId          String            @unique // Alphanumeric 5 chars
+  shortId          String            @unique
   openingAmount    Decimal
   closingAmount    Decimal?
   expectedAmount   Decimal?
   difference       Decimal?
-  depositAmount    Decimal?          // Amount to be deposited in safe
-  status           String            @default("OPEN") // OPEN, CLOSED
+  depositAmount    Decimal?
+  status           String            @default("OPEN")
   openedById       String
   openedBy         User              @relation("OpenedBy", fields: [openedById], references: [id])
   closedById       String?
@@ -120,9 +112,9 @@ model CashRegister {
 model Sale {
   id              String         @id @default(cuid())
   total           Decimal
-  status          String         @default("COMPLETED") // PENDING, COMPLETED, CANCELLED
-  type            String         // "VENTA", "PRESUPUESTO", "VENTA_NO_REALIZADA"
-  auditLog        String?        // Store JSON analysis of additions and removals
+  status          String         @default("COMPLETED")
+  type            String
+  auditLog        String?
   paymentMethodId String?
   paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
   createdAt       DateTime       @default(now())
@@ -157,7 +149,7 @@ model Supplier {
 
 model SupplierPayment {
   id              String        @id @default(cuid())
-  shortId         String        @unique // Alphanumeric code similar to CashRegister
+  shortId         String        @unique
   amount          Decimal
   description     String?
   paidFromCash    Boolean       @default(false)
@@ -204,13 +196,12 @@ model WeeklyClosureDetail {
   difference       Decimal
 }
 
-// Configuración de branding del sistema (nombre + tema). Singleton.
 model SystemConfig {
   id              String   @id @default(cuid())
   brandName       String   @default("PPG Gestión Comercial")
   description     String   @default("Sistema avanzado de gestión comercial, stock y ventas")
   sidebarTitle    String   @default("PPG")
   sidebarSubtitle String   @default("Gestión Comercial")
-  theme           String   @default("warm-sand") // theme id from src/lib/themes.ts
+  theme           String   @default("warm-sand")
   updatedAt       DateTime @updatedAt
 }

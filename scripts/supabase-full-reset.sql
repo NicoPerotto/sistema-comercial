@@ -17,6 +17,7 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
     "role" TEXT NOT NULL DEFAULT 'SELLER',
     "roleId" TEXT,
@@ -209,6 +210,7 @@ CREATE TABLE "SystemConfig" (
 
 -- 3) Índices únicos
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 CREATE UNIQUE INDEX "Category_name_key" ON "Category"("name");
 CREATE UNIQUE INDEX "Product_barcode_key" ON "Product"("barcode");
 CREATE UNIQUE INDEX "PaymentMethod_name_key" ON "PaymentMethod"("name");
@@ -254,8 +256,8 @@ INSERT INTO "Role" ("id", "name", "slug", "description", "isSystem", "permission
    '{"windows":["/","/ventas/nueva","/caja","/pago-proveedores","/productos","/categorias","/proveedores","/metricas","/caja/semanal","/ventas","/pago-proveedores/historial","/caja/historial","/empleados","/configuracion/pagos"]}',
    NOW(), NOW());
 
-INSERT INTO "User" ("id", "name", "email", "password", "role", "roleId", "createdAt", "updatedAt") VALUES
-  ('user_admin', 'Administrador', 'admin@sistema.com',
+INSERT INTO "User" ("id", "name", "email", "username", "password", "role", "roleId", "createdAt", "updatedAt") VALUES
+  ('user_admin', 'Administrador', 'admin@sistema.com', 'admin',
    '$2a$10$2IB30gKqF4uAQ3g/t9kANuDKhCyJAFTBjuY6dVYlV3aAiR.EVHZsy',
    'ADMIN', 'role_owner', NOW(), NOW());
 

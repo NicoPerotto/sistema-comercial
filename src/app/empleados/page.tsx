@@ -33,6 +33,7 @@ export default function EmployeeControlPage() {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        username: '',
         password: '',
         role: 'SELLER'
     });
@@ -68,7 +69,7 @@ export default function EmployeeControlPage() {
             if (res.ok) {
                 setIsModalOpen(false);
                 setEditingEmployee(null);
-                setFormData({ name: '', email: '', password: '', role: 'SELLER' });
+                setFormData({ name: '', email: '', username: '', password: '', role: 'SELLER' });
                 fetchEmployees();
             }
         } catch (error) {
@@ -99,7 +100,7 @@ export default function EmployeeControlPage() {
                 <button
                     onClick={() => {
                         setEditingEmployee(null);
-                        setFormData({ name: '', email: '', password: '', role: 'SELLER' });
+                        setFormData({ name: '', email: '', username: '', password: '', role: 'SELLER' });
                         setIsModalOpen(true);
                     }}
                     className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-2xl font-black uppercase italic tracking-tighter transition-all shadow-xl shadow-primary/20 flex items-center gap-2 group"
@@ -169,6 +170,7 @@ export default function EmployeeControlPage() {
                                     setFormData({
                                         name: emp.name,
                                         email: (emp as any).email || '',
+                                        username: (emp as any).username || '',
                                         password: '',
                                         role: emp.role
                                     });
@@ -317,7 +319,19 @@ export default function EmployeeControlPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Email / Usuario</label>
+                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Usuario (login)</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.username}
+                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                    className="w-full bg-card/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+                                    placeholder="Ej: jperez"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Email</label>
                                 <input
                                     type="email"
                                     required

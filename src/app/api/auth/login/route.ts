@@ -5,11 +5,17 @@ import { signSession, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/session
 
 export async function POST(request: Request) {
     try {
-        const { email, password } = await request.json();
+        const body = await request.json();
+        const username = body.username || body.email;
+        const password = body.password;
 
-        // 1. Find user
+        if (!username) {
+            return NextResponse.json({ error: 'Usuario requerido' }, { status: 400 });
+        }
+
+        // 1. Find user by username (email también se acepta por compatibilidad)
         const user = await prisma.user.findUnique({
-            where: { email }
+            where: { username }
         });
 
         // 2. Verify password (hashed). Usuario o clave inválidos -> 401 genérico.

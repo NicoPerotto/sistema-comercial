@@ -55,9 +55,10 @@ async function main() {
     // Create Admin (asociado al rol OWNER)
     const admin = await prisma.user.upsert({
         where: { email: 'admin@sistema.com' },
-        update: { password: await bcrypt.hash('admin', 10), roleId: ownerRole.id },
+        update: { password: await bcrypt.hash('admin', 10), roleId: ownerRole.id, username: 'admin' },
         create: {
             email: 'admin@sistema.com',
+            username: 'admin',
             name: 'Administrador',
             role: 'ADMIN',
             roleId: ownerRole.id,
@@ -68,9 +69,10 @@ async function main() {
     // Create Preventista
     await prisma.user.upsert({
         where: { email: 'prev@sistema.com' },
-        update: { password: await bcrypt.hash('123', 10) },
+        update: { password: await bcrypt.hash('123', 10), username: 'juan' },
         create: {
             email: 'prev@sistema.com',
+            username: 'juan',
             name: 'Preventista Juan',
             role: 'PREVENTISTA',
             password: await bcrypt.hash('123', 10),

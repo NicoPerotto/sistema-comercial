@@ -23,7 +23,8 @@ INSERT INTO "_prisma_migrations" ("id", "checksum", "finished_at", "migration_na
 VALUES
   (gen_random_uuid(), '0001_init_registered', NOW(), '0001_init', 1),
   (gen_random_uuid(), '0002_add_role_model_registered', NOW(), '0002_add_role_model', 1),
-  (gen_random_uuid(), '0003_add_system_config_registered', NOW(), '0003_add_system_config', 1)
+  (gen_random_uuid(), '0003_add_system_config_registered', NOW(), '0003_add_system_config', 1),
+  (gen_random_uuid(), '0004_add_username_registered', NOW(), '0004_add_username', 1)
 ON CONFLICT ("id") DO NOTHING;
 
 -- ¡Listo! Vercel podrá correr `migrate deploy` sin tocar las tablas existentes.
