@@ -22,8 +22,9 @@ export async function POST(request: Request) {
         const productByName = new Map(allProducts.map(p => [p.name.toLowerCase(), p]));
 
         const results = { created: 0, updated: 0, errors: 0 };
+        const errorDetails: string[] = [];
 
-        // 2. Pre-crear categorías faltantes (fuera de la transacción principal para no bloquearla)
+        // 2. Pre-crear categorías faltantes (fuera de transacción para no bloquear)
         const missingCategories = new Set<string>();
         for (const item of products) {
             const raw = item.Categoría?.toString().trim() || item.Categoria?.toString().trim() || 'Sin Categoría';
@@ -35,76 +36,95 @@ export async function POST(request: Request) {
             categoryMap.set(catName.toLowerCase(), newCat.id);
         }
 
-        // 3. Procesar productos en una sola transacción para atomicidad y mejor rendimiento
-        await prisma.$transaction(async (tx) => {
-            for (const item of products) {
-                try {
-                    const name = (item.Nombre || '').toString().trim();
-                    const brand = (item.Marca || item.brand || '').toString().trim();
-                    const subcategory = (item.Subcategoría || item.Subcategoria || item.subcategory || '').toString().trim();
-                    const barcode = item.Código?.toString().trim() || item.Barcode?.toString().trim() || null;
-                    const categoryName = item.Categoría?.toString().trim() || item.Categoria?.toString().trim() || 'Sin Categoría';
-                    const price = parseFloat(item.Precio) || 0;
-                    const cost = item.Costo ? parseFloat(item.Costo) : 0;
-                    const stockQty = parseFloat(item.Stock) || 0;
-                    const hasIva = item['Tiene IVA']?.toString().toUpperCase() === 'SI' || !!item.hasIva;
-                    const margin = parseFloat(item['Margen %']) || parseFloat(item.margin) || 0;
+        // 3. Procesar productos UNO POR UNO (sin $transaction interactiva).
+        //    En Vercel + Postgres la transacción interactiva tiene timeout de 5s y
+        //    con muchos items lo supera (P2028). Hacerlo fuera de transacción es
+        //    más tolerante: si un item falla, el resto continúa.
+        for (const item of products) {
+            try {
+                const name = (item.Nombre || '').toString().trim();
+                const brand = (item.Marca || item.brand || '').toString().trim();
+                const subcategory = (item.Subcategoría || item.Subcategoria || item.subcategory || '').toString().trim();
+                const barcode = item.Código?.toString().trim() || item.Barcode?.toString().trim() || null;
+                const categoryName = item.Categoría?.toString().trim() || item.Categoria?.toString().trim() || 'Sin Categoría';
+                const price = parseFloat(item.Precio) || 0;
+                const cost = item.Costo ? parseFloat(item.Costo) : 0;
+                const stockQty = parseFloat(item.Stock) || 0;
+                const hasIva = item['Tiene IVA']?.toString().toUpperCase() === 'SI' || !!item.hasIva;
+                const margin = parseFloat(item['Margen %']) || parseFloat(item.margin) || 0;
 
-                    if (!name) { results.errors++; continue; }
-
-                    const categoryId = categoryMap.get(categoryName.toLowerCase()) ?? null;
-
-                    // Buscar en los índices en-memoria (sin queries adicionales)
-                    const existingProduct = (barcode && productByBarcode.get(barcode)) ||
-                        productByName.get(name.toLowerCase());
-
-                    if (existingProduct) {
-                        await (tx as any).product.update({
-                            where: { id: existingProduct.id },
-                            data: {
-                                ...(brand !== '' ? { brand } : {}),
-                                ...(subcategory !== '' ? { subcategory } : {}),
-                                price,
-                                cost,
-                                hasIva,
-                                margin,
-                                // El stock del Excel reemplaza el actual (no se suma)
-                                stock: stockQty,
-                                ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
-                            },
-                        });
-                        results.updated++;
-                    } else {
-                        await (tx as any).product.create({
-                            data: {
-                                name,
-                                brand,
-                                subcategory,
-                                barcode,
-                                price,
-                                cost,
-                                hasIva,
-                                margin,
-                                stock: stockQty,
-                                category: categoryId ? { connect: { id: categoryId } } : undefined
-                            },
-                        });
-                        results.created++;
-                    }
-                } catch (err) {
-                    console.error('Error procesando item:', item, err);
+                if (!name) {
                     results.errors++;
+                    errorDetails.push('Fila sin nombre (ignorada)');
+                    continue;
                 }
+
+                const categoryId = categoryMap.get(categoryName.toLowerCase()) ?? null;
+
+                // Buscar en los índices en-memoria (sin queries adicionales)
+                const existingProduct = (barcode && productByBarcode.get(barcode)) ||
+                    productByName.get(name.toLowerCase());
+
+                if (existingProduct) {
+                    await (prisma as any).product.update({
+                        where: { id: existingProduct.id },
+                        data: {
+                            ...(brand !== '' ? { brand } : {}),
+                            ...(subcategory !== '' ? { subcategory } : {}),
+                            price,
+                            cost,
+                            hasIva,
+                            margin,
+                            // El stock del Excel reemplaza el actual (no se suma)
+                            stock: stockQty,
+                            ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
+                        },
+                    });
+                    results.updated++;
+                } else {
+                    const created = await (prisma as any).product.create({
+                        data: {
+                            name,
+                            brand,
+                            subcategory,
+                            barcode,
+                            price,
+                            cost,
+                            hasIva,
+                            margin,
+                            stock: stockQty,
+                            category: categoryId ? { connect: { id: categoryId } } : undefined
+                        },
+                    });
+                    // Actualizar índice en memoria para evitar duplicados dentro del mismo lote
+                    if (created?.id) {
+                        productByName.set(name.toLowerCase(), { id: created.id, name, barcode, stock: stockQty } as any);
+                        if (barcode) productByBarcode.set(barcode, { id: created.id, name, barcode, stock: stockQty } as any);
+                    }
+                    results.created++;
+                }
+            } catch (err: any) {
+                results.errors++;
+                const label = (item?.Nombre || 'producto sin nombre')?.toString();
+                errorDetails.push(`${label}: ${err?.message || 'error desconocido'}`);
+                console.error('Error procesando item:', item, err);
             }
-        });
+        }
 
+        const summary = `Importación finalizada. Creados: ${results.created}, Actualizados: ${results.updated}, Errores: ${results.errors}`;
         return NextResponse.json({
-            success: true,
-            summary: `Importación finalizada. Creados: ${results.created}, Actualizados: ${results.updated}, Errores: ${results.errors}`
+            success: results.errors === 0,
+            summary,
+            details: errorDetails.slice(0, 10), // primeros 10 errores para no inundar
+            total: products.length
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error en bulk import API:', error);
-        return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+        // Mensaje de error real en lugar de genérico
+        return NextResponse.json({
+            error: `Error al importar: ${error?.message || 'Error interno del servidor'}`,
+            code: error?.code || null
+        }, { status: 500 });
     }
 }
