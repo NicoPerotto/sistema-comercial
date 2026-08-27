@@ -63,7 +63,8 @@ export async function POST(request: Request) {
                 supplier: { connect: { id: supplierId } },
                 paymentMethod: { connect: { id: paymentMethodId } },
                 user: { connect: { id: userId } },
-                cashRegister: finalRegisterId ? { connect: { id: finalRegisterId } } : undefined
+                cashRegister: finalRegisterId ? { connect: { id: finalRegisterId } } : undefined,
+                paidFromCash: isFinalPaidFromCash ? true : false
             },
             include: {
                 supplier: true,
@@ -71,12 +72,6 @@ export async function POST(request: Request) {
                 cashRegister: { select: { shortId: true } }
             }
         });
-
-        // Use Raw SQL for paidFromCash status
-        await prisma.$executeRawUnsafe(
-            `UPDATE SupplierPayment SET paidFromCash = ? WHERE id = ?`,
-            isFinalPaidFromCash ? 1 : 0, payment.id
-        );
 
         return NextResponse.json({ ...payment, paidFromCash: isFinalPaidFromCash });
     } catch (error: any) {

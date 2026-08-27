@@ -48,16 +48,11 @@ export async function POST(request: Request) {
                 barcode: barcode || null,
                 description: description || '',
                 cost: parsedCost,
-                // hasIva and margin are handled via executeRaw below due to locked prisma client
+                hasIva: useHasIva,
+                margin: parsedMargin,
                 sellByWeight: !!sellByWeight
             }
         });
-
-        // Workaround: Update fields directly in DB because Prisma Client is locked/stale
-        await prisma.$executeRawUnsafe(
-            `UPDATE Product SET hasIva = ?, margin = ? WHERE id = ?`,
-            useHasIva ? 1 : 0, parsedMargin, product.id
-        );
 
         return NextResponse.json(jsonSafe({ ...product, hasIva: useHasIva, margin: parsedMargin }));
     } catch (error: any) {
@@ -103,16 +98,11 @@ export async function PUT(request: Request) {
                 barcode: barcode || null,
                 description: description || '',
                 cost: parsedCost,
-                // hasIva and margin are updated via raw SQL below
+                hasIva: useHasIva,
+                margin: parsedMargin,
                 sellByWeight: !!sellByWeight
             }
         });
-
-        // Workaround for stale Prisma Client
-        await prisma.$executeRawUnsafe(
-            `UPDATE Product SET hasIva = ?, margin = ? WHERE id = ?`,
-            useHasIva ? 1 : 0, parsedMargin, id
-        );
 
         return NextResponse.json(jsonSafe({ ...product, hasIva: useHasIva, margin: parsedMargin }));
     } catch (error: any) {
