@@ -68,8 +68,8 @@ export async function POST(request: Request) {
                                 cost,
                                 hasIva,
                                 margin,
-                                // Convertimos el Decimal a número antes de sumar
-                                stock: Number(existingProduct.stock) + stockQty,
+                                // El stock del Excel reemplaza el actual (no se suma)
+                                stock: stockQty,
                                 ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
                             },
                         });

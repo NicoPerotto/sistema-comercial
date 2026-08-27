@@ -116,7 +116,6 @@ export default function ProductsPage() {
         const sorted = [...products].sort((a, b) => (a.id || '').localeCompare(b.id || ''));
 
         const exportData = sorted.map(p => ({
-            'ID': p.id,
             'Código de barras': p.barcode || '',
             'Nombre': p.name,
             'Marca': p.brand || '',
