@@ -112,12 +112,17 @@ export default function ProductsPage() {
         // Importación dinámica para reducir bundle size
         const XLSX = await import('xlsx');
 
-        const exportData = products.map(p => ({
+        // Ordenado por id ascendente para una exportación consistente
+        const sorted = [...products].sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+
+        const exportData = sorted.map(p => ({
+            'ID': p.id,
+            'Código de barras': p.barcode || '',
             'Nombre': p.name,
             'Marca': p.brand || '',
-            'Subcategoría': p.subcategory || '',
-            'Código': p.barcode || '',
             'Categoría': p.category?.name || 'Sin Categoría',
+            'Subcategoría': p.subcategory || '',
+            'Descripción': p.description || '',
             'Precio': p.price,
             'Costo': p.cost || 0,
             'Tiene IVA': p.hasIva ? 'SI' : 'NO',
