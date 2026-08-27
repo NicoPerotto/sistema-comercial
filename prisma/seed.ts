@@ -100,6 +100,20 @@ async function main() {
         },
     })
 
+    // Configuración de branding por defecto (singleton)
+    await prisma.systemConfig.upsert({
+        where: { id: 'singleton' },
+        update: {},
+        create: {
+            id: 'singleton',
+            brandName: 'PPG Gestión Comercial',
+            description: 'Sistema avanzado de gestión comercial, stock y ventas',
+            sidebarTitle: 'PPG',
+            sidebarSubtitle: 'Gestión Comercial',
+            theme: 'warm-sand',
+        },
+    })
+
     console.log('Seed completed:', {
         admin: admin.email,
         roles: [ownerRole.slug, adminRole.slug, managerRole.slug],

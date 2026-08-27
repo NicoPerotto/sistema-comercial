@@ -4,7 +4,7 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { ToastProvider } from "@/components/ToastProvider";
 import { AuthProvider } from "@/components/AuthProvider";
-import { SITE_CONFIG } from "@/config";
+import { getSiteConfig } from "@/lib/system-config";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const geistSans = Geist({
@@ -17,36 +17,43 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: `${SITE_CONFIG.title} - Sistema de Gestión`,
-  description: SITE_CONFIG.description,
-  manifest: "/manifest.json",
-  applicationName: "Sistema Comercial",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Comercial",
-  },
-};
-
 export const viewport: Viewport = {
   themeColor: "#0f172a",
 };
 
-export default function RootLayout({
+export async function generateMetadata(): Promise<Metadata> {
+  const config = await getSiteConfig();
+  return {
+    title: `${config.title} - Sistema de Gestión`,
+    description: config.description,
+    manifest: "/manifest.json",
+    applicationName: "Sistema Comercial",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "Comercial",
+    },
+  };
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const config = await getSiteConfig();
   return (
-    <html lang="es" className={`dark ${SITE_CONFIG.theme}`}>
+    <html lang="es" className={`dark theme-${config.theme}`}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
           <ToastProvider>
             <div className="flex min-h-screen bg-background text-foreground">
-              <Sidebar />
+              <Sidebar
+                brandTitle={config.sidebar.title}
+                brandSubtitle={config.sidebar.subtitle}
+              />
               <div className="flex-1 flex flex-col">
                 {children}
               </div>

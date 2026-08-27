@@ -2,7 +2,17 @@
  * Configuración global del Sistema Comercial.
  * Permite cambiar el título de la marca, los subtítulos y el tema visual desde un único lugar.
  */
-export const SITE_CONFIG = {
+export interface SiteConfig {
+  title: string;
+  description: string;
+  sidebar: {
+    title: string;
+    subtitle: string;
+  };
+  theme: string;
+}
+
+export const SITE_CONFIG: SiteConfig = {
   // Título principal en las pestañas del navegador
   title: "PPG Gestión Comercial",
   // Descripción general del sistema
@@ -15,21 +25,10 @@ export const SITE_CONFIG = {
   },
 
   // ── Selección del Tema Activo ──
-  // ─── TEMAS OSCUROS ────────────────────────────────────────────────
-  // - 'theme-indigo'          → Azul Indigo corporativo
-  // - 'theme-emerald'         → Verde Esmeralda (alimentos/eco)
-  // - 'theme-violet'          → Violeta Moderno (boutiques/tecnología)
-  // - 'theme-amber'           → Naranja/Ámbar (comidas/panaderías)
-  // - 'theme-rose'            → Crimson Rose (moda/estética/chic)
-  // - 'theme-cyber'           → Midnight Cyber (futurista/cyberlime)
-  // - 'theme-gold'            → Golden Luxury (lujo/joyerías/chocolaterías)
-  // ─── TEMAS CLAROS ─────────────────────────────────────────────────
-  // - 'theme-nordic-light'    → Nordic Light (minimalista/limpio/claro)
-  // - 'theme-corporate-white' → Corporate White (azul clásico/oficinas)
-  // - 'theme-warm-sand'       → Warm Sand (orgánico/panaderías/cálido claro)
-  // - 'theme-mint-fresh'      → Mint Fresh (salud/farmacias/bienestar)
-  // - 'theme-lavender-soft'   → Lavender Soft (spa/belleza/relajación)
-  // - 'theme-rose-light'      → Rose Light (florerías/confiterías/femenino)
-  // - 'theme-forest-light'    → Forest Light (jardinería/viveros/natural)
-  theme: "theme-warm-sand" as const,
+  // El valor es el ID del tema (sin prefijo). El className aplicado es `theme-${theme}`.
+  // Catálogo completo en src/lib/themes.ts
+  //   TEMAS OSCUROS: indigo, emerald, violet, amber, rose, cyber, gold
+  //   TEMAS CLAROS: nordic-light, corporate-white, warm-sand, mint-fresh,
+  //                 lavender-soft, rose-light, forest-light
+  theme: "warm-sand" as const,
 };

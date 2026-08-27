@@ -78,7 +78,13 @@ const NAV: NavDef[] = [
     { href: '/sistema/roles', label: 'Gestor de Roles', Icon: ShieldCheck, section: 'Sistema' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({
+    brandTitle,
+    brandSubtitle,
+}: {
+    brandTitle?: string;
+    brandSubtitle?: string;
+}) {
     const pathname = usePathname();
     const { user, logout } = useAuth();
 
@@ -120,8 +126,8 @@ export default function Sidebar() {
                         <Zap className="w-5 h-5" />
                     </div>
                     <div>
-                        <h2 className="text-lg font-black tracking-tight text-foreground leading-none">{SITE_CONFIG.sidebar.title}</h2>
-                        <p className="text-[9px] font-bold text-primary/70 uppercase tracking-[0.15em] mt-0.5">{SITE_CONFIG.sidebar.subtitle}</p>
+                        <h2 className="text-lg font-black tracking-tight text-foreground leading-none">{brandTitle || SITE_CONFIG.sidebar.title}</h2>
+                        <p className="text-[9px] font-bold text-primary/70 uppercase tracking-[0.15em] mt-0.5">{brandSubtitle || SITE_CONFIG.sidebar.subtitle}</p>
                     </div>
                 </div>
             </div>

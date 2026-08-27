@@ -202,3 +202,14 @@ model WeeklyClosureDetail {
   realAmount       Decimal
   difference       Decimal
 }
+
+// Configuración de branding del sistema (nombre + tema). Singleton.
+model SystemConfig {
+  id              String   @id @default(cuid())
+  brandName       String   @default("PPG Gestión Comercial")
+  description     String   @default("Sistema avanzado de gestión comercial, stock y ventas")
+  sidebarTitle    String   @default("PPG")
+  sidebarSubtitle String   @default("Gestión Comercial")
+  theme           String   @default("warm-sand") // theme id from src/lib/themes.ts
+  updatedAt       DateTime @updatedAt
+}
