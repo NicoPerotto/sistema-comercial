@@ -1,7 +1,7 @@
 /**
  * Catálogo de temas visuales disponibles para el sistema.
  * Cada tema es una clase CSS que define las variables de color.
- * Usado por el selector de tema en /sistema/configuracion.
+ * Usado por el selector de tema en /sistema/apariencia.
  */
 export interface AppTheme {
   id: string;

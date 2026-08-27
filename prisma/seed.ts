@@ -9,7 +9,7 @@ const ALL_WINDOWS = [
   '/productos', '/categorias', '/proveedores',
   '/metricas', '/caja/semanal', '/ventas', '/pago-proveedores/historial',
   '/caja/historial', '/empleados', '/configuracion/pagos',
-  '/sistema', '/sistema/roles',
+  '/sistema/apariencia', '/sistema/roles',
 ]
 
 async function main() {

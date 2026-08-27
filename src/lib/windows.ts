@@ -6,7 +6,7 @@
 export interface AppWindow {
   path: string;
   label: string;
-  section: 'Inicio' | 'Operaciones' | 'Catálogo' | 'Administración' | 'Sistema';
+  section: 'Inicio' | 'Operaciones' | 'Catálogo' | 'Administración' | 'Apariencia';
   /** Solo visible para ADMIN siempre (no se puede quitar). */
   adminOnly?: boolean;
 }
@@ -34,9 +34,9 @@ export const APP_WINDOWS: AppWindow[] = [
   { path: '/empleados', label: 'Empleados', section: 'Administración' },
   { path: '/configuracion/pagos', label: 'Métodos de Pago', section: 'Administración' },
 
-  // Sistema (solo ADMIN siempre)
-  { path: '/sistema', label: 'Sistema', section: 'Sistema', adminOnly: true },
-  { path: '/sistema/roles', label: 'Gestor de Roles', section: 'Sistema', adminOnly: true },
+  // Apariencia (solo ADMIN siempre)
+  { path: '/sistema/apariencia', label: 'Apariencia', section: 'Apariencia', adminOnly: true },
+  { path: '/sistema/roles', label: 'Gestor de Roles', section: 'Apariencia', adminOnly: true },
 ];
 
 /** Vistas base que todo rol (aun el más restrictivo) debería tener. */

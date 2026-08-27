@@ -8,7 +8,7 @@ import { SITE_CONFIG } from '@/config';
 import {
     LayoutGrid, Package, Tag, ShoppingCart, ClipboardList,
     Wallet, CreditCard, Users, BarChart3, Zap, LogOut, Archive, Truck, LucideIcon,
-    Calendar, ShieldCheck
+    Calendar, ShieldCheck, Palette
 } from 'lucide-react';
 
 
@@ -52,7 +52,7 @@ interface NavDef {
     href: string;
     label: string;
     Icon: LucideIcon;
-    section: 'Inicio' | 'Operaciones' | 'Catálogo' | 'Administración' | 'Sistema';
+    section: 'Inicio' | 'Operaciones' | 'Catálogo' | 'Administración' | 'Apariencia';
 }
 
 const NAV: NavDef[] = [
@@ -74,8 +74,8 @@ const NAV: NavDef[] = [
     { href: '/empleados', label: 'Empleados', Icon: Users, section: 'Administración' },
     { href: '/configuracion/pagos', label: 'Métodos de Pago', Icon: CreditCard, section: 'Administración' },
 
-    { href: '/sistema', label: 'Sistema', Icon: ShieldCheck, section: 'Sistema' },
-    { href: '/sistema/roles', label: 'Gestor de Roles', Icon: ShieldCheck, section: 'Sistema' },
+    { href: '/sistema/apariencia', label: 'Apariencia', Icon: Palette, section: 'Apariencia' },
+    { href: '/sistema/roles', label: 'Gestor de Roles', Icon: ShieldCheck, section: 'Apariencia' },
 ];
 
 export default function Sidebar({
@@ -112,7 +112,7 @@ export default function Sidebar({
     const visible = NAV.filter((item) => isAdmin || allowed.has(item.href));
 
     // Agrupa por sección preservando el orden de aparición
-    const sectionsOrder: NavDef['section'][] = ['Inicio', 'Operaciones', 'Catálogo', 'Administración', 'Sistema'];
+    const sectionsOrder: NavDef['section'][] = ['Inicio', 'Operaciones', 'Catálogo', 'Administración', 'Apariencia'];
     const sections = sectionsOrder
         .map((sec) => ({ section: sec, items: visible.filter((i) => i.section === sec) }))
         .filter((g) => g.items.length > 0);
