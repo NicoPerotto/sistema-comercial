@@ -45,7 +45,13 @@ export async function POST(request: Request) {
                 const name = (item.Nombre || '').toString().trim();
                 const brand = (item.Marca || item.brand || '').toString().trim();
                 const subcategory = (item.Subcategoría || item.Subcategoria || item.subcategory || '').toString().trim();
-                const barcode = item.Código?.toString().trim() || item.Barcode?.toString().trim() || null;
+                const barcode = item['Código de barras']?.toString().trim()
+                    || item['Codigo de barras']?.toString().trim()
+                    || item.Código?.toString().trim()
+                    || item.Codigo?.toString().trim()
+                    || item.Barcode?.toString().trim()
+                    || item.barcode?.toString().trim()
+                    || null;
                 const categoryName = item.Categoría?.toString().trim() || item.Categoria?.toString().trim() || 'Sin Categoría';
                 const price = parseFloat(item.Precio) || 0;
                 const cost = item.Costo ? parseFloat(item.Costo) : 0;
@@ -71,6 +77,7 @@ export async function POST(request: Request) {
                         data: {
                             ...(brand !== '' ? { brand } : {}),
                             ...(subcategory !== '' ? { subcategory } : {}),
+                            ...(barcode ? { barcode } : {}),
                             price,
                             cost,
                             hasIva,

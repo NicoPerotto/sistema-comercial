@@ -45,6 +45,7 @@ export default function ProductsPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
+    const [importing, setImporting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -158,6 +159,7 @@ export default function ProductsPage() {
                 }
 
                 setLoading(true);
+                setImporting(true);
                 const res = await fetch('/api/products/bulk', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -176,6 +178,7 @@ export default function ProductsPage() {
                 showToast('Error al leer el archivo Excel', 'error');
             } finally {
                 setLoading(false);
+                setImporting(false);
                 if (fileInputRef.current) fileInputRef.current.value = '';
             }
         };
@@ -307,9 +310,9 @@ export default function ProductsPage() {
                             <Icon name="Download" className="w-5 h-5 text-success-dark" />
                             <span className="hidden sm:inline">Exportar</span>
                         </button>
-                        <button onClick={() => fileInputRef.current?.click()} className="btn-secondary" title="Importar desde Excel">
+                        <button onClick={() => fileInputRef.current?.click()} className="btn-secondary" title="Importar desde Excel" disabled={importing}>
                             <Icon name="Upload" className="w-5 h-5 text-blue-600" />
-                            <span className="hidden sm:inline">Importar</span>
+                            <span className="hidden sm:inline">{importing ? 'Procesando...' : 'Importar'}</span>
                         </button>
                     </div>
 
@@ -319,6 +322,13 @@ export default function ProductsPage() {
                     </button>
                 </div>
             </header>
+
+            {importing && (
+                <div className="mb-4 flex items-center justify-center gap-3 rounded-xl bg-blue-50 border border-blue-200 px-4 py-3 text-blue-700">
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-blue-400 border-t-transparent"></span>
+                    <span className="font-medium">Procesando importación de productos, por favor esperá...</span>
+                </div>
+            )}
 
             <div className="card-premium p-0 flex-1 flex flex-col min-h-0 overflow-hidden">
                 <div className="overflow-x-auto flex-1">
