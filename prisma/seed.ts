@@ -23,7 +23,7 @@ async function main() {
             name: 'Owner',
             slug: 'OWNER',
             description: 'Dueño del sistema: acceso total a todas las ventanas y configuración.',
-            isSystem: true,
+            isSystem: false,
             permissions: JSON.stringify({ windows: ALL_WINDOWS }),
         },
     })
@@ -46,8 +46,8 @@ async function main() {
         create: {
             name: 'Encargado',
             slug: 'MANAGER',
-            description: 'Encargado: control de stock y ventas.',
-            isSystem: true,
+            description: 'Encargado: control de stock y ventanas.',
+            isSystem: false,
             permissions: JSON.stringify({ windows: ALL_WINDOWS.filter((w) => !w.startsWith('/sistema')) }),
         },
     })

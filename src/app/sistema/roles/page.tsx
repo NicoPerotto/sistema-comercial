@@ -281,8 +281,9 @@ export default function RolesManagerPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {items.map((w) => {
                             const checked = form.windows.includes(w.path);
-                            const disabled = w.adminOnly && !editing?.isSystem;
-                            const isChecked = checked || (w.adminOnly && editing?.isSystem);
+                            const isBaseRole = !!editing && ['ADMIN', 'OWNER', 'MANAGER'].includes(editing.slug);
+                            const disabled = w.adminOnly && !isBaseRole;
+                            const isChecked = checked || (w.adminOnly && isBaseRole);
                             return (
                               <label
                                 key={w.path}
