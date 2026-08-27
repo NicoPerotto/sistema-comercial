@@ -59,10 +59,23 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, email, username, password, role } = body;
+        const { name, email, username, password, role, roleId } = body;
 
         if (!username) {
             return NextResponse.json({ error: 'El nombre de usuario es obligatorio' }, { status: 400 });
+        }
+
+        // Si se asigna un rol de la tabla Role, usar su slug como role y guardar roleId
+        let resolvedRole = role || 'VENDEDOR';
+        let resolvedRoleId: string | null = roleId || null;
+        if (roleId) {
+            const found = await prisma.role.findUnique({ where: { id: roleId } });
+            if (found) {
+                resolvedRole = found.slug;
+                resolvedRoleId = found.id;
+            } else {
+                resolvedRoleId = null;
+            }
         }
 
         const user = await prisma.user.create({
@@ -71,7 +84,8 @@ export async function POST(request: Request) {
                 email,
                 username,
                 password: await bcrypt.hash(password, 10),
-                role: role || 'SELLER'
+                role: resolvedRole,
+                roleId: resolvedRoleId
             }
         });
 
@@ -84,7 +98,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { id, name, email, username, password, role } = body;
+        const { id, name, email, username, password, role, roleId } = body;
 
         const updateData: any = {
             name,
@@ -92,6 +106,18 @@ export async function PUT(request: Request) {
             username,
             role
         };
+
+        if (roleId) {
+            const found = await prisma.role.findUnique({ where: { id: roleId } });
+            if (found) {
+                updateData.role = found.slug;
+                updateData.roleId = found.id;
+            } else {
+                updateData.roleId = null;
+            }
+        } else if (roleId === '' || roleId === null) {
+            updateData.roleId = null;
+        }
 
         if (password) {
             updateData.password = await bcrypt.hash(password, 10);

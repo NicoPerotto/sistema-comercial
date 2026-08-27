@@ -52,6 +52,31 @@ async function main() {
         },
     })
 
+    // Roles operativos (editables, isSystem=true para no borrarlos por error)
+    const ventasWindows = ['/', '/ventas/nueva', '/productos'];
+    const vendedorRole = await prisma.role.upsert({
+        where: { slug: 'VENDEDOR' },
+        update: {},
+        create: {
+            name: 'Vendedor',
+            slug: 'VENDEDOR',
+            description: 'Personal de ventas en mostrador.',
+            isSystem: true,
+            permissions: JSON.stringify({ windows: ventasWindows }),
+        },
+    })
+    const cajeroRole = await prisma.role.upsert({
+        where: { slug: 'CAJERO' },
+        update: {},
+        create: {
+            name: 'Cajero',
+            slug: 'CAJERO',
+            description: 'Manejo de caja diaria.',
+            isSystem: true,
+            permissions: JSON.stringify({ windows: ['/', '/caja', '/ventas/nueva', '/productos'] }),
+        },
+    })
+
     // Create Admin (asociado al rol OWNER)
     const admin = await prisma.user.upsert({
         where: { email: 'admin@sistema.com' },

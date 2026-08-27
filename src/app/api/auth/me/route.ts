@@ -37,6 +37,16 @@ export async function GET(request: Request) {
                 } catch {
                     allowedWindows = [];
                 }
+            } else if (dbUser) {
+                // Fallback para empleados legacy sin roleRef asignado
+                if (dbUser.role === 'MANAGER') {
+                    allowedWindows = ADMIN_WINDOWS.filter((w) => !w.startsWith('/sistema'));
+                } else if (dbUser.role === 'PREVENTISTA') {
+                    allowedWindows = ['/', '/ventas/nueva', '/productos'];
+                } else {
+                    // SELLER / CAJERO / otros: operaciones básicas
+                    allowedWindows = ['/', '/ventas/nueva', '/caja', '/productos'];
+                }
             }
         }
 

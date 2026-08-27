@@ -35,12 +35,25 @@ export default function EmployeeControlPage() {
         email: '',
         username: '',
         password: '',
-        role: 'SELLER'
+        role: 'VENDEDOR',
+        roleId: ''
     });
+    const [roles, setRoles] = useState<{ id: string; name: string; slug: string; isSystem: boolean }[]>([]);
 
     useEffect(() => {
         fetchEmployees();
+        fetchRoles();
     }, []);
+
+    const fetchRoles = async () => {
+        try {
+            const res = await fetch('/api/roles');
+            const data = await res.json();
+            if (res.ok) setRoles(data);
+        } catch (error) {
+            console.error('Error fetching roles:', error);
+        }
+    };
 
     const fetchEmployees = async () => {
         try {
@@ -69,7 +82,7 @@ export default function EmployeeControlPage() {
             if (res.ok) {
                 setIsModalOpen(false);
                 setEditingEmployee(null);
-                setFormData({ name: '', email: '', username: '', password: '', role: 'SELLER' });
+                setFormData({ name: '', email: '', username: '', password: '', role: 'VENDEDOR', roleId: '' });
                 fetchEmployees();
             }
         } catch (error) {
@@ -100,7 +113,7 @@ export default function EmployeeControlPage() {
                 <button
                     onClick={() => {
                         setEditingEmployee(null);
-                        setFormData({ name: '', email: '', username: '', password: '', role: 'SELLER' });
+                        setFormData({ name: '', email: '', username: '', password: '', role: 'VENDEDOR', roleId: '' });
                         setIsModalOpen(true);
                     }}
                     className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-2xl font-black uppercase italic tracking-tighter transition-all shadow-xl shadow-primary/20 flex items-center gap-2 group"
@@ -172,7 +185,8 @@ export default function EmployeeControlPage() {
                                         email: (emp as any).email || '',
                                         username: (emp as any).username || '',
                                         password: '',
-                                        role: emp.role
+                                        role: emp.role,
+                                        roleId: (emp as any).roleId || ''
                                     });
                                     setIsModalOpen(true);
                                 }}
@@ -357,20 +371,23 @@ export default function EmployeeControlPage() {
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Rol del Sistema</label>
                                 <div className="grid grid-cols-2 gap-3">
-                                    {['ADMIN', 'MANAGER', 'SELLER', 'PREVENTISTA'].map((role) => (
+                                    {roles.map((r) => (
                                         <button
-                                            key={role}
+                                            key={r.id}
                                             type="button"
-                                            onClick={() => setFormData({ ...formData, role })}
-                                            className={`p-4 rounded-2xl border font-black text-[10px] uppercase tracking-tighter transition-all ${formData.role === role
+                                            onClick={() => setFormData({ ...formData, roleId: r.id, role: r.slug })}
+                                            className={`p-4 rounded-2xl border font-black text-[10px] uppercase tracking-tighter transition-all ${formData.roleId === r.id
                                                     ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
                                                     : 'bg-card/50 text-zinc-400 border-border hover:border-primary/50'
                                                 }`}
                                         >
-                                            {role}
+                                            {r.name}
                                         </button>
                                     ))}
                                 </div>
+                                {roles.length === 0 && (
+                                    <p className="text-[11px] text-zinc-400">Cargando roles…</p>
+                                )}
                             </div>
 
                             <div className="pt-4 flex gap-4">
