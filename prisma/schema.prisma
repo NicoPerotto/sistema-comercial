@@ -41,6 +41,7 @@ model Role {
   slug        String   @unique // ADMIN, MANAGER, OWNER, VENDEDOR, ...
   description String?
   isSystem    Boolean  @default(false)
+  showInEmployees Boolean @default(false)
   permissions String   @default("{\"windows\":[]}") // JSON: { windows: string[] }
   users       User[]
   createdAt   DateTime @default(now())

@@ -31,12 +31,14 @@ export const APP_WINDOWS: AppWindow[] = [
   { path: '/ventas', label: 'Historial de Ventas', section: 'Administración' },
   { path: '/pago-proveedores/historial', label: 'Historial de Pagos', section: 'Administración' },
   { path: '/caja/historial', label: 'Historial de Caja', section: 'Administración' },
-  { path: '/empleados', label: 'Empleados', section: 'Administración' },
+  { path: '/empleados', label: 'Vendedores', section: 'Administración' },
   { path: '/configuracion/pagos', label: 'Métodos de Pago', section: 'Administración' },
 
-  // Apariencia (solo ADMIN siempre)
-  { path: '/sistema/apariencia', label: 'Apariencia', section: 'Apariencia', adminOnly: true },
-  { path: '/sistema/roles', label: 'Gestor de Roles', section: 'Apariencia', adminOnly: true },
+  // Sistema
+  { path: '/sistema/usuarios', label: 'Usuarios', section: 'Sistema' },
+  { path: '/sistema/perfil', label: 'Mi Perfil', section: 'Sistema' },
+  { path: '/sistema/apariencia', label: 'Apariencia', section: 'Sistema', adminOnly: true },
+  { path: '/sistema/roles', label: 'Gestor de Roles', section: 'Sistema', adminOnly: true },
 ];
 
 /** Vistas base que todo rol (aun el más restrictivo) debería tener. */

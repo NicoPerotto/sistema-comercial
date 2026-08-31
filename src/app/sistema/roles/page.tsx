@@ -31,7 +31,7 @@ export default function RolesManagerPage() {
   const [loadingRoles, setLoadingRoles] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<Role | null>(null);
-  const [form, setForm] = useState({ name: '', slug: '', description: '', windows: [] as string[] });
+  const [form, setForm] = useState({ name: '', slug: '', description: '', windows: [] as string[], showInEmployees: false });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,7 +61,7 @@ export default function RolesManagerPage() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: '', slug: '', description: '', windows: [] });
+    setForm({ name: '', slug: '', description: '', windows: [], showInEmployees: false });
     setError(null);
     setIsModalOpen(true);
   };
@@ -73,6 +73,7 @@ export default function RolesManagerPage() {
       slug: role.slug,
       description: role.description || '',
       windows: [...role.permissions.windows],
+      showInEmployees: !!role.showInEmployees,
     });
     setError(null);
     setIsModalOpen(true);
@@ -181,6 +182,9 @@ export default function RolesManagerPage() {
                 )}
               </div>
               <p className="text-sm text-text-muted mb-4 min-h-[20px]">{role.description || 'Sin descripción'}</p>
+              {role.showInEmployees && (
+                <span className="inline-block text-[9px] font-black uppercase bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full mb-3">Visible en Vendedores</span>
+              )}
               <div className="flex items-center justify-between">
                 <p className="text-[10px] font-bold text-zinc-400 uppercase">
                   {role.permissions.windows.length} ventana(s) · {role.userCount} usuario(s)
@@ -266,6 +270,19 @@ export default function RolesManagerPage() {
                   placeholder="Ej: Personal de ventas en mostrador"
                 />
               </div>
+
+              <label className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-border bg-card/30 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="accent-primary w-4 h-4"
+                  checked={form.showInEmployees}
+                  onChange={(e) => setForm({ ...form, showInEmployees: e.target.checked })}
+                />
+                <div>
+                  <p className="text-sm font-bold text-foreground">Mostrar en Vendedores</p>
+                  <p className="text-[10px] text-text-muted">Si está activo, este rol aparece en la pantalla de Vendedores (para comparar desempeño).</p>
+                </div>
+              </label>
 
               <div className="space-y-3">
                 <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">

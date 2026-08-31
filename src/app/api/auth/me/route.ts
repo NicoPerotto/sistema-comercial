@@ -23,13 +23,15 @@ export async function GET(request: Request) {
 
         // Resolver ventanas permitidas según el rol del usuario
         let allowedWindows: string[] = [];
-        if (user.role === 'ADMIN') {
-            allowedWindows = ADMIN_WINDOWS;
-        } else if (user.id) {
+        const isAdminByString = user.role === 'ADMIN';
+        let isAdminByRole = false;
+
+        if (user.id) {
             const dbUser = await prisma.user.findUnique({
                 where: { id: user.id },
                 include: { roleRef: true },
             });
+            isAdminByRole = dbUser?.roleRef?.slug === 'ADMIN';
             if (dbUser?.roleRef) {
                 try {
                     const perms = JSON.parse(dbUser.roleRef.permissions);
@@ -37,17 +39,17 @@ export async function GET(request: Request) {
                 } catch {
                     allowedWindows = [];
                 }
-            } else if (dbUser) {
-                // Fallback para empleados legacy sin roleRef asignado
-                if (dbUser.role === 'MANAGER') {
-                    allowedWindows = ADMIN_WINDOWS.filter((w) => !w.startsWith('/sistema'));
-                } else if (dbUser.role === 'PREVENTISTA') {
-                    allowedWindows = ['/', '/ventas/nueva', '/productos'];
-                } else {
-                    // SELLER / CAJERO / otros: operaciones básicas
-                    allowedWindows = ['/', '/ventas/nueva', '/caja', '/productos'];
-                }
             }
+        }
+
+        const isAdmin = isAdminByString || isAdminByRole;
+        if (isAdmin) {
+            allowedWindows = ADMIN_WINDOWS;
+        }
+
+        // Sin roleRef asignado (y no es admin por string) => no ve ninguna ventana (se lo saca del sistema).
+        if (!isAdmin && allowedWindows.length === 0) {
+            return NextResponse.json({ user: null }, { status: 401 });
         }
 
         return NextResponse.json({

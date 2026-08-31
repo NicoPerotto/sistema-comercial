@@ -12,6 +12,7 @@ interface Employee {
     id: string;
     name: string;
     role: string;
+    showInEmployees?: boolean;
     stats: {
         totalRevenue: number;
         completedCount: number;
@@ -28,32 +29,10 @@ export default function EmployeeControlPage() {
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        username: '',
-        password: '',
-        role: 'VENDEDOR',
-        roleId: ''
-    });
-    const [roles, setRoles] = useState<{ id: string; name: string; slug: string; isSystem: boolean }[]>([]);
 
     useEffect(() => {
         fetchEmployees();
-        fetchRoles();
     }, []);
-
-    const fetchRoles = async () => {
-        try {
-            const res = await fetch('/api/roles');
-            const data = await res.json();
-            if (res.ok) setRoles(data);
-        } catch (error) {
-            console.error('Error fetching roles:', error);
-        }
-    };
 
     const fetchEmployees = async () => {
         try {
@@ -67,62 +46,13 @@ export default function EmployeeControlPage() {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            const method = editingEmployee ? 'PUT' : 'POST';
-            const body = editingEmployee ? { ...formData, id: editingEmployee.id } : formData;
-
-            const res = await fetch('/api/employees', {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-
-            if (res.ok) {
-                setIsModalOpen(false);
-                setEditingEmployee(null);
-                setFormData({ name: '', email: '', username: '', password: '', role: 'VENDEDOR', roleId: '' });
-                fetchEmployees();
-            }
-        } catch (error) {
-            console.error('Error saving employee:', error);
-        }
-    };
-
-    const handleDelete = async (id: string) => {
-        if (!confirm('¿Estás seguro de que deseas eliminar este empleado?')) return;
-        try {
-            const res = await fetch(`/api/employees?id=${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                if (selectedEmployee?.id === id) setSelectedEmployee(null);
-                fetchEmployees();
-            }
-        } catch (error) {
-            console.error('Error deleting employee:', error);
-        }
-    };
-
     return (
         <main className="flex-1 flex flex-col p-6 lg:p-10 space-y-8 overflow-hidden text-foreground relative">
             <header className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight text-primary">Control de Empleados</h1>
-                    <p className="text-foreground/60 font-medium">Monitoreo de turnos, recaudación y desempeño auditado</p>
+                    <h1 className="text-4xl font-black tracking-tight text-primary">Vendedores</h1>
+                    <p className="text-foreground/60 font-medium">Monitoreo de turnos, recaudación y desempeño</p>
                 </div>
-                <button
-                    onClick={() => {
-                        setEditingEmployee(null);
-                        setFormData({ name: '', email: '', username: '', password: '', role: 'VENDEDOR', roleId: '' });
-                        setIsModalOpen(true);
-                    }}
-                    className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-2xl font-black uppercase italic tracking-tighter transition-all shadow-xl shadow-primary/20 flex items-center gap-2 group"
-                >
-                    <Icon className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
-                    </Icon>
-                    Nuevo Empleado
-                </button>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -130,12 +60,11 @@ export default function EmployeeControlPage() {
                     Array(3).fill(0).map((_, i) => (
                         <div key={i} className="glass p-6 rounded-3xl animate-pulse h-64 bg-primary/5"></div>
                     ))
-                ) : employees.map((emp) => (
-                    <div key={emp.id} className="relative group">
+                ) : employees.filter((e) => e.showInEmployees).map((emp) => (
+                    <div key={emp.id} className="relative">
                         <button
                             onClick={() => setSelectedEmployee(emp)}
-                            className={`w-full glass p-8 rounded-3xl border text-left transition-all relative overflow-hidden h-full ${selectedEmployee?.id === emp.id ? 'border-primary ring-2 ring-primary/20 bg-primary/5' : 'border-border hover:border-primary/50'
-                                }`}
+                            className="w-full glass p-8 rounded-3xl border border-border hover:border-primary/50 text-left transition-all relative overflow-hidden h-full"
                         >
                             <div className="flex justify-between items-start mb-6">
                                 <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-primary/20">
@@ -173,39 +102,12 @@ export default function EmployeeControlPage() {
                                 </div>
                             )}
                         </button>
-
-                        {/* Action Buttons on Hover */}
-                        <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingEmployee(emp);
-                                    setFormData({
-                                        name: emp.name,
-                                        email: (emp as any).email || '',
-                                        username: (emp as any).username || '',
-                                        password: '',
-                                        role: emp.role,
-                                        roleId: (emp as any).roleId || ''
-                                    });
-                                    setIsModalOpen(true);
-                                }}
-                                className="p-2 bg-card/80 hover:bg-card rounded-xl shadow-lg border border-border text-primary transition-all"
-                            >
-                                <Icon className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></Icon>
-                            </button>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDelete(emp.id);
-                                }}
-                                className="p-2 bg-red-50 hover:bg-danger-subtle rounded-xl shadow-lg border border-red-200 text-danger transition-all"
-                            >
-                                <Icon className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></Icon>
-                            </button>
-                        </div>
                     </div>
                 ))}
+
+                {!loading && employees.filter((e) => e.showInEmployees).length === 0 && (
+                    <p className="text-text-muted col-span-full">Ningún vendedor marcado como visible. Activá &quot;Mostrar en Vendedores&quot; en el rol correspondiente (Gestor de Roles).</p>
+                )}
             </div>
 
             {selectedEmployee && (
@@ -295,117 +197,6 @@ export default function EmployeeControlPage() {
                             </div>
                             <p className="text-[10px] font-bold text-zinc-400 uppercase mt-2">Porcentaje de ventas concretadas vs canceladas</p>
                         </section>
-                    </div>
-                </div>
-            )}
-
-            {/* Modal for Create/Edit */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="glass w-full max-w-lg rounded-3xl p-8 border border-white/20 shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
-                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary to-primary-dark"></div>
-
-                        <header className="flex justify-between items-center mb-8">
-                            <div>
-                                <h2 className="text-3xl font-black text-primary uppercase italic tracking-tighter">
-                                    {editingEmployee ? 'Editar Empleado' : 'Nuevo Empleado'}
-                                </h2>
-                                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
-                                    {editingEmployee ? 'Modificar credenciales y rol' : 'Registrar nuevo miembro del equipo'}
-                                </p>
-                            </div>
-                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-zinc-100 rounded-xl transition-all">
-                                <Icon><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></Icon>
-                            </button>
-                        </header>
-
-                        <form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto pr-2">
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Nombre Completo</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full bg-card/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                    placeholder="Ej: Juan Pérez"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Usuario (login)</label>
-                                <input
-                                    type="text"
-                                    required
-                                    value={formData.username}
-                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                    className="w-full bg-card/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                    placeholder="Ej: jperez"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Email</label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full bg-card/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                    placeholder="juan@sistema.com"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Contraseña {editingEmployee && '(dejar en blanco para no cambiar)'}</label>
-                                <input
-                                    type="password"
-                                    required={!editingEmployee}
-                                    value={formData.password}
-                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full bg-card/50 border border-border rounded-2xl p-4 font-bold text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
-                                    placeholder="••••••••"
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">Rol del Sistema</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    {roles.map((r) => (
-                                        <button
-                                            key={r.id}
-                                            type="button"
-                                            onClick={() => setFormData({ ...formData, roleId: r.id, role: r.slug })}
-                                            className={`p-4 rounded-2xl border font-black text-[10px] uppercase tracking-tighter transition-all ${formData.roleId === r.id
-                                                    ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
-                                                    : 'bg-card/50 text-zinc-400 border-border hover:border-primary/50'
-                                                }`}
-                                        >
-                                            {r.name}
-                                        </button>
-                                    ))}
-                                </div>
-                                {roles.length === 0 && (
-                                    <p className="text-[11px] text-zinc-400">Cargando roles…</p>
-                                )}
-                            </div>
-
-                            <div className="pt-4 flex gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 p-4 rounded-2xl font-black uppercase text-[12px] tracking-widest text-zinc-400 hover:bg-zinc-100 transition-all border border-border"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="flex-[2] bg-primary text-white p-4 rounded-2xl font-black uppercase italic text-[12px] tracking-widest shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                                >
-                                    {editingEmployee ? 'Guardar Cambios' : 'Registrar Empleado'}
-                                </button>
-                            </div>
-                        </form>
                     </div>
                 </div>
             )}

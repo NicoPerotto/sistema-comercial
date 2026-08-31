@@ -33,6 +33,7 @@ model Role {
   slug        String   @unique
   description String?
   isSystem    Boolean  @default(false)
+  showInEmployees Boolean @default(false)
   permissions String   @default("{\"windows\":[]}")
   users       User[]
   createdAt   DateTime @default(now())

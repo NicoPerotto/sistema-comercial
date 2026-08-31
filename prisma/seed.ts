@@ -9,7 +9,7 @@ const ALL_WINDOWS = [
   '/productos', '/categorias', '/proveedores',
   '/metricas', '/caja/semanal', '/ventas', '/pago-proveedores/historial',
   '/caja/historial', '/empleados', '/configuracion/pagos',
-  '/sistema/apariencia', '/sistema/roles',
+  '/sistema/usuarios', '/sistema/perfil', '/sistema/apariencia', '/sistema/roles',
 ]
 
 async function main() {
@@ -52,55 +52,44 @@ async function main() {
         },
     })
 
-    // Roles operativos (editables, isSystem=true para no borrarlos por error)
+    // Roles operativos (editables, isSystem=false salvo ADMIN)
     const ventasWindows = ['/', '/ventas/nueva', '/productos'];
     const vendedorRole = await prisma.role.upsert({
         where: { slug: 'VENDEDOR' },
-        update: {},
+        update: { showInEmployees: true },
         create: {
             name: 'Vendedor',
             slug: 'VENDEDOR',
             description: 'Personal de ventas en mostrador.',
-            isSystem: true,
+            isSystem: false,
+            showInEmployees: true,
             permissions: JSON.stringify({ windows: ventasWindows }),
         },
     })
     const cajeroRole = await prisma.role.upsert({
         where: { slug: 'CAJERO' },
-        update: {},
+        update: { showInEmployees: true },
         create: {
             name: 'Cajero',
             slug: 'CAJERO',
             description: 'Manejo de caja diaria.',
-            isSystem: true,
+            isSystem: false,
+            showInEmployees: true,
             permissions: JSON.stringify({ windows: ['/', '/caja', '/ventas/nueva', '/productos'] }),
         },
     })
 
-    // Create Admin (asociado al rol OWNER)
+    // Create Admin (vinculado al rol ADMIN real)
     const admin = await prisma.user.upsert({
         where: { email: 'admin@sistema.com' },
-        update: { password: await bcrypt.hash('admin', 10), roleId: ownerRole.id, username: 'admin' },
+        update: { password: await bcrypt.hash('admin', 10), roleId: adminRole.id, role: 'ADMIN', username: 'admin' },
         create: {
             email: 'admin@sistema.com',
             username: 'admin',
             name: 'Administrador',
             role: 'ADMIN',
-            roleId: ownerRole.id,
+            roleId: adminRole.id,
             password: await bcrypt.hash('admin', 10),
-        },
-    })
-
-    // Create Preventista
-    await prisma.user.upsert({
-        where: { email: 'prev@sistema.com' },
-        update: { password: await bcrypt.hash('123', 10), username: 'juan' },
-        create: {
-            email: 'prev@sistema.com',
-            username: 'juan',
-            name: 'Preventista Juan',
-            role: 'PREVENTISTA',
-            password: await bcrypt.hash('123', 10),
         },
     })
 

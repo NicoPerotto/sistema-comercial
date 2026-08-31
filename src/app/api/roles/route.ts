@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
       slug: r.slug,
       description: r.description,
       isSystem: r.isSystem,
+      showInEmployees: r.showInEmployees,
       userCount: r._count.users,
       permissions: parsePermissions(r.permissions),
     }));
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { name, slug, description, windows } = body;
+    const { name, slug, description, windows, showInEmployees } = body;
 
     if (!name || !slug) {
       return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 });
@@ -67,6 +68,7 @@ export async function POST(req: NextRequest) {
         name: String(name),
         slug: String(slug).toUpperCase(),
         description: description ? String(description) : null,
+        showInEmployees: Boolean(showInEmployees),
         permissions: JSON.stringify({ windows: cleanWindows }),
       },
     });
@@ -86,7 +88,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { id, name, slug, description, windows } = body;
+    const { id, name, slug, description, windows, showInEmployees } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'ID requerido' }, { status: 400 });
@@ -109,6 +111,7 @@ export async function PUT(req: NextRequest) {
         name: name ?? existing.name,
         slug: slug ? String(slug).toUpperCase() : existing.slug,
         description: description !== undefined ? (description ? String(description) : null) : existing.description,
+        showInEmployees: showInEmployees !== undefined ? Boolean(showInEmployees) : existing.showInEmployees,
         permissions: JSON.stringify({ windows: cleanWindows }),
       },
     });

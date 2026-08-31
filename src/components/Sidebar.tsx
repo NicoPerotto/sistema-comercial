@@ -8,7 +8,7 @@ import { SITE_CONFIG } from '@/config';
 import {
     LayoutGrid, Package, Tag, ShoppingCart, ClipboardList,
     Wallet, CreditCard, Users, BarChart3, Zap, LogOut, Archive, Truck, LucideIcon,
-    Calendar, ShieldCheck, Palette
+    Calendar, ShieldCheck, Palette, UserCircle
 } from 'lucide-react';
 
 
@@ -52,7 +52,7 @@ interface NavDef {
     href: string;
     label: string;
     Icon: LucideIcon;
-    section: 'Inicio' | 'Operaciones' | 'Catálogo' | 'Administración' | 'Apariencia';
+    section: 'Inicio' | 'Operaciones' | 'Catálogo' | 'Administración' | 'Sistema';
 }
 
 const NAV: NavDef[] = [
@@ -71,11 +71,13 @@ const NAV: NavDef[] = [
     { href: '/ventas', label: 'Historial de Ventas', Icon: ClipboardList, section: 'Administración' },
     { href: '/pago-proveedores/historial', label: 'Historial de Pagos', Icon: Archive, section: 'Administración' },
     { href: '/caja/historial', label: 'Historial de Caja', Icon: Archive, section: 'Administración' },
-    { href: '/empleados', label: 'Empleados', Icon: Users, section: 'Administración' },
+    { href: '/empleados', label: 'Vendedores', Icon: Users, section: 'Administración' },
     { href: '/configuracion/pagos', label: 'Métodos de Pago', Icon: CreditCard, section: 'Administración' },
 
-    { href: '/sistema/apariencia', label: 'Apariencia', Icon: Palette, section: 'Apariencia' },
-    { href: '/sistema/roles', label: 'Gestor de Roles', Icon: ShieldCheck, section: 'Apariencia' },
+    { href: '/sistema/usuarios', label: 'Usuarios', Icon: Users, section: 'Sistema' },
+    { href: '/sistema/perfil', label: 'Mi Perfil', Icon: UserCircle, section: 'Sistema' },
+    { href: '/sistema/apariencia', label: 'Apariencia', Icon: Palette, section: 'Sistema' },
+    { href: '/sistema/roles', label: 'Gestor de Roles', Icon: ShieldCheck, section: 'Sistema' },
 ];
 
 export default function Sidebar({
@@ -112,7 +114,7 @@ export default function Sidebar({
     const visible = NAV.filter((item) => isAdmin || allowed.has(item.href));
 
     // Agrupa por sección preservando el orden de aparición
-    const sectionsOrder: NavDef['section'][] = ['Inicio', 'Operaciones', 'Catálogo', 'Administración', 'Apariencia'];
+    const sectionsOrder: NavDef['section'][] = ['Inicio', 'Operaciones', 'Catálogo', 'Administración', 'Sistema'];
     const sections = sectionsOrder
         .map((sec) => ({ section: sec, items: visible.filter((i) => i.section === sec) }))
         .filter((g) => g.items.length > 0);

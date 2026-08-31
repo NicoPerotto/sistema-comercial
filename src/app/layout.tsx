@@ -7,6 +7,10 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { getSiteConfig } from "@/lib/system-config";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
+// El branding (nombre + tema) se lee de la DB en cada request.
+// Sin esto, next start cachea el HTML y los cambios de Apariencia no se ven hasta reiniciar.
+export const dynamic = 'force-dynamic';
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
