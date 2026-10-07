@@ -464,6 +464,28 @@ export default function POSPage() {
         return matchesSearch && matchesCategory && hasStock;
     });
 
+    // Pistola de código de barras: el scanner escribe el código y termina con Enter.
+    // Si hay match exacto de barcode (o un único resultado filtrado), se suma al carrito.
+    const handleSearchEnter = (rawValue: string) => {
+        const term = rawValue.trim();
+        if (!term) return;
+        const lower = term.toLowerCase();
+        const candidates = products.filter(p => {
+            const matchesSearch = `${p.brand ? `${p.brand} - ` : ''}${p.name}`.toLowerCase().includes(lower) || (p.barcode && p.barcode.includes(term));
+            const matchesCategory = selectedCategory ? p.categoryId === selectedCategory : true;
+            return matchesSearch && matchesCategory && p.stock > 0;
+        });
+        const exactBarcode = candidates.find(p => p.barcode === term);
+        const target = exactBarcode ?? (candidates.length === 1 ? candidates[0] : null);
+        if (!target) return; // sin match único: se deja el texto para corrección manual
+        handleAddToCart(target as Product, 1);
+        setSearch('');
+        // Si abrió el modal de peso, el foco va a ese input (autoFocus); si no, vuelve al buscador.
+        requestAnimationFrame(() => {
+            if (!target.sellByWeight) searchInputRef.current?.focus();
+        });
+    };
+
     // --- CAJA CERRADA: pantalla de bloqueo ---
     if (registerOpen === false) {
         return (
@@ -537,6 +559,9 @@ export default function POSPage() {
                             className="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg outline-none focus:ring-2 focus:ring-primary"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleSearchEnter(e.currentTarget.value);
+                            }}
                         />
                     </div>
                 </header>
