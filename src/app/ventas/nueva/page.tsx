@@ -103,6 +103,7 @@ export default function POSPage() {
     const { showToast } = useToast();
     const router = useRouter();
     const { user } = useAuth();
+    const canConfigurePrice = user?.role === 'ADMIN' || (user?.windows ?? []).includes('/productos');
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [cart, setCart] = useState<CartItem[]>([]);
@@ -162,6 +163,7 @@ export default function POSPage() {
 
     const handleOpenQuickEdit = (e: React.MouseEvent, product: any) => {
         e.stopPropagation();
+        if (!canConfigurePrice) return;
         setQuickEditModal({ isOpen: true, product });
         setQuickEditData({
             cost: product.cost ? product.cost.toString() : '',
@@ -606,13 +608,15 @@ export default function POSPage() {
                                         <div className="mb-4">
                                             <div className="flex justify-between items-start">
                                                 <p className="text-[10px] text-text-muted font-bold uppercase">{p.category?.name || 'Sin categoría'}</p>
-                                                <button
-                                                    onClick={(e) => handleOpenQuickEdit(e, p)}
-                                                    className="p-1 text-text-muted hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
-                                                    title="Configurar Precio"
-                                                >
-                                                    <Icon name="Edit" className="w-4 h-4" />
-                                                </button>
+                                                {canConfigurePrice && (
+                                                    <button
+                                                        onClick={(e) => handleOpenQuickEdit(e, p)}
+                                                        className="p-1 text-text-muted hover:text-primary transition-colors opacity-0 group-hover:opacity-100"
+                                                        title="Configurar Precio"
+                                                    >
+                                                        <Icon name="Edit" className="w-4 h-4" />
+                                                    </button>
+                                                )}
                                             </div>
                                             <h3 className="font-bold text-sm line-clamp-2">{p.brand ? `${p.brand} - ${p.name}` : p.name}</h3>
                                         </div>
