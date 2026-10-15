@@ -86,6 +86,7 @@ CREATE TABLE "PaymentMethod" (
     "name" TEXT NOT NULL,
     "percentage" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "isArqueable" BOOLEAN NOT NULL DEFAULT true,
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

@@ -92,6 +92,7 @@ model PaymentMethod {
   name             String            @unique
   percentage       Float             @default(0) // e.g., 10 for +10%, -5 for -5%
   isArqueable      Boolean           @default(true) // If true, it is included in cash count/arqueo
+  isDefault        Boolean           @default(false) // Método preseleccionado en venta nueva (solo uno)
   sales            Sale[]
   supplierPayments     SupplierPayment[]
   weeklyClosureDetails WeeklyClosureDetail[]

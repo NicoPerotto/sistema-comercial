@@ -23,6 +23,7 @@ interface PaymentMethod {
     name: string;
     percentage: number;
     isArqueable: boolean;
+    isDefault?: boolean;
 }
 
 export default function PaymentMethodsPage() {
@@ -32,7 +33,7 @@ export default function PaymentMethodsPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [formData, setFormData] = useState({ name: '', percentage: '', isArqueable: true });
+    const [formData, setFormData] = useState({ name: '', percentage: '', isArqueable: true, isDefault: false });
 
     const fetchMethods = async () => {
         setLoading(true);
@@ -83,6 +84,28 @@ export default function PaymentMethodsPage() {
             if (res.ok) {
                 showToast('Método eliminado', 'success');
                 fetchMethods();
+            } else {
+                const err = await res.json();
+                showToast(err.error || 'Error al eliminar', 'error');
+            }
+        } catch (error) {
+            showToast('Error de conexión', 'error');
+        }
+    };
+
+    const setAsDefault = async (m: PaymentMethod) => {
+        try {
+            const res = await fetch('/api/payment-methods', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: m.id, name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable, isDefault: true }),
+            });
+            if (res.ok) {
+                showToast(`"${m.name}" es ahora el método por defecto`, 'success');
+                fetchMethods();
+            } else {
+                const err = await res.json();
+                showToast(err.error || 'Error al guardar', 'error');
             }
         } catch (error) {
             showToast('Error de conexión', 'error');
@@ -99,7 +122,7 @@ export default function PaymentMethodsPage() {
                 <button
                     onClick={() => {
                         setEditingId(null);
-                        setFormData({ name: '', percentage: '0', isArqueable: true });
+                        setFormData({ name: '', percentage: '0', isArqueable: true, isDefault: methods.length === 0 });
                         setIsModalOpen(true);
                     }}
                     className="btn-primary"
@@ -116,6 +139,7 @@ export default function PaymentMethodsPage() {
                             <th className="table-header pl-6">Nombre</th>
                             <th className="table-header">Tipo</th>
                             <th className="table-header">Modificador (%)</th>
+                            <th className="table-header">Por defecto</th>
                             <th className="table-header text-right pr-6">Acciones</th>
                         </tr>
                     </thead>
@@ -123,12 +147,19 @@ export default function PaymentMethodsPage() {
                         {loading ? (
                             Array(3).fill(0).map((_, i) => (
                                 <tr key={i} className="animate-pulse">
-                                    <td colSpan={4} className="px-6 py-4"><div className="h-6 bg-surface rounded w-full"></div></td>
+                                    <td colSpan={5} className="px-6 py-4"><div className="h-6 bg-surface rounded w-full"></div></td>
                                 </tr>
                             ))
                         ) : methods.map(m => (
                             <tr key={m.id} className="table-row">
-                                <td className="px-6 py-4 font-medium">{m.name}</td>
+                                <td className="px-6 py-4 font-medium">
+                                    {m.name}
+                                    {m.isDefault && (
+                                        <span className="ml-2 text-[10px] font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">
+                                            POR DEFECTO
+                                        </span>
+                                    )}
+                                </td>
                                 <td className="px-6 py-4">
                                     <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${m.isArqueable ? 'bg-warning-light text-amber-700' : 'bg-surface text-text-muted'}`}>
                                         {m.isArqueable ? 'ARQUEABLE' : 'DIGITAL'}
@@ -139,9 +170,24 @@ export default function PaymentMethodsPage() {
                                         {m.percentage > 0 ? `+${m.percentage}%` : m.percentage < 0 ? `${m.percentage}%` : '0%'}
                                     </span>
                                 </td>
+                                <td className="px-6 py-4">
+                                    {m.isDefault ? (
+                                        <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-primary text-white">
+                                            ✓ DEFAULT
+                                        </span>
+                                    ) : (
+                                        <button
+                                            onClick={() => setAsDefault(m)}
+                                            className="text-[11px] font-bold text-text-muted hover:text-primary border border-border rounded-full px-3 py-1 transition-colors"
+                                            title="Marcar como método por defecto"
+                                        >
+                                            Marcar
+                                        </button>
+                                    )}
+                                </td>
                                 <td className="px-6 py-4 text-right pr-6">
                                     <div className="flex justify-end gap-2">
-                                        <button onClick={() => { setEditingId(m.id); setFormData({ name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable }); setIsModalOpen(true); }} className="p-2 text-text-muted hover:text-primary transition-colors">
+                                        <button onClick={() => { setEditingId(m.id); setFormData({ name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable, isDefault: !!m.isDefault }); setIsModalOpen(true); }} className="p-2 text-text-muted hover:text-primary transition-colors">
                                             <Icon name="Edit" />
                                         </button>
                                         <button onClick={() => deleteMethod(m.id)} className="p-2 text-text-muted hover:text-danger transition-colors">
@@ -179,6 +225,15 @@ export default function PaymentMethodsPage() {
                                     {formData.isArqueable && <Icon name="Check" className="w-3 h-3" />}
                                 </div>
                                 <span className="text-sm font-medium">Método Arqueable (Efectivo)</span>
+                            </div>
+                            <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-lg cursor-pointer" onClick={() => setFormData({ ...formData, isDefault: !formData.isDefault })}>
+                                <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.isDefault ? 'bg-primary border-primary text-white' : 'border-border bg-card'}`}>
+                                    {formData.isDefault && <Icon name="Check" className="w-3 h-3" />}
+                                </div>
+                                <div>
+                                    <span className="text-sm font-bold">Método por defecto</span>
+                                    <p className="text-xs text-text-muted">Se preselecciona en una venta nueva. Solo puede haber uno.</p>
+                                </div>
                             </div>
                             <div className="flex gap-3 pt-4">
                                 <button type="button" onClick={() => setIsModalOpen(false)} className="btn-secondary flex-1">CANCELAR</button>

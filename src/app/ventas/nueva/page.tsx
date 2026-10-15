@@ -283,7 +283,10 @@ export default function POSPage() {
             setCategories(categoriesData);
             setPaymentMethods(pmData);
 
-            if (pmData.length > 0) setSelectedPaymentMethod(pmData[0].id);
+            if (pmData.length > 0) {
+                const defaultPM = pmData.find((m: any) => m.isDefault) ?? pmData[0];
+                setSelectedPaymentMethod(defaultPM.id);
+            }
         } catch (err) {
             setError('No se pudo cargar el catálogo de productos o métodos de pago');
         } finally {

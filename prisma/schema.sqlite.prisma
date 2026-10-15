@@ -84,6 +84,7 @@ model PaymentMethod {
   name             String            @unique
   percentage       Float             @default(0)
   isArqueable      Boolean           @default(true)
+  isDefault        Boolean           @default(false)
   sales            Sale[]
   supplierPayments     SupplierPayment[]
   weeklyClosureDetails WeeklyClosureDetail[]
