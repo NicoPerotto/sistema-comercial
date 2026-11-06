@@ -13,8 +13,17 @@ import {
     Container, Popcorn, Candy, CupSoda, Wine, Beer, SprayCan, Scroll, Brush,
     PawPrint, Bone, Shirt, Gift, Stethoscope, Hammer, Smartphone, Pizza,
     IceCream, Cake, Zap, Lightbulb, Home, Search, Trash2, Pencil, Plus, Minus,
-    ArrowLeft, ChevronLeft, ChevronRight, X, AlertTriangle, Delete
+    ArrowLeft, ChevronLeft, ChevronRight, X, AlertTriangle, Delete,
+    HandCoins, UserPlus, Check
 } from 'lucide-react';
+
+const money = (value: any) => {
+    const n = Number(value) || 0;
+    return `$${n.toLocaleString('es-AR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+    })}`;
+};
 
 const AVAILABLE_ICONS: Record<string, any> = {
     Package,
@@ -69,6 +78,9 @@ const AVAILABLE_ICONS: Record<string, any> = {
     X,
     AlertTriangle,
     Delete,
+    HandCoins,
+    UserPlus,
+    Check,
 };
 
 const Icon = ({ name, className = "w-5 h-5", fallback = Package }: { name: string, className?: string, fallback?: any }) => {
@@ -119,6 +131,14 @@ export default function POSPage() {
     const [registerOpen, setRegisterOpen] = useState<boolean | null>(null);
     const [showExitWarning, setShowExitWarning] = useState(false);
 
+    // Cuenta corriente / deudores
+    const [creditCustomers, setCreditCustomers] = useState<any[]>([]);
+    const [selectedCreditCustomer, setSelectedCreditCustomer] = useState<any | null>(null);
+    const [isCreditModalOpen, setIsCreditModalOpen] = useState(false);
+    const [creditSearch, setCreditSearch] = useState('');
+    // Aviso de límite de crédito excedido antes de confirmar la venta.
+    const [limitWarning, setLimitWarning] = useState<any | null>(null);
+
     // Weight Modal state
     const [weightModal, setWeightModal] = useState<{ isOpen: boolean; product: Product | null; isRemoving: boolean }>({
         isOpen: false,
@@ -157,6 +177,7 @@ export default function POSPage() {
     useEffect(() => {
         checkRegisterStatus();
         fetchData();
+        fetchCreditCustomers();
         const savedCart = localStorage.getItem('active_cart');
         if (savedCart) setCart(JSON.parse(savedCart));
     }, []);
@@ -207,6 +228,18 @@ export default function POSPage() {
         }
     };
 
+
+    const fetchCreditCustomers = async () => {
+        try {
+            const res = await fetch('/api/credit-customers?active=1', { cache: 'no-store' });
+            if (res.ok) {
+                const data = await res.json();
+                setCreditCustomers(Array.isArray(data) ? data : []);
+            }
+        } catch {
+            // Si falla, el POS sigue funcionando; solo no se podrá vender a cuenta.
+        }
+    };
 
     const checkRegisterStatus = async () => {
         try {
@@ -380,12 +413,38 @@ export default function POSPage() {
     };
 
     const activePM = paymentMethods.find(pm => pm.id === selectedPaymentMethod);
+    const isCreditPayment = !!activePM?.isCredit;
     const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const surcharge = activePM ? (subtotal * (activePM.percentage / 100)) : 0;
     const total = subtotal + surcharge;
 
-    const finalizarVenta = async (type: string = 'VENTA') => {
+    // Límite de crédito del cliente seleccionado (si tiene).
+    const creditLimit =
+        selectedCreditCustomer?.creditLimit === null ||
+        selectedCreditCustomer?.creditLimit === undefined
+            ? null
+            : Number(selectedCreditCustomer.creditLimit);
+    const creditDebt = Number(selectedCreditCustomer?.balance || 0);
+    const creditAvailable = creditLimit === null ? null : creditLimit - creditDebt;
+    const creditAlreadyOver = creditLimit !== null && creditDebt > creditLimit + 0.01;
+    const creditWillExceed =
+        creditLimit !== null && creditDebt + total > creditLimit + 0.01;
+
+    const finalizarVenta = async (
+        type: string = 'VENTA',
+        creditCustomerOverride?: any | null,
+        confirmOverLimit: boolean = false
+    ) => {
         if (cart.length === 0) return;
+
+        const customerForSale = creditCustomerOverride ?? selectedCreditCustomer;
+
+        // Si el método es cuenta corriente, no se puede cobrar sin cliente.
+        if (type === 'VENTA' && isCreditPayment && !customerForSale) {
+            setIsCreditModalOpen(true);
+            return;
+        }
+
         setProcessing(true);
 
         const saleData = {
@@ -396,6 +455,9 @@ export default function POSPage() {
                 price: item.price
             })),
             paymentMethodId: selectedPaymentMethod,
+            creditCustomerId:
+                type === 'VENTA' && isCreditPayment ? customerForSale?.id ?? null : null,
+            confirmOverLimit,
             total: total,
             type: type,
             auditLog: auditLog
@@ -411,17 +473,32 @@ export default function POSPage() {
             const result = await res.json();
             if (res.ok) {
                 showToast(type === 'VENTA' ? 'Venta registrada con éxito' : 'Operación cancelada y registrada', 'success');
+                // Aviso posventa: esta venta dejó al cliente por encima del límite.
+                if (result.credit?.exceeded) {
+                    showToast(
+                        `Atención: ${customerForSale?.name || 'el cliente'} quedó excedido por ${money(Math.abs(Number(result.credit.available || 0)))} sobre su límite de ${money(result.credit.limit)}.`,
+                        'warning'
+                    );
+                }
                 setCart([]);
                 setAuditLog([]);
+                setSelectedCreditCustomer(null);
                 localStorage.removeItem('active_cart');
                 setSearch('');
                 setSelectedCategory(null);
                 fetchData();
+                fetchCreditCustomers();
             } else if (result.error === 'CAJA_CERRADA') {
                 showToast('La caja está cerrada. Abrí el turno antes de vender.', 'error');
                 setRegisterOpen(false);
+            } else if (result.error === 'CREDIT_LIMIT_EXCEEDED') {
+                // El cliente ya estaba excedido: pedir confirmación explícita.
+                setLimitWarning({ ...result, customer: customerForSale });
+            } else if (result.error === 'CREDIT_CUSTOMER_REQUIRED' || result.error === 'CREDIT_CUSTOMER_NOT_FOUND') {
+                showToast(result.message || 'Seleccioná un cliente para la venta a cuenta.', 'error');
+                setIsCreditModalOpen(true);
             } else {
-                showToast('Error: ' + result.error, 'error');
+                showToast('Error: ' + (result.message || result.error), 'error');
             }
         } catch (err) {
             // Sin red: encolar la venta para enviarla al reconectar.
@@ -430,6 +507,7 @@ export default function POSPage() {
                 showToast(`Sin conexión: venta guardada localmente (${queued.id.slice(0, 8)}). Se enviará al reconectar.`, 'error');
                 setCart([]);
                 setAuditLog([]);
+                setSelectedCreditCustomer(null);
                 localStorage.removeItem('active_cart');
                 await refreshPending();
             } catch {
@@ -439,6 +517,24 @@ export default function POSPage() {
             setProcessing(false);
         }
     };
+
+    const handleCobrar = () => {
+        if (isCreditPayment && !selectedCreditCustomer) {
+            setIsCreditModalOpen(true);
+            return;
+        }
+        finalizarVenta('VENTA');
+    };
+
+    const filteredCreditCustomers = creditCustomers.filter((customer) => {
+        const term = creditSearch.trim().toLowerCase();
+        if (!term) return true;
+        return (
+            customer.name?.toLowerCase().includes(term) ||
+            customer.dni?.toLowerCase().includes(term) ||
+            customer.phone?.toLowerCase().includes(term)
+        );
+    });
 
     const [pendingCount, setPendingCount] = useState(0);
     const refreshPending = async () => {
@@ -784,8 +880,75 @@ export default function POSPage() {
                 <div className="p-6 bg-surface-alt border-t border-border space-y-4 shrink-0">
                     <button onClick={() => setIsPaymentModalOpen(true)} className="w-full h-12 flex items-center justify-between px-4 bg-card border border-border rounded-lg hover:border-primary group transition-all">
                         <span className="text-sm font-medium">{activePM?.name || 'Método de Pago'}</span>
-                        <Icon name="ChevronRight" className="w-4 h-4 text-text-muted group-hover:text-primary" />
+                        <span className="flex items-center gap-2">
+                            {isCreditPayment && (
+                                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-danger-subtle text-danger-dark uppercase tracking-tighter">
+                                    A cuenta
+                                </span>
+                            )}
+                            <Icon name="ChevronRight" className="w-4 h-4 text-text-muted group-hover:text-primary" />
+                        </span>
                     </button>
+
+                    {isCreditPayment && (
+                        <button
+                            onClick={() => setIsCreditModalOpen(true)}
+                            className={`w-full h-11 flex items-center justify-between px-4 rounded-lg border text-left transition-all ${
+                                selectedCreditCustomer
+                                    ? 'bg-primary/5 border-primary/40 text-primary'
+                                    : 'bg-card border-dashed border-danger/40 text-danger-dark hover:border-danger'
+                            }`}
+                        >
+                            <span className="flex items-center gap-2 min-w-0">
+                                <Icon name="UserPlus" className="w-4 h-4 flex-shrink-0" />
+                                <span className="text-xs font-bold truncate">
+                                    {selectedCreditCustomer
+                                        ? selectedCreditCustomer.name
+                                        : 'Seleccionar cliente a cuenta'}
+                                </span>
+                            </span>
+                            <Icon name="ChevronRight" className="w-4 h-4 flex-shrink-0" />
+                        </button>
+                    )}
+
+                    {isCreditPayment && selectedCreditCustomer && creditLimit !== null && (
+                        <div
+                            className={`rounded-lg border p-3 text-[11px] space-y-1 ${
+                                creditAlreadyOver
+                                    ? 'bg-danger-subtle/50 border-danger/30 text-danger-dark'
+                                    : creditWillExceed
+                                      ? 'bg-warning-light/40 border-warning/30 text-amber-800'
+                                      : 'bg-surface border-border text-text-muted'
+                            }`}
+                        >
+                            <div className="flex justify-between gap-3">
+                                <span>Deuda actual</span>
+                                <strong>{money(creditDebt)}</strong>
+                            </div>
+                            <div className="flex justify-between gap-3">
+                                <span>Límite</span>
+                                <strong>{money(creditLimit)}</strong>
+                            </div>
+                            <div className="flex justify-between gap-3">
+                                <span>Disponible</span>
+                                <strong className={creditAvailable !== null && creditAvailable < -0.01 ? 'text-danger-dark' : ''}>
+                                    {money(creditAvailable)}
+                                </strong>
+                            </div>
+                            {creditAlreadyOver && (
+                                <p className="font-bold flex items-start gap-1 pt-1">
+                                    <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                    El cliente ya está excedido. Se pedirá confirmación.
+                                </p>
+                            )}
+                            {!creditAlreadyOver && creditWillExceed && (
+                                <p className="font-bold flex items-start gap-1 pt-1">
+                                    <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                    Esta venta supera el límite por {money(creditDebt + total - creditLimit)}.
+                                </p>
+                            )}
+                        </div>
+                    )}
 
                     <div className="flex justify-between items-center text-2xl font-bold">
                         <span>Total</span>
@@ -793,7 +956,7 @@ export default function POSPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <button onClick={() => finalizarVenta('VENTA')} disabled={cart.length === 0 || processing} className="btn-primary w-full py-3 h-14 text-lg">
+                        <button onClick={handleCobrar} disabled={cart.length === 0 || processing} className="btn-primary w-full py-3 h-14 text-lg">
                             {processing ? 'Procesando...' : 'COBRAR'}
                         </button>
                         <button onClick={() => confirm('¿Cancelar venta?') && finalizarVenta('VENTA_NO_REALIZADA')} disabled={cart.length === 0 || processing} className="w-full text-xs font-bold text-text-muted hover:text-danger py-2 uppercase tracking-widest">
@@ -814,14 +977,172 @@ export default function POSPage() {
                             {paymentMethods.map(pm => (
                                 <button
                                     key={pm.id}
-                                    onClick={() => { setSelectedPaymentMethod(pm.id); setIsPaymentModalOpen(false); }}
+                                    onClick={() => {
+                                        setSelectedPaymentMethod(pm.id);
+                                        setIsPaymentModalOpen(false);
+                                        if (pm.isCredit) {
+                                            if (!selectedCreditCustomer) setIsCreditModalOpen(true);
+                                        } else {
+                                            setSelectedCreditCustomer(null);
+                                        }
+                                    }}
                                     className={`p-4 rounded-lg border-2 text-left flex justify-between items-center transition-all ${selectedPaymentMethod === pm.id ? 'border-primary bg-primary/5 text-primary' : 'border-border-subtle hover:border-border'}`}
                                 >
                                     <span className="font-bold">{pm.name}</span>
-                                    {pm.percentage !== 0 && <span className={`text-xs px-2 py-1 rounded-full ${pm.percentage > 0 ? 'bg-danger-subtle text-danger' : 'bg-green-100 text-green-600'}`}>{pm.percentage > 0 ? '+' : ''}{pm.percentage}%</span>}
+                                    <span className="flex items-center gap-2">
+                                        {pm.isCredit && (
+                                            <span className="text-[9px] font-bold px-2 py-1 rounded-full bg-danger-subtle text-danger-dark uppercase tracking-tighter">
+                                                A cuenta
+                                            </span>
+                                        )}
+                                        {pm.percentage !== 0 && <span className={`text-xs px-2 py-1 rounded-full ${pm.percentage > 0 ? 'bg-danger-subtle text-danger' : 'bg-green-100 text-green-600'}`}>{pm.percentage > 0 ? '+' : ''}{pm.percentage}%</span>}
+                                    </span>
                                 </button>
                             ))}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Modal Cliente a Cuenta Corriente ── */}
+            {isCreditModalOpen && (
+                <div className="fixed inset-0 z-[55] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-card rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 flex flex-col max-h-[85vh]">
+                        <header className="p-6 border-b border-border flex justify-between items-start">
+                            <div>
+                                <h2 className="text-lg font-bold">Venta a cuenta</h2>
+                                <p className="text-xs text-text-muted">
+                                    Seleccioná a quién se le carga la deuda de esta venta.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setIsCreditModalOpen(false)}
+                                className="text-text-muted hover:text-foreground transition-colors"
+                            >
+                                <Icon name="X" />
+                            </button>
+                        </header>
+
+                        <div className="p-6 space-y-4 overflow-y-auto custom-scrollbar">
+                            <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted">
+                                    <Icon name="Search" className="w-4 h-4" />
+                                </span>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    placeholder="Buscar por nombre, DNI o teléfono..."
+                                    className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-border outline-none focus:ring-2 focus:ring-primary"
+                                    value={creditSearch}
+                                    onChange={(event) => setCreditSearch(event.target.value)}
+                                />
+                            </div>
+
+                            <div className="space-y-2 max-h-72 overflow-y-auto custom-scrollbar pr-1">
+                                {filteredCreditCustomers.length === 0 ? (
+                                    <div className="text-center py-8 text-text-muted">
+                                        <Icon name="HandCoins" className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                                        <p className="text-xs font-medium">
+                                            {creditSearch
+                                                ? 'No se encontraron clientes'
+                                                : 'Todavía no hay clientes a cuenta'}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    filteredCreditCustomers.map((customer) => {
+                                        const selected = selectedCreditCustomer?.id === customer.id;
+                                        return (
+                                            <button
+                                                key={customer.id}
+                                                onClick={() => {
+                                                    setSelectedCreditCustomer(customer);
+                                                    setIsCreditModalOpen(false);
+                                                    setCreditSearch('');
+                                                }}
+                                                className={`w-full p-3 rounded-lg border-2 text-left flex justify-between items-center gap-3 transition-all ${
+                                                    selected
+                                                        ? 'border-primary bg-primary/5'
+                                                        : 'border-border-subtle hover:border-border'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold flex-shrink-0">
+                                                        {customer.name?.[0]?.toUpperCase() || '?'}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="font-bold text-sm truncate">{customer.name}</p>
+                                                        <p className="text-[10px] text-text-faint">
+                                                            {customer.dni ? `DNI ${customer.dni}` : 'Sin DNI'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right flex-shrink-0">
+                                                    <p className={`text-xs font-black ${Number(customer.balance) > 0.009 ? 'text-danger-dark' : 'text-success-dark'}`}>
+                                                        ${Number(customer.balance || 0).toLocaleString()}
+                                                    </p>
+                                                    <p className="text-[9px] text-text-faint uppercase tracking-tighter">
+                                                        debe
+                                                    </p>
+                                                </div>
+                                            </button>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Confirmación: cliente ya excedido ── */}
+            {limitWarning && (
+                <div className="fixed inset-0 z-[65] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-card rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95">
+                        <header className="p-6 border-b border-border">
+                            <h2 className="text-lg font-bold flex items-center gap-2 text-danger-dark">
+                                <AlertTriangle className="w-5 h-5" />
+                                Límite de crédito excedido
+                            </h2>
+                            <p className="text-xs text-text-muted mt-1">
+                                {limitWarning.customer?.name || 'El cliente'} ya debe más que su límite.
+                            </p>
+                        </header>
+                        <div className="p-6 space-y-3 text-sm">
+                            <div className="flex justify-between gap-3">
+                                <span className="text-text-muted">Límite</span>
+                                <strong>{money(limitWarning.limit)}</strong>
+                            </div>
+                            <div className="flex justify-between gap-3">
+                                <span className="text-text-muted">Deuda actual</span>
+                                <strong className="text-danger-dark">{money(limitWarning.currentDebt)}</strong>
+                            </div>
+                            <div className="flex justify-between gap-3">
+                                <span className="text-text-muted">Total de esta venta</span>
+                                <strong>{money(limitWarning.saleTotal)}</strong>
+                            </div>
+                            <div className="flex justify-between gap-3 border-t border-border pt-3">
+                                <span className="text-text-muted">Quedaría excedido por</span>
+                                <strong className="text-danger-dark">{money(limitWarning.excess)}</strong>
+                            </div>
+                            <p className="text-[11px] text-text-muted pt-1">
+                                Si continuás, la venta se registra y queda marcada como “excedió límite”.
+                            </p>
+                        </div>
+                        <footer className="p-4 border-t border-border bg-surface-alt flex gap-3">
+                            <button onClick={() => setLimitWarning(null)} className="btn-secondary flex-1">
+                                CANCELAR
+                            </button>
+                            <button
+                                onClick={() => {
+                                    const customer = limitWarning.customer;
+                                    setLimitWarning(null);
+                                    finalizarVenta('VENTA', customer, true);
+                                }}
+                                className="btn-primary flex-1"
+                            >
+                                CONTINUAR
+                            </button>
+                        </footer>
                     </div>
                 </div>
             )}

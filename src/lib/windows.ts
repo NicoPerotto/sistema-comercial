@@ -6,7 +6,7 @@
 export interface AppWindow {
   path: string;
   label: string;
-  section: 'Inicio' | 'Operaciones' | 'Catálogo' | 'Administración' | 'Apariencia';
+  section: 'Inicio' | 'Operaciones' | 'Catálogo' | 'Administración' | 'Apariencia' | 'Sistema';
   /** Solo visible para ADMIN siempre (no se puede quitar). */
   adminOnly?: boolean;
 }
@@ -18,6 +18,7 @@ export const APP_WINDOWS: AppWindow[] = [
   // Operaciones
   { path: '/ventas/nueva', label: 'Nueva Venta', section: 'Operaciones' },
   { path: '/caja', label: 'Caja Diaria', section: 'Operaciones' },
+  { path: '/a-cuenta', label: 'A Cuenta', section: 'Operaciones' },
   { path: '/pago-proveedores', label: 'Pago Proveedores', section: 'Operaciones' },
 
   // Catálogo

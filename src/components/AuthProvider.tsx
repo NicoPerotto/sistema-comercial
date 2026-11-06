@@ -9,6 +9,7 @@ interface User {
     email: string;
     role: string;
     windows?: string[];
+    actions?: string[];
 }
 
 interface AuthContextType {

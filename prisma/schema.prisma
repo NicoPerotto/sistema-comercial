@@ -28,6 +28,7 @@ model User {
   openedRegisters  CashRegister[] @relation("OpenedBy")
   closedRegisters  CashRegister[] @relation("ClosedBy")
   supplierPayments SupplierPayment[]
+  creditPayments   CreditPayment[]
   weeklyClosures   WeeklyClosure[]
 }
 
@@ -93,8 +94,10 @@ model PaymentMethod {
   percentage       Float             @default(0) // e.g., 10 for +10%, -5 for -5%
   isArqueable      Boolean           @default(true) // If true, it is included in cash count/arqueo
   isDefault        Boolean           @default(false) // Método preseleccionado en venta nueva (solo uno)
+  isCredit         Boolean           @default(false) // Si true, la venta genera deuda (cuenta corriente)
   sales            Sale[]
   supplierPayments     SupplierPayment[]
+  creditPayments       CreditPayment[]
   weeklyClosureDetails WeeklyClosureDetail[]
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
@@ -117,6 +120,7 @@ model CashRegister {
   closedAt         DateTime?
   sales            Sale[]
   supplierPayments SupplierPayment[]
+  creditPayments   CreditPayment[]
 }
 
 model Sale {
@@ -127,12 +131,18 @@ model Sale {
   auditLog        String?        // Store JSON analysis of additions and removals
   paymentMethodId String?
   paymentMethod   PaymentMethod? @relation(fields: [paymentMethodId], references: [id])
+  creditCustomerId String?
+  creditCustomer   CreditCustomer? @relation(fields: [creditCustomerId], references: [id], onDelete: SetNull)
+  creditLimitExceeded Boolean    @default(false) // la venta superó el límite al registrarse
+  creditLimitAtSale   Decimal?                    // límite vigente del cliente al momento de la venta
   createdAt       DateTime       @default(now())
   userId          String
   user            User           @relation(fields: [userId], references: [id])
   items           SaleItem[]
   cashRegisterId  String?
   cashRegister    CashRegister?  @relation(fields: [cashRegisterId], references: [id])
+
+  @@index([creditCustomerId, status])
 }
 
 model SaleItem {
@@ -146,6 +156,46 @@ model SaleItem {
   sale      Sale    @relation(fields: [saleId], references: [id])
   productId String
   product   Product @relation(fields: [productId], references: [id])
+}
+
+// Cliente que compra "a cuenta" (cuenta corriente). El saldo se calcula
+// dinámicamente: suma de ventas COMPLETED con creditCustomerId - suma de pagos.
+model CreditCustomer {
+  id        String   @id @default(cuid())
+  name      String
+  dni       String?  @unique
+  phone     String?
+  address   String?
+  email     String?
+  active    Boolean  @default(true)
+  creditLimit Decimal? // null = sin límite; límite sobre la deuda acumulada
+  sales     Sale[]
+  payments  CreditPayment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+// Cobro de deuda de un cliente a cuenta. Todo cobro exige una caja abierta.
+// Si el método de pago es arqueable, suma al arqueo; si no, solo queda
+// registrado para trazabilidad.
+model CreditPayment {
+  id              String         @id @default(cuid())
+  amount          Decimal        // importe bruto recibido
+  appliedAmount   Decimal?       // importe neto aplicado a reducir la deuda; null en cobros previos
+  customerId      String
+  customer        CreditCustomer @relation(fields: [customerId], references: [id])
+  paymentMethodId String
+  paymentMethod   PaymentMethod  @relation(fields: [paymentMethodId], references: [id])
+  cashRegisterId  String
+  cashRegister    CashRegister  @relation(fields: [cashRegisterId], references: [id])
+  userId          String
+  user            User           @relation(fields: [userId], references: [id])
+  createdAt       DateTime       @default(now())
+
+  @@index([customerId, createdAt])
+  @@index([cashRegisterId])
 }
 
 model Supplier {

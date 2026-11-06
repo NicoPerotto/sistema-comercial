@@ -1,25 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireAdmin } from '@/lib/auth';
-import { APP_WINDOWS } from '@/lib/windows';
-
-interface Permissions {
-  windows: string[];
-}
-
-function parsePermissions(raw: string): Permissions {
-  try {
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed?.windows)) {
-      // Validar contra el catálogo conocido para evitar paths inventados
-      const valid = new Set(APP_WINDOWS.map((w) => w.path));
-      return { windows: parsed.windows.filter((p: string) => valid.has(p)) };
-    }
-  } catch {
-    // ignore
-  }
-  return { windows: [] };
-}
+import { parseRolePermissions, sanitizeRolePermissions } from '@/lib/role-permissions';
 
 export async function GET(req: NextRequest) {
   const guard = await requireAdmin(req);
@@ -39,7 +21,7 @@ export async function GET(req: NextRequest) {
       isSystem: r.isSystem,
       showInEmployees: r.showInEmployees,
       userCount: r._count.users,
-      permissions: parsePermissions(r.permissions),
+      permissions: parseRolePermissions(r.permissions),
     }));
 
     return NextResponse.json(data);
@@ -54,14 +36,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { name, slug, description, windows, showInEmployees } = body;
+    const { name, slug, description, windows, actions, showInEmployees } = body;
 
     if (!name || !slug) {
       return NextResponse.json({ error: 'Nombre y slug son requeridos' }, { status: 400 });
     }
 
-    const valid = new Set(APP_WINDOWS.map((w) => w.path));
-    const cleanWindows = Array.isArray(windows) ? windows.filter((w: string) => valid.has(w)) : [];
+    const permissions = sanitizeRolePermissions(windows, actions);
 
     const role = await prisma.role.create({
       data: {
@@ -69,11 +50,11 @@ export async function POST(req: NextRequest) {
         slug: String(slug).toUpperCase(),
         description: description ? String(description) : null,
         showInEmployees: Boolean(showInEmployees),
-        permissions: JSON.stringify({ windows: cleanWindows }),
+        permissions: JSON.stringify(permissions),
       },
     });
 
-    return NextResponse.json({ ...role, permissions: { windows: cleanWindows } }, { status: 201 });
+    return NextResponse.json({ ...role, permissions }, { status: 201 });
   } catch (error: any) {
     if (error.code === 'P2002') {
       return NextResponse.json({ error: 'Ya existe un rol con ese nombre o slug' }, { status: 409 });
@@ -88,7 +69,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { id, name, slug, description, windows, showInEmployees } = body;
+    const { id, name, slug, description, windows, actions, showInEmployees } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'ID requerido' }, { status: 400 });
@@ -102,8 +83,11 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Los roles del sistema no se pueden editar' }, { status: 403 });
     }
 
-    const valid = new Set(APP_WINDOWS.map((w) => w.path));
-    const cleanWindows = Array.isArray(windows) ? windows.filter((w: string) => valid.has(w)) : [];
+    const existingPermissions = parseRolePermissions(existing.permissions);
+    const permissions = sanitizeRolePermissions(
+      windows,
+      Array.isArray(actions) ? actions : existingPermissions.actions
+    );
 
     const role = await prisma.role.update({
       where: { id },
@@ -112,11 +96,11 @@ export async function PUT(req: NextRequest) {
         slug: slug ? String(slug).toUpperCase() : existing.slug,
         description: description !== undefined ? (description ? String(description) : null) : existing.description,
         showInEmployees: showInEmployees !== undefined ? Boolean(showInEmployees) : existing.showInEmployees,
-        permissions: JSON.stringify({ windows: cleanWindows }),
+        permissions: JSON.stringify(permissions),
       },
     });
 
-    return NextResponse.json({ ...role, permissions: { windows: cleanWindows } });
+    return NextResponse.json({ ...role, permissions });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

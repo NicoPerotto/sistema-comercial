@@ -12,11 +12,11 @@ export async function GET() {
         // Seed if empty
         if (methods.length === 0) {
             const defaultMethods = [
-                { name: 'Efectivo', percentage: 0, isArqueable: true, isDefault: true },
-                { name: 'Transferencia', percentage: 0, isArqueable: false, isDefault: false },
-                { name: 'QR', percentage: 0, isArqueable: false, isDefault: false },
-                { name: 'Credito', percentage: 10, isArqueable: false, isDefault: false },
-                { name: 'Cuenta corriente', percentage: 5, isArqueable: false, isDefault: false }
+                { name: 'Efectivo', percentage: 0, isArqueable: true, isDefault: true, isCredit: false },
+                { name: 'Transferencia', percentage: 0, isArqueable: false, isDefault: false, isCredit: false },
+                { name: 'QR', percentage: 0, isArqueable: false, isDefault: false, isCredit: false },
+                { name: 'Tarjeta de crédito', percentage: 10, isArqueable: false, isDefault: false, isCredit: false },
+                { name: 'Cuenta corriente', percentage: 0, isArqueable: false, isDefault: false, isCredit: true }
             ];
 
             for (const method of defaultMethods) {
@@ -44,6 +44,23 @@ export async function GET() {
             }
         }
 
+        // Backfill: en bases existentes marcamos "Cuenta corriente" como
+        // método de crédito si todavía no hay ninguno configurado.
+        if (!methods.some((m: any) => m.isCredit)) {
+            const creditMethod = methods.find(
+                (m: any) => m.name?.trim().toLowerCase() === 'cuenta corriente'
+            );
+            if (creditMethod) {
+                await (prisma as any).paymentMethod.update({
+                    where: { id: creditMethod.id },
+                    data: { isCredit: true }
+                });
+                methods = await (prisma as any).paymentMethod.findMany({
+                    orderBy: ORDER
+                });
+            }
+        }
+
         return NextResponse.json(methods);
     } catch (error: any) {
         console.error('API Error PaymentMethods GET:', error);
@@ -54,7 +71,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, percentage, isArqueable, isDefault } = body;
+        const { name, percentage, isArqueable, isDefault, isCredit } = body;
 
         if (!name) {
             return NextResponse.json({ error: 'El nombre es requerido' }, { status: 400 });
@@ -74,7 +91,8 @@ export async function POST(request: Request) {
                 name,
                 percentage: parseFloat(percentage) || 0,
                 isArqueable: isArqueable ?? true,
-                isDefault: makeDefault
+                isDefault: makeDefault,
+                isCredit: !!isCredit
             }
         });
 
@@ -88,7 +106,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
     try {
         const body = await request.json();
-        const { id, name, percentage, isArqueable, isDefault } = body;
+        const { id, name, percentage, isArqueable, isDefault, isCredit } = body;
 
         if (!id || !name) {
             return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 });
@@ -109,7 +127,8 @@ export async function PUT(request: Request) {
                 name,
                 percentage: parseFloat(percentage) || 0,
                 isArqueable: isArqueable ?? true,
-                isDefault: makeDefault
+                isDefault: makeDefault,
+                ...(typeof isCredit === 'boolean' ? { isCredit } : {})
             }
         });
 
@@ -137,6 +156,19 @@ export async function DELETE(request: Request) {
         if (salesCount > 0) {
             return NextResponse.json({
                 error: 'No se puede eliminar porque ya tiene ventas asociadas'
+            }, { status: 400 });
+        }
+
+        // Tampoco se puede borrar si ya se usó para cobrar cuentas corrientes
+        // o pagar proveedores (integridad histórica).
+        const [creditPaymentsCount, supplierPaymentsCount] = await Promise.all([
+            (prisma as any).creditPayment.count({ where: { paymentMethodId: id } }),
+            (prisma as any).supplierPayment.count({ where: { paymentMethodId: id } }),
+        ]);
+
+        if (creditPaymentsCount > 0 || supplierPaymentsCount > 0) {
+            return NextResponse.json({
+                error: 'No se puede eliminar porque ya tiene cobros o pagos asociados'
             }, { status: 400 });
         }
 

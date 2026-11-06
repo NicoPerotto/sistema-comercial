@@ -13,7 +13,10 @@ interface Sale {
     auditLog: string | null;
     createdAt: string;
     user: { name: string; role: string; };
-    paymentMethod?: { name: string; percentage: number; };
+    paymentMethod?: { name: string; percentage: number; isCredit?: boolean; };
+    creditCustomer?: { id: string; name: string; dni?: string | null } | null;
+    creditLimitExceeded?: boolean;
+    creditLimitAtSale?: number | string | null;
     items: { id: string; quantity: number; price: number; product: { name: string; brand?: string; }; }[];
 }
 
@@ -60,6 +63,7 @@ export default function SalesHistoryPage() {
             s.id.slice(-6).toUpperCase().includes(search.toUpperCase()) ||
             s.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
             s.paymentMethod?.name?.toLowerCase().includes(search.toLowerCase()) ||
+            s.creditCustomer?.name?.toLowerCase().includes(search.toLowerCase()) ||
             String(s.total).includes(search);
         const matchStatus = statusFilter === 'ALL' || s.status === statusFilter;
         return matchSearch && matchStatus;
@@ -193,6 +197,16 @@ export default function SalesHistoryPage() {
                                                                 {sale.paymentMethod.percentage > 0 ? '+' : ''}{sale.paymentMethod.percentage}%
                                                             </span>
                                                         )}
+                                                        {sale.creditCustomer && (
+                                                            <span className="text-[9px] font-bold text-danger-dark">
+                                                                {sale.creditCustomer.name}
+                                                            </span>
+                                                        )}
+                                                        {sale.creditLimitExceeded && (
+                                                            <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-warning-light text-amber-800 uppercase tracking-tighter">
+                                                                Excedió límite
+                                                            </span>
+                                                        )}
                                                     </div>
                                                 ) : <span className="text-[10px] text-text-faint">—</span>}
                                             </td>
@@ -268,6 +282,20 @@ export default function SalesHistoryPage() {
                                 <div className="p-4 bg-surface-alt rounded-xl border border-border">
                                     <p className="text-[10px] font-bold text-text-faint uppercase mb-1">Método</p>
                                     <p className="text-base font-bold">{selectedSale.paymentMethod?.name || 'Efectivo'}</p>
+                                    {selectedSale.creditCustomer && (
+                                        <p className="text-[10px] font-bold text-danger-dark mt-1">
+                                            A cuenta: {selectedSale.creditCustomer.name}
+                                            {selectedSale.creditCustomer.dni ? ` (${selectedSale.creditCustomer.dni})` : ''}
+                                        </p>
+                                    )}
+                                    {selectedSale.creditLimitExceeded && (
+                                        <p className="text-[10px] font-bold text-amber-800 mt-1">
+                                            Excedió el límite
+                                            {selectedSale.creditLimitAtSale != null
+                                                ? ` (límite ${'$' + Number(selectedSale.creditLimitAtSale).toLocaleString()})`
+                                                : ''}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="p-4 bg-surface-alt rounded-xl border border-border">
                                     <p className="text-[10px] font-bold text-text-faint uppercase mb-1">Tipo</p>

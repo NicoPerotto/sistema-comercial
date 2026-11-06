@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifySession, SESSION_COOKIE_NAME } from '@/lib/session';
-import { prisma } from '@/lib/db';
-import { APP_WINDOWS } from '@/lib/windows';
-
-// Labels de las ventanas siempre visibles para ADMIN
-const ADMIN_WINDOWS = APP_WINDOWS.map((w) => w.path);
+import { resolveRoleAccess } from '@/lib/role-access';
 
 export async function GET(request: Request) {
     try {
@@ -21,41 +17,20 @@ export async function GET(request: Request) {
             return NextResponse.json({ user: null }, { status: 401 });
         }
 
-        // Resolver ventanas permitidas según el rol del usuario
-        let allowedWindows: string[] = [];
-        const isAdminByString = user.role === 'ADMIN';
-        let isAdminByRole = false;
-
-        if (user.id) {
-            const dbUser = await prisma.user.findUnique({
-                where: { id: user.id },
-                include: { roleRef: true },
-            });
-            isAdminByRole = dbUser?.roleRef?.slug === 'ADMIN';
-            if (dbUser?.roleRef) {
-                try {
-                    const perms = JSON.parse(dbUser.roleRef.permissions);
-                    allowedWindows = Array.isArray(perms?.windows) ? perms.windows : [];
-                } catch {
-                    allowedWindows = [];
-                }
-            }
-        }
-
-        const isAdmin = isAdminByString || isAdminByRole;
-        if (isAdmin) {
-            allowedWindows = ADMIN_WINDOWS;
-        }
+        const access = user.id
+            ? await resolveRoleAccess(user.id, user.role)
+            : { isAdmin: false, windows: [], actions: [] };
 
         // Sin roleRef asignado (y no es admin por string) => no ve ninguna ventana (se lo saca del sistema).
-        if (!isAdmin && allowedWindows.length === 0) {
+        if (!access.isAdmin && access.windows.length === 0) {
             return NextResponse.json({ user: null }, { status: 401 });
         }
 
         return NextResponse.json({
             user: {
                 ...user,
-                windows: allowedWindows,
+                windows: access.windows,
+                actions: access.actions,
             },
         });
     } catch (error: any) {

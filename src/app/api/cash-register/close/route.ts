@@ -15,6 +15,9 @@ export async function POST(request: Request) {
                 },
                 supplierPayments: {
                     include: { paymentMethod: true }
+                },
+                creditPayments: {
+                    include: { paymentMethod: true }
                 }
             }
         });
@@ -36,6 +39,18 @@ export async function POST(request: Request) {
 
             if (isArqueable) {
                 arqueableTotal += Number(sale.total);
+            }
+        });
+
+        // Cobros de cuentas corrientes: suman al método con el que se cobraron.
+        activeRegister.creditPayments.forEach((payment: any) => {
+            const methodName = payment.paymentMethod?.name || 'Efectivo';
+            const isArqueable = payment.paymentMethod ? payment.paymentMethod.isArqueable : true;
+
+            breakdown[methodName] = (breakdown[methodName] || 0) + Number(payment.amount);
+
+            if (isArqueable) {
+                arqueableTotal += Number(payment.amount);
             }
         });
 
@@ -78,7 +93,8 @@ export async function POST(request: Request) {
         return NextResponse.json({
             ...updatedRegister,
             breakdown,
-            paymentsTotal: activeRegister.supplierPayments.reduce((acc: number, p: any) => acc + Number(p.amount), 0)
+            paymentsTotal: activeRegister.supplierPayments.reduce((acc: number, p: any) => acc + Number(p.amount), 0),
+            creditCollectionsTotal: activeRegister.creditPayments.reduce((acc: number, p: any) => acc + Number(p.amount), 0)
         });
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });

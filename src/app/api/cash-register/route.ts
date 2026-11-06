@@ -7,7 +7,8 @@ export async function GET() {
             where: { status: 'OPEN' },
             include: {
                 openedBy: { select: { name: true } },
-                sales: { include: { paymentMethod: true } }
+                sales: { include: { paymentMethod: true } },
+                creditPayments: { include: { paymentMethod: true } }
             }
         });
 

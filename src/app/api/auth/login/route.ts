@@ -2,6 +2,7 @@ import { prisma } from '@/lib/db';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { signSession, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/session';
+import { resolveRoleAccess } from '@/lib/role-access';
 
 export async function POST(request: Request) {
     try {
@@ -51,9 +52,14 @@ export async function POST(request: Request) {
             email: userWithoutPassword.email,
             role: userWithoutPassword.role,
         });
+        const access = await resolveRoleAccess(userWithoutPassword.id, userWithoutPassword.role);
 
         const response = NextResponse.json({
-            user: userWithoutPassword,
+            user: {
+                ...userWithoutPassword,
+                windows: access.windows,
+                actions: access.actions,
+            },
             shiftId: shift.id
         });
 

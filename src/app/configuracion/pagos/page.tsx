@@ -24,6 +24,7 @@ interface PaymentMethod {
     percentage: number;
     isArqueable: boolean;
     isDefault?: boolean;
+    isCredit?: boolean;
 }
 
 export default function PaymentMethodsPage() {
@@ -33,7 +34,7 @@ export default function PaymentMethodsPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
-    const [formData, setFormData] = useState({ name: '', percentage: '', isArqueable: true, isDefault: false });
+    const [formData, setFormData] = useState({ name: '', percentage: '', isArqueable: true, isDefault: false, isCredit: false });
 
     const fetchMethods = async () => {
         setLoading(true);
@@ -98,7 +99,7 @@ export default function PaymentMethodsPage() {
             const res = await fetch('/api/payment-methods', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: m.id, name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable, isDefault: true }),
+                body: JSON.stringify({ id: m.id, name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable, isDefault: true, isCredit: !!m.isCredit }),
             });
             if (res.ok) {
                 showToast(`"${m.name}" es ahora el método por defecto`, 'success');
@@ -122,7 +123,7 @@ export default function PaymentMethodsPage() {
                 <button
                     onClick={() => {
                         setEditingId(null);
-                        setFormData({ name: '', percentage: '0', isArqueable: true, isDefault: methods.length === 0 });
+                        setFormData({ name: '', percentage: '0', isArqueable: true, isDefault: methods.length === 0, isCredit: false });
                         setIsModalOpen(true);
                     }}
                     className="btn-primary"
@@ -161,9 +162,16 @@ export default function PaymentMethodsPage() {
                                     )}
                                 </td>
                                 <td className="px-6 py-4">
-                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${m.isArqueable ? 'bg-warning-light text-amber-700' : 'bg-surface text-text-muted'}`}>
-                                        {m.isArqueable ? 'ARQUEABLE' : 'DIGITAL'}
-                                    </span>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${m.isArqueable ? 'bg-warning-light text-amber-700' : 'bg-surface text-text-muted'}`}>
+                                            {m.isArqueable ? 'ARQUEABLE' : 'DIGITAL'}
+                                        </span>
+                                        {m.isCredit && (
+                                            <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-danger-subtle text-danger-dark">
+                                                A CUENTA
+                                            </span>
+                                        )}
+                                    </div>
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`text-sm font-bold ${m.percentage > 0 ? 'text-red-500' : m.percentage < 0 ? 'text-green-500' : 'text-text-muted'}`}>
@@ -187,7 +195,7 @@ export default function PaymentMethodsPage() {
                                 </td>
                                 <td className="px-6 py-4 text-right pr-6">
                                     <div className="flex justify-end gap-2">
-                                        <button onClick={() => { setEditingId(m.id); setFormData({ name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable, isDefault: !!m.isDefault }); setIsModalOpen(true); }} className="p-2 text-text-muted hover:text-primary transition-colors">
+                                        <button onClick={() => { setEditingId(m.id); setFormData({ name: m.name, percentage: m.percentage.toString(), isArqueable: m.isArqueable, isDefault: !!m.isDefault, isCredit: !!m.isCredit }); setIsModalOpen(true); }} className="p-2 text-text-muted hover:text-primary transition-colors">
                                             <Icon name="Edit" />
                                         </button>
                                         <button onClick={() => deleteMethod(m.id)} className="p-2 text-text-muted hover:text-danger transition-colors">
@@ -233,6 +241,18 @@ export default function PaymentMethodsPage() {
                                 <div>
                                     <span className="text-sm font-bold">Método por defecto</span>
                                     <p className="text-xs text-text-muted">Se preselecciona en una venta nueva. Solo puede haber uno.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-3 p-4 bg-danger-subtle/40 border border-danger/20 rounded-lg cursor-pointer" onClick={() => setFormData({ ...formData, isCredit: !formData.isCredit })}>
+                                <div className={`w-5 h-5 rounded border flex items-center justify-center ${formData.isCredit ? 'bg-danger border-danger text-white' : 'border-border bg-card'}`}>
+                                    {formData.isCredit && <Icon name="Check" className="w-3 h-3" />}
+                                </div>
+                                <div>
+                                    <span className="text-sm font-bold">Genera deuda (a cuenta)</span>
+                                    <p className="text-xs text-text-muted">
+                                        Al cobrar, exige seleccionar un cliente y registra la deuda en su cuenta.
+                                        Puede haber varios métodos a cuenta; no sirve para cobrar deudas.
+                                    </p>
                                 </div>
                             </div>
                             <div className="flex gap-3 pt-4">

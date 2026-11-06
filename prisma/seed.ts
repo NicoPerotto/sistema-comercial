@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs'
 const prisma = new PrismaClient()
 
 const ALL_WINDOWS = [
-  '/', '/ventas/nueva', '/caja', '/pago-proveedores',
+  '/', '/ventas/nueva', '/caja', '/a-cuenta', '/pago-proveedores',
   '/productos', '/categorias', '/proveedores',
   '/metricas', '/caja/semanal', '/ventas', '/pago-proveedores/historial',
   '/caja/historial', '/empleados', '/configuracion/pagos',
@@ -75,7 +75,7 @@ async function main() {
             description: 'Manejo de caja diaria.',
             isSystem: false,
             showInEmployees: true,
-            permissions: JSON.stringify({ windows: ['/', '/caja', '/ventas/nueva', '/productos'] }),
+            permissions: JSON.stringify({ windows: ['/', '/caja', '/a-cuenta', '/ventas/nueva', '/productos'] }),
         },
     })
 

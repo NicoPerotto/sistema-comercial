@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
 import { APP_WINDOWS } from '@/lib/windows';
+import { CREATE_CREDIT_CUSTOMERS } from '@/lib/role-permissions';
 
 interface Role {
   id: string;
@@ -11,8 +12,9 @@ interface Role {
   slug: string;
   description: string | null;
   isSystem: boolean;
+  showInEmployees: boolean;
   userCount: number;
-  permissions: { windows: string[] };
+  permissions: { windows: string[]; actions: string[] };
 }
 
 const Icon = ({ children, className = 'w-5 h-5' }: { children: React.ReactNode; className?: string }) => (
@@ -31,7 +33,14 @@ export default function RolesManagerPage() {
   const [loadingRoles, setLoadingRoles] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editing, setEditing] = useState<Role | null>(null);
-  const [form, setForm] = useState({ name: '', slug: '', description: '', windows: [] as string[], showInEmployees: false });
+  const [form, setForm] = useState({
+    name: '',
+    slug: '',
+    description: '',
+    windows: [] as string[],
+    createCreditCustomers: false,
+    showInEmployees: false,
+  });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,7 +70,14 @@ export default function RolesManagerPage() {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: '', slug: '', description: '', windows: [], showInEmployees: false });
+    setForm({
+      name: '',
+      slug: '',
+      description: '',
+      windows: [],
+      createCreditCustomers: false,
+      showInEmployees: false,
+    });
     setError(null);
     setIsModalOpen(true);
   };
@@ -73,6 +89,7 @@ export default function RolesManagerPage() {
       slug: role.slug,
       description: role.description || '',
       windows: [...role.permissions.windows],
+      createCreditCustomers: role.permissions.actions.includes(CREATE_CREDIT_CUSTOMERS),
       showInEmployees: !!role.showInEmployees,
     });
     setError(null);
@@ -94,7 +111,11 @@ export default function RolesManagerPage() {
     setError(null);
     try {
       const method = editing ? 'PUT' : 'POST';
-      const body = editing ? { ...form, id: editing.id } : form;
+      const body = {
+        ...form,
+        actions: form.createCreditCustomers ? [CREATE_CREDIT_CUSTOMERS] : [],
+        id: editing?.id,
+      };
       const res = await fetch('/api/roles', {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -322,6 +343,26 @@ export default function RolesManagerPage() {
                     );
                   })}
                 </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black uppercase text-zinc-400 tracking-widest ml-1">
+                  Permisos de acciones
+                </label>
+                <label className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-border bg-card/30 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="accent-primary w-4 h-4"
+                    checked={form.createCreditCustomers}
+                    onChange={(e) => setForm({ ...form, createCreditCustomers: e.target.checked })}
+                  />
+                  <div>
+                    <p className="text-sm font-bold text-foreground">Crear clientes</p>
+                    <p className="text-[10px] text-text-muted">
+                      Permite dar de alta clientes en A Cuenta. La ventana debe estar habilitada para usar esta acción.
+                    </p>
+                  </div>
+                </label>
               </div>
 
               <div className="flex gap-4 pt-2">

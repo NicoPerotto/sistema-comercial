@@ -42,6 +42,17 @@ export async function GET() {
             include: { paymentMethod: true }
         });
 
+        // 3b. Cobros de cuentas corrientes dentro del período.
+        const allCreditPayments = await (prisma as any).creditPayment.findMany({
+            where: {
+                createdAt: {
+                    gt: startDate,
+                    lte: endDate
+                }
+            },
+            include: { paymentMethod: true }
+        });
+
         // 4. Get all sales in the period separately to be sure we don't miss any 
         // (though they should be in registers, but just in case)
         const allSales = await (prisma as any).sale.findMany({
@@ -68,6 +79,10 @@ export async function GET() {
                 .filter((p: any) => p.paymentMethodId === pm.id)
                 .reduce((acc: number, p: any) => acc + Number(p.amount), 0);
 
+            const methodCreditPayments = allCreditPayments
+                .filter((p: any) => p.paymentMethodId === pm.id)
+                .reduce((acc: number, p: any) => acc + Number(p.amount), 0);
+
             // Important: Cash method might need to include opening amount of the VERY FIRST register 
             // since the last week closure? 
             // Actually, if we just subtract, we are looking at NET results of the week.
@@ -78,8 +93,9 @@ export async function GET() {
                 paymentMethodName: pm.name,
                 isArqueable: pm.isArqueable,
                 salesTotal: methodSales,
+                creditPaymentsTotal: methodCreditPayments,
                 supplierPaymentsTotal: methodSupplierPayments,
-                expectedTotal: methodSales - methodSupplierPayments,
+                expectedTotal: methodSales + methodCreditPayments - methodSupplierPayments,
                 realAmount: 0 // Default for the draft
             };
         });

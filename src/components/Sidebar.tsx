@@ -8,7 +8,7 @@ import { SITE_CONFIG } from '@/config';
 import {
     LayoutGrid, Package, Tag, ShoppingCart, ClipboardList,
     Wallet, CreditCard, Users, BarChart3, Zap, LogOut, Archive, Truck, LucideIcon,
-    Calendar, ShieldCheck, Palette, UserCircle
+    Calendar, ShieldCheck, Palette, UserCircle, HandCoins
 } from 'lucide-react';
 
 
@@ -60,6 +60,7 @@ const NAV: NavDef[] = [
 
     { href: '/ventas/nueva', label: 'Nueva Venta', Icon: ShoppingCart, section: 'Operaciones' },
     { href: '/caja', label: 'Caja Diaria', Icon: Wallet, section: 'Operaciones' },
+    { href: '/a-cuenta', label: 'A Cuenta', Icon: HandCoins, section: 'Operaciones' },
     { href: '/pago-proveedores', label: 'Pago Proveedores', Icon: CreditCard, section: 'Operaciones' },
 
     { href: '/productos', label: 'Productos', Icon: Package, section: 'Catálogo' },

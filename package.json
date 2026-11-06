@@ -5,10 +5,16 @@
     "seed": "tsx prisma/seed.ts"
   },
   "scripts": {
-    "dev": "prisma generate --schema=./prisma/schema.sqlite.prisma && next dev --webpack",
+    "dev": "prisma generate && next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "db:up": "docker compose up -d db",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:setup": "prisma migrate deploy && tsx prisma/seed.ts",
     "db:local:generate": "prisma generate --schema=./prisma/schema.sqlite.prisma",
     "db:local:push": "prisma db push --schema=./prisma/schema.sqlite.prisma --accept-data-loss",
     "db:local:seed": "prisma db push --schema=./prisma/schema.sqlite.prisma --accept-data-loss && tsx prisma/seed.ts",

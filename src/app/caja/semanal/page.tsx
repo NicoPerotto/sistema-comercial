@@ -24,6 +24,7 @@ interface BreakdownItem {
     paymentMethodName: string;
     isArqueable: boolean;
     salesTotal: number;
+    creditPaymentsTotal: number;
     supplierPaymentsTotal: number;
     expectedTotal: number;
     realAmount: number;
@@ -196,6 +197,7 @@ export default function WeeklyClosurePage() {
                                 <tr>
                                     <th className="table-header pl-6">Método de Pago</th>
                                     <th className="table-header text-right">Ventas de la Semana</th>
+                                    <th className="table-header text-right">Cobros Cta. Cte.</th>
                                     <th className="table-header text-right">Pago Proveedores</th>
                                     <th className="table-header text-right">Total Esperado</th>
                                     <th className="table-header text-center pr-6" style={{ width: '220px' }}>Real en Mano</th>
@@ -214,6 +216,9 @@ export default function WeeklyClosurePage() {
                                         </td>
                                         <td className="px-6 py-5 text-right font-medium text-success-dark text-base">
                                             +${item.salesTotal.toLocaleString()}
+                                        </td>
+                                        <td className="px-6 py-5 text-right font-medium text-amber-600 text-base">
+                                            +${Number(item.creditPaymentsTotal || 0).toLocaleString()}
                                         </td>
                                         <td className="px-6 py-5 text-right font-medium text-rose-600 text-base">
                                             -${item.supplierPaymentsTotal.toLocaleString()}
@@ -239,6 +244,7 @@ export default function WeeklyClosurePage() {
                                 <tr>
                                     <td className="px-6 py-8 text-sm uppercase tracking-widest text-text-muted">Balance Semanal Consolidado</td>
                                     <td className="px-6 py-8 text-right text-emerald-400 text-lg">+${breakdown.reduce((acc, i) => acc + i.salesTotal, 0).toLocaleString()}</td>
+                                    <td className="px-6 py-8 text-right text-amber-300 text-lg">+${breakdown.reduce((acc, i) => acc + Number(i.creditPaymentsTotal || 0), 0).toLocaleString()}</td>
                                     <td className="px-6 py-8 text-right text-rose-400 text-lg">-${breakdown.reduce((acc, i) => acc + i.supplierPaymentsTotal, 0).toLocaleString()}</td>
                                     <td className="px-6 py-8 text-right text-3xl font-black">${totalExpected.toLocaleString()}</td>
                                     <td className="px-6 py-8 text-right pr-6 text-4xl font-black text-primary">${totalReal.toLocaleString()}</td>
